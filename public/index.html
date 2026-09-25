@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashop - Your Mobile Store</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <meta name="description" content="Dashop - Shop mobile-first for great deals">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <span class="logo-text">Dashop</span>
+        </div>
+        <nav class="main-nav">
+            <button class="cart-btn" onclick="openCart()">
+                🛒 Cart (<span id="cart-count">0</span>)
+            </button>
+        </nav>
+    </header>
+
+    <main class="content">
+        <section class="hero">
+            <h1>Welcome to Dashop</h1>
+            <p>Your mobile-first shopping experience</p>
+            <a href="#products" class="cta-button">Shop Now</a>
+        </section>
+
+        <section id="products" class="product-list">
+            <h2>Featured Products</h2>
+            <div id="product-grid" class="product-grid"></div>
+        </section>
+
+        <section class="info-banner">
+            <p>🚀 Built with HTML/JS - No framework, lightweight & fast!</p>
+        </section>
+    </main>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content cart-modal">
+            <div class="modal-header">
+                <h2>Your Cart</h2>
+                <button class="close-btn" onclick="closeCart()">×</button>
+            </div>
+            <div id="cart-items" class="cart-items"></div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    Total: $<span id="cart-total">0.00</span>
+                </div>
+                <button class="checkout-btn" onclick="proceedToCheckout()">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content checkout-modal">
+            <div class="modal-header">
+                <h2>Checkout</h2>
+                <button class="close-btn" onclick="closeCheckout()">×</button>
+            </div>
+            <form id="checkout-form" onsubmit="handleCheckout(event)">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="john@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" required placeholder="123 Main St, City"></textarea>
+                </div>
+                <button type="submit" class="place-order-btn">Place Order</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/supabase-client.js"></script>
+</body>
+</html>

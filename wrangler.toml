@@ -1,0 +1,11 @@
+[[routes]]
+path = "/*"
+params = { fallback_config: 'serve-all' }
+
+[env.production]
+SUPABASE_URL = "your_supabase_url_here"
+SUPABASE_ANON_KEY = "your_supabase_anon_key_here"
+
+# Cloudflare Pages Configuration
+# Deploy at: https://pages.cloudflare.com/
+# See: https://developers.cloudflare.com/pages/functions/wrangler-configuration/

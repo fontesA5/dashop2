@@ -1,0 +1,20 @@
+{
+  "name": "dashop",
+  "version": "1.0.0",
+  "description": "Mobile-first e-commerce store built with HTML/JS and Supabase - Phase 1 Complete!",
+  "main": "public/index.html",
+  "scripts": {
+    "dev": "npx serve public -l 3000",
+    "deploy": "./deploy.sh",
+    "build": "echo 'Static site - no build needed'"
+  },
+  "keywords": [
+    "ecommerce",
+    "shop",
+    "mobile-first",
+    "supabase",
+    "cloudflare"
+  ],
+  "author": "Dashop Team",
+  "license": "MIT"
+}

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashop Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <span class="logo-text">🛒 Admin</span>
+        </div>
+        <nav class="main-nav">
+            <a href="/" target="_blank" class="btn-primary">View Store</a>
+            <button onclick="logout()" class="cart-btn">Logout</button>
+        </nav>
+    </header>
+
+    <main class="content">
+        <div style="padding: 2rem; background: white; border-radius: 15px; margin-top: 1.5rem;">
+            <h1>📊 Admin Dashboard</h1>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem; border-radius: 15px; color: white;">
+                    <h3>Total Sales</h3>
+                    <p style="font-size: 2rem; font-weight: bold;">$0.00</p>
+                </div>
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 1.5rem; border-radius: 15px; color: white;">
+                    <h3>Total Orders</h3>
+                    <p style="font-size: 2rem; font-weight: bold;">0</p>
+                </div>
+                <div style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); padding: 1.5rem; border-radius: 15px; color: white;">
+                    <h3>Total Products</h3>
+                    <p style="font-size: 2rem; font-weight: bold;">8</p>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 2rem;">Quick Actions</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <button onclick="showInventory()" style="padding: 1rem; border: none; background: #f8fafc; border-radius: 10px; cursor: pointer; font-weight: 600;">📦 Inventory</button>
+                <button onclick="showOrders()" style="padding: 1rem; border: none; background: #f8fafc; border-radius: 10px; cursor: pointer; font-weight: 600;">📋 Orders</button>
+                <button onclick="showReports()" style="padding: 1rem; border: none; background: #f8fafc; border-radius: 10px; cursor: pointer; font-weight: 600;">📊 Reports</button>
+            </div>
+            
+            <div id="admin-content" style="margin-top: 2rem; padding: 1.5rem; background: #f8fafc; border-radius: 15px;">
+                <p>Welcome to the Dashop Admin Dashboard! Select a quick action above to get started.</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/supabase-client.js"></script>
+    <script>
+        // Initialize Supabase
+        if (window.supabaseClient) {
+            console.log('✅ Admin dashboard connected to Supabase');
+        }
+
+        async function showInventory() {
+            document.getElementById('admin-content').innerHTML = 'Loading inventory...';
+            
+            const supabaseUrl = window.supabaseUrl;
+            const supabaseKey = window.supabaseKey;
+            
+            let products = [];
+            if (supabaseUrl && supabaseKey) {
+                const supabase = window.supabaseClient;
+                const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                products = data;
+            } else {
+                products = [
+                    { id: 1, name: 'Wireless Bluetooth Earbuds', price: 49.99, stock: 50 },
+                    { id: 2, name: 'Smartphone Stand', price: 19.99, stock: 100 },
+                    { id: 3, name: 'USB-C Cable 6ft', price: 12.99, stock: 200 }
+                ];
+            }
+
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<tr style="background: #f1f5f9; font-weight: bold;"><th>Name</th><th>Price</th><th>Stock</th><th>Action</th></tr>';
+            
+            products.forEach(p => {
+                html += `
+                    <tr>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">${p.name}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0; color: #764ba2; font-weight: bold;">$${p.price.toFixed(2)}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">${p.stock}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;"><button style="padding: 0.5rem 1rem; border: none; background: #667eea; color: white; border-radius: 8px; cursor: pointer;">Edit</button></td>
+                    </tr>
+                `;
+            });
+            html += '</table>';
+            
+            document.getElementById('admin-content').innerHTML = html;
+        }
+
+        async function showOrders() {
+            document.getElementById('admin-content').innerHTML = 'Loading orders...';
+            
+            const supabaseUrl = window.supabaseUrl;
+            const supabaseKey = window.supabaseKey;
+            
+            let orders = [];
+            if (supabaseUrl && supabaseKey) {
+                const supabase = window.supabaseClient;
+                const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                orders = data;
+            } else {
+                orders = [];
+            }
+
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<tr style="background: #f1f5f9; font-weight: bold;"><th>Customer</th><th>Email</th><th>Total</th><th>Status</th></tr>';
+            
+            orders.forEach(o => {
+                html += `
+                    <tr>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">${o.customer_name}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">${o.customer_email}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0; color: #764ba2; font-weight: bold;">$${o.total.toFixed(2)}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;"><span style="padding: 0.25rem 0.5rem; background: ${o.status === 'completed' ? '#84fab0' : '#fed7aa'}; color: ${o.status === 'completed' ? '#065f46' : '#92400e'}; border-radius: 10px; font-size: 0.8rem;">${o.status}</span></td>
+                    </tr>
+                `;
+            });
+            html += '</table>';
+            
+            document.getElementById('admin-content').innerHTML = html;
+        }
+
+        function showReports() {
+            document.getElementById('admin-content').innerHTML = `
+                <h3>📊 Sales Reports</h3>
+                <p>Charts and analytics will be loaded here in Phase 3.</p>
+                <div style="margin-top: 1rem; height: 200px; background: #e2e8f0; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    Chart placeholder - Will implement in Phase 3
+                </div>
+            `;
+        }
+
+        function logout() {
+            if (window.supabaseClient) {
+                window.supabaseClient.auth.signOut().then(() => {
+                    window.location.href = '/admin/login.html';
+                });
+            } else {
+                    window.location.href = '/admin/login.html';
+            }
+        }
+
+        // Initialize dashboard
+        showInventory();
+    </script>
+</body>
+</html>

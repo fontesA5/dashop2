@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "name": "dashop-architecture",
+  "title": "Dashop System Architecture",
+  "description": "Mobile-first e-commerce store architecture documentation",
+  "components": [
+    {
+      "name": "Frontend (public/)",
+      "type": "HTML/JS/CSS",
+      "files": ["index.html", "css/styles.css", "js/app.js", "js/supabase-client.js"],
+      "description": "Mobile-first shopping experience with cart, checkout, and product browsing"
+    },
+    {
+      "name": "Backend (Supabase)",
+      "type": "Database/API",
+      "files": ["supabase/migrations/001-schema.sql"],
+      "tables": ["products", "orders", "sessions", "admin_users"],
+      "description": "PostgreSQL database for persistent data storage"
+    },
+    {
+      "name": "Admin Dashboard",
+      "type": "HTML/JS",
+      "files": ["admin/login.html", "admin/dashboard.html"],
+      "description": "Protected admin interface for inventory and order management"
+    }
+  ],
+  "deployment": {
+    "platform": "Cloudflare Pages",
+    "config": "wrangler.toml",
+    "static": true,
+    "functions": false
+  },
+  "features": ["Mobile-first design", "Shopping cart with localStorage sync", "Checkout flow", "Admin dashboard foundation"]
+}
