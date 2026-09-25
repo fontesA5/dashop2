@@ -1,0 +1,32 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: # Manual trigger
+  
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install Wrangler
+        run: npm install -g wrangler
+      
+      - name: Deploy to Cloudflare Pages
+        run: |
+          # Check if logged in
+          wrangler whoami || true
+          
+          # Deploy static site from public folder
+          wrangler pages deploy public \
+            --project-name=dashop \
+            --branch=${{ github.ref_name }}
