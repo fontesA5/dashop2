@@ -15,7 +15,7 @@ body {
 .header {
     position: sticky;
     top: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
     padding: 1rem;
     display: flex;
     justify-content: space-between;
@@ -66,7 +66,7 @@ body {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
     color: white;
     padding: 3rem 1.5rem;
     border-radius: 20px;
@@ -133,7 +133,7 @@ body {
 .product-image {
     width: 100%;
     height: 120px;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #86efac 0%, #10b981 100%);
     border-radius: 10px;
     margin-bottom: 0.75rem;
     display: flex;
@@ -175,7 +175,7 @@ body {
 
 /* Info Banner */
 .info-banner {
-    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    background: linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%);
     padding: 1rem;
     border-radius: 15px;
     margin-top: 2rem;
@@ -294,7 +294,7 @@ body {
 
 .checkout-btn {
     width: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
     color: white;
     border: none;
     padding: 1rem;
@@ -307,7 +307,7 @@ body {
 
 .checkout-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+    box-shadow: 0 8px 20px rgba(16,185,129,0.4);
 }
 
 /* Checkout Form */
