@@ -27,7 +27,7 @@ async function startApp() {
     await loadProducts();
     await loadProductDetail();
     initSearchAutocomplete();
-    initPromoBanner();
+    initHeroBannerCarousel();
     initNewArrivals();
 }
 
@@ -527,7 +527,7 @@ async function loadProducts() {
                 .order('created_at', { ascending: false });
             
             if (!error && data) {
-                allProducts = data;
+                allProducts = data.filter(p => p.category !== '__dashop_config__');
             }
         }
     } catch (e) {
@@ -757,21 +757,223 @@ function initNewArrivals() {
     container.innerHTML = html;
 }
 
-// Dynamic Hero Promo Banner on index.html
-async function initPromoBanner() {
-    const bannerTitle = document.getElementById('hero-promo-title');
-    const bannerSub = document.getElementById('hero-promo-sub');
-    const promoCodeBadge = document.getElementById('hero-promo-code');
-    if (!bannerTitle || !window.promoManager) return;
+// Dynamic Hero Promo Banner Carousel on index.html
+let heroBanners = [];
+let currentHeroSlide = 0;
+let heroCarouselInterval = null;
 
-    const promo = await window.promoManager.getActivePromo();
-    if (promo) {
-        bannerTitle.textContent = promo.title;
-        if (bannerSub) bannerSub.textContent = promo.description;
-        if (promoCodeBadge) {
-            promoCodeBadge.textContent = promo.promo_code;
-            promoCodeBadge.parentElement.classList.remove('hidden');
+async function initHeroBannerCarousel() {
+    const track = document.getElementById('hero-banner-track');
+    if (!track) return;
+
+    if (!window.bannerManager) {
+        console.warn('BannerManager not initialized');
+        return;
+    }
+
+    try {
+        heroBanners = await window.bannerManager.getActiveBanners();
+    } catch (e) {
+        console.error('Error fetching active banners:', e);
+    }
+
+    if (!heroBanners || heroBanners.length === 0) {
+        // Fallback default banner
+        heroBanners = [
+            {
+                id: 'default',
+                title: "Save Big on Your Essentials",
+                subtitle: "Use code SAVE10 for instant discounts on all everyday items!",
+                tag: "Limited Time",
+                tag_icon: "local_fire_department",
+                promo_code: "SAVE10",
+                link_url: "/catalog",
+                button_text: "Shop now",
+                theme: "primary"
+            }
+        ];
+    }
+
+    renderHeroCarouselSlides();
+    setupHeroCarouselControls();
+}
+window.initPromoBanner = initHeroBannerCarousel;
+
+function renderHeroCarouselSlides() {
+    const track = document.getElementById('hero-banner-track');
+    const dotsContainer = document.getElementById('hero-carousel-dots');
+    const prevBtn = document.getElementById('hero-carousel-prev');
+    const nextBtn = document.getElementById('hero-carousel-next');
+    if (!track) return;
+
+    track.innerHTML = '';
+    if (dotsContainer) dotsContainer.innerHTML = '';
+
+    heroBanners.forEach((b, index) => {
+        const themeStyle = window.getBannerThemeClasses ? window.getBannerThemeClasses(b.theme) : {
+            bg: 'bg-gradient-to-br from-primary via-primary-container to-secondary text-on-primary',
+            tagBg: 'bg-tertiary-fixed text-on-tertiary-fixed',
+            btnBg: 'bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed',
+            badgeBg: 'bg-tertiary-fixed text-on-tertiary-fixed',
+            blurColor: 'bg-tertiary-fixed'
+        };
+
+        const slide = document.createElement('div');
+        slide.className = `min-w-full relative overflow-hidden rounded-2xl ${themeStyle.bg} p-space-lg shadow-md flex items-center justify-between transition-all`;
+
+        const hasImage = b.image_url && b.image_url.trim() !== '';
+
+        slide.innerHTML = `
+            <div class="absolute -right-8 -bottom-10 w-48 h-48 rounded-full ${themeStyle.blurColor} opacity-20 blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col items-start ${hasImage ? 'max-w-[70%]' : 'max-w-[88%]'}">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full ${themeStyle.tagBg} font-label-sm uppercase tracking-wider mb-space-xs shadow-sm font-bold">
+                    <span class="material-symbols-outlined text-[14px]">${b.tag_icon || 'local_fire_department'}</span>
+                    <span>${b.tag || 'Special Offer'}</span>
+                </div>
+                <h2 class="font-headline-xl-mobile sm:font-headline-lg font-extrabold leading-tight mb-space-2xs drop-shadow-sm">
+                    ${b.title}
+                </h2>
+                <p class="font-body-md opacity-90 font-medium mb-space-md leading-relaxed line-clamp-2">
+                    ${b.subtitle || ''}
+                </p>
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="${b.link_url || '/catalog'}" class="h-10 px-space-lg rounded-full ${themeStyle.btnBg} font-title-md font-bold shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-space-xs">
+                        <span>${b.button_text || 'Shop now'}</span>
+                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                    </a>
+                    ${b.promo_code ? `
+                    <div onclick="copyBannerPromoCode('${b.promo_code}', event)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${themeStyle.badgeBg} cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-sm font-bold text-xs uppercase" title="Click to copy code">
+                        <span>Code:</span>
+                        <span class="font-mono tracking-wider">${b.promo_code}</span>
+                        <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                    </div>` : ''}
+                </div>
+            </div>
+            ${hasImage ? `
+            <div class="relative z-10 hidden sm:flex shrink-0 w-32 h-32 md:w-40 md:h-40 items-center justify-center p-2">
+                <img src="${b.image_url}" alt="${b.title}" class="max-w-full max-h-full object-contain drop-shadow-lg rounded-xl"/>
+            </div>` : ''}
+        `;
+        track.appendChild(slide);
+
+        // Indicator dot
+        if (dotsContainer && heroBanners.length > 1) {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = `h-2 rounded-full transition-all duration-300 ${index === 0 ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'}`;
+            dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+            dot.onclick = () => goToHeroSlide(index);
+            dotsContainer.appendChild(dot);
         }
+    });
+
+    if (heroBanners.length > 1) {
+        if (prevBtn) prevBtn.classList.remove('hidden');
+        if (nextBtn) nextBtn.classList.remove('hidden');
+    } else {
+        if (prevBtn) prevBtn.classList.add('hidden');
+        if (nextBtn) nextBtn.classList.add('hidden');
+    }
+
+    goToHeroSlide(0);
+}
+
+function updateHeroCarouselDots() {
+    const dotsContainer = document.getElementById('hero-carousel-dots');
+    if (!dotsContainer) return;
+    const dots = dotsContainer.children;
+    for (let i = 0; i < dots.length; i++) {
+        if (i === currentHeroSlide) {
+            dots[i].className = 'w-6 h-2 rounded-full bg-white transition-all duration-300';
+        } else {
+            dots[i].className = 'w-2 h-2 rounded-full bg-white/50 hover:bg-white/80 transition-all duration-300';
+        }
+    }
+}
+
+function goToHeroSlide(index) {
+    if (!heroBanners || heroBanners.length === 0) return;
+    const track = document.getElementById('hero-banner-track');
+    if (!track) return;
+
+    currentHeroSlide = (index + heroBanners.length) % heroBanners.length;
+    track.style.transform = `translateX(-${currentHeroSlide * 100}%)`;
+    updateHeroCarouselDots();
+}
+
+window.nextHeroBanner = function() {
+    goToHeroSlide(currentHeroSlide + 1);
+};
+
+window.prevHeroBanner = function() {
+    goToHeroSlide(currentHeroSlide - 1);
+};
+
+window.copyBannerPromoCode = function(code, e) {
+    if (e) e.stopPropagation();
+    if (!code) return;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(code).then(() => {
+            showNotification(`Promo code "${code}" copied to clipboard!`);
+        }).catch(() => {
+            showNotification(`Promo code: ${code}`);
+        });
+    } else {
+        showNotification(`Promo code: ${code}`);
+    }
+};
+
+function setupHeroCarouselControls() {
+    const frame = document.getElementById('hero-carousel-frame');
+    if (!frame) return;
+
+    if (heroCarouselInterval) {
+        clearInterval(heroCarouselInterval);
+        heroCarouselInterval = null;
+    }
+
+    if (heroBanners.length > 1) {
+        const startAutoPlay = () => {
+            if (!heroCarouselInterval) {
+                heroCarouselInterval = setInterval(() => {
+                    window.nextHeroBanner();
+                }, 5000);
+            }
+        };
+
+        const stopAutoPlay = () => {
+            if (heroCarouselInterval) {
+                clearInterval(heroCarouselInterval);
+                heroCarouselInterval = null;
+            }
+        };
+
+        startAutoPlay();
+
+        frame.onmouseenter = stopAutoPlay;
+        frame.onmouseleave = startAutoPlay;
+
+        // Mobile touch swipe
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        frame.ontouchstart = (e) => {
+            stopAutoPlay();
+            touchStartX = e.changedTouches[0].screenX;
+        };
+
+        frame.ontouchend = (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchEndX - touchStartX;
+            if (Math.abs(diff) > 40) {
+                if (diff < 0) {
+                    window.nextHeroBanner();
+                } else {
+                    window.prevHeroBanner();
+                }
+            }
+            startAutoPlay();
+        };
     }
 }
 
@@ -867,7 +1069,7 @@ async function loadProductDetail() {
                 product = data;
             } else if (slug) {
                 const { data } = await window.supabaseClient.from('products').select('*');
-                if (data) product = data.find(p => getProductSlug(p) === slug);
+                if (data) product = data.filter(p => p.category !== '__dashop_config__').find(p => getProductSlug(p) === slug);
             }
         } catch (e) {
             console.error('Error loading product detail:', e);

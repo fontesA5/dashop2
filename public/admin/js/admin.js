@@ -118,7 +118,7 @@ async function loadAdminData() {
                 .from('products')
                 .select('*')
                 .order('created_at', { ascending: false });
-            if (!pErr && pData) adminProducts = pData;
+            if (!pErr && pData) adminProducts = pData.filter(p => p.category !== '__dashop_config__');
 
             // Load Orders
             const { data: oData, error: oErr } = await window.supabaseClient
@@ -738,8 +738,9 @@ window.adminQuickBarcodeLookup = function() {
     }, "Scan Barcode to Lookup Product");
 };
 
-// Manage Promos Modal Open / Close
+// Manage Promos & Carousel Banners Modal Open / Close
 window.openManagePromosModal = async function() {
+    await renderBannersList();
     await renderPromosList();
     const modal = document.getElementById('manage-promos-modal');
     if (modal) modal.classList.remove('hidden');
@@ -750,6 +751,167 @@ window.closeManagePromosModal = function() {
     if (modal) modal.classList.add('hidden');
 };
 
+// Switch Tabs between Carousel Banners and Discount Codes
+window.switchPromoTab = function(tab) {
+    const bannersPanel = document.getElementById('promo-panel-banners');
+    const codesPanel = document.getElementById('promo-panel-codes');
+    const bannersBtn = document.getElementById('promo-tab-btn-banners');
+    const codesBtn = document.getElementById('promo-tab-btn-codes');
+
+    if (tab === 'banners') {
+        bannersPanel?.classList.remove('hidden');
+        codesPanel?.classList.add('hidden');
+        bannersBtn?.classList.add('border-primary', 'text-primary');
+        bannersBtn?.classList.remove('border-transparent', 'text-on-surface-variant');
+        codesBtn?.classList.remove('border-primary', 'text-primary');
+        codesBtn?.classList.add('border-transparent', 'text-on-surface-variant');
+    } else {
+        bannersPanel?.classList.add('hidden');
+        codesPanel?.classList.remove('hidden');
+        codesBtn?.classList.add('border-primary', 'text-primary');
+        codesBtn?.classList.remove('border-transparent', 'text-on-surface-variant');
+        bannersBtn?.classList.remove('border-primary', 'text-primary');
+        bannersBtn?.classList.add('border-transparent', 'text-on-surface-variant');
+    }
+};
+
+// Render Banners List in Admin Modal
+async function renderBannersList() {
+    const container = document.getElementById('banners-list-container');
+    const badge = document.getElementById('active-banners-count-badge');
+    if (!container || !window.bannerManager) return;
+
+    const banners = await window.bannerManager.getBanners();
+    const activeCount = banners.filter(b => b.active).length;
+    if (badge) badge.textContent = activeCount;
+
+    if (banners.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-on-surface-variant bg-surface-container-low rounded-xl">No banners yet. Use the form above to create your first promo banner.</div>`;
+        return;
+    }
+
+    let html = '';
+    banners.forEach(b => {
+        const themeStyle = window.getBannerThemeClasses ? window.getBannerThemeClasses(b.theme) : {
+            bg: 'bg-gradient-to-br from-primary via-primary-container to-secondary text-on-primary',
+            tagBg: 'bg-tertiary-fixed text-on-tertiary-fixed',
+            btnBg: 'bg-tertiary-fixed text-on-tertiary-fixed',
+            badgeBg: 'bg-tertiary-fixed text-on-tertiary-fixed'
+        };
+
+        html += `
+        <div class="rounded-xl border border-surface-container overflow-hidden shadow-sm bg-surface-container-low flex flex-col sm:flex-row items-stretch">
+            <!-- Mini visual banner preview card -->
+            <div class="sm:w-60 p-3 ${themeStyle.bg} flex flex-col justify-between shrink-0 relative overflow-hidden">
+                <div class="relative z-10">
+                    <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${themeStyle.tagBg} text-[10px] font-bold uppercase tracking-wider mb-1 shadow-xs">
+                        <span class="material-symbols-outlined text-[12px]">${b.tag_icon || 'local_fire_department'}</span>
+                        <span>${b.tag || 'Promo'}</span>
+                    </div>
+                    <h4 class="font-bold text-sm leading-tight text-white line-clamp-1 drop-shadow-xs">${b.title}</h4>
+                    <p class="text-[11px] opacity-85 line-clamp-2 mt-0.5 text-white/90">${b.subtitle || ''}</p>
+                </div>
+                <div class="relative z-10 flex items-center justify-between mt-2 pt-2 border-t border-white/20">
+                    <span class="text-[10px] font-semibold text-white/90 underline">${b.button_text || 'Shop now'}</span>
+                    ${b.promo_code ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${themeStyle.badgeBg}">${b.promo_code}</span>` : ''}
+                </div>
+            </div>
+
+            <!-- Details & Controls -->
+            <div class="p-3 flex-1 flex flex-col justify-between gap-2">
+                <div>
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-bold text-sm text-on-surface line-clamp-1">${b.title}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${b.active ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-dim text-outline'}">
+                            ${b.active ? '● LIVE IN STORE' : '○ DISABLED'}
+                        </span>
+                    </div>
+                    <div class="text-xs text-on-surface-variant mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span>Link: <code class="bg-surface-container px-1 py-0.5 rounded text-[11px] font-mono">${b.link_url || '/catalog'}</code></span>
+                        <span>Theme: <b class="capitalize">${b.theme || 'primary'}</b></span>
+                        ${b.promo_code ? `<span>Code: <b class="font-mono text-primary font-bold">${b.promo_code}</b></span>` : ''}
+                    </div>
+                </div>
+
+                <!-- Action Buttons: Toggle Active and Delete -->
+                <div class="flex items-center justify-between pt-2 border-t border-surface-container">
+                    <button type="button" onclick="handleToggleBannerActive('${b.id}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 ${b.active ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'}">
+                        <span class="material-symbols-outlined text-[16px]">${b.active ? 'toggle_on' : 'toggle_off'}</span>
+                        <span>${b.active ? 'Active (Turn OFF)' : 'Disabled (Turn ON)'}</span>
+                    </button>
+
+                    <button type="button" onclick="handleDeleteBanner('${b.id}')" class="p-1.5 rounded-lg hover:bg-error-container/40 text-error transition active:scale-90" title="Delete Banner">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+window.handleCreateBanner = async function(event) {
+    event.preventDefault();
+    const title = document.getElementById('banner-title').value.trim();
+    const subtitle = document.getElementById('banner-subtitle').value.trim();
+    const tag = document.getElementById('banner-tag').value.trim() || 'Limited Time';
+    const tag_icon = document.getElementById('banner-icon').value || 'local_fire_department';
+    const promo_code = document.getElementById('banner-promo-code').value.trim();
+    const link_url = document.getElementById('banner-link').value.trim() || '/catalog';
+    const button_text = document.getElementById('banner-btn-text').value.trim() || 'Shop now';
+    const image_url = document.getElementById('banner-image').value.trim();
+    const active = document.getElementById('banner-active').checked;
+
+    const themeRadio = document.querySelector('input[name="banner-theme"]:checked');
+    const theme = themeRadio ? themeRadio.value : 'primary';
+
+    if (!title) return;
+
+    if (window.bannerManager) {
+        await window.bannerManager.createBanner({
+            title,
+            subtitle,
+            tag,
+            tag_icon,
+            promo_code,
+            link_url,
+            button_text,
+            theme,
+            image_url,
+            active
+        });
+
+        event.target.reset();
+        document.getElementById('banner-tag').value = 'Limited Time';
+        document.getElementById('banner-link').value = '/catalog';
+        document.getElementById('banner-btn-text').value = 'Shop now';
+        document.getElementById('banner-active').checked = true;
+
+        await renderBannersList();
+        showNotification(`Banner "${title}" created and saved!`);
+    }
+};
+
+window.handleToggleBannerActive = async function(id) {
+    if (window.bannerManager) {
+        const b = await window.bannerManager.toggleBannerActive(id);
+        await renderBannersList();
+        showNotification(`Banner ${b && b.active ? 'turned ON' : 'turned OFF'}`);
+    }
+};
+
+window.handleDeleteBanner = async function(id) {
+    if (!confirm('Are you sure you want to delete this promotional banner?')) return;
+    if (window.bannerManager) {
+        await window.bannerManager.deleteBanner(id);
+        await renderBannersList();
+        showNotification('Banner deleted.');
+    }
+};
+
+// Promos List & Code Management
 async function renderPromosList() {
     const container = document.getElementById('promos-list-container');
     if (!container || !window.promoManager) return;
@@ -763,7 +925,7 @@ async function renderPromosList() {
     let html = '';
     promos.forEach(p => {
         html += `
-        <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low shadow-sm">
+        <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low shadow-sm border border-surface-container">
             <div>
                 <div class="flex items-center gap-2">
                     <span class="font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/10 text-sm">${p.promo_code}</span>
@@ -773,10 +935,10 @@ async function renderPromosList() {
                 <p class="font-body-sm text-outline text-xs">${p.discount_value}% OFF • ${p.description}</p>
             </div>
             <div class="flex items-center gap-1">
-                <button onclick="togglePromoActive(${p.id})" class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant text-xs font-bold">
+                <button type="button" onclick="togglePromoActive(${p.id})" class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant text-xs font-bold">
                     ${p.active ? 'Deactivate' : 'Activate'}
                 </button>
-                <button onclick="deletePromoCode(${p.id})" class="p-2 rounded-lg hover:bg-error-container/40 text-error">
+                <button type="button" onclick="deletePromoCode(${p.id})" class="p-2 rounded-lg hover:bg-error-container/40 text-error">
                     <span class="material-symbols-outlined text-[18px]">delete</span>
                 </button>
             </div>
@@ -823,7 +985,7 @@ window.deletePromoCode = async function(id) {
         if (window.promoManager) {
             await window.promoManager.deletePromo(id);
             await renderPromosList();
-            showNotification('Promo deleted');
+            showNotification('Promo code deleted');
         }
     }
 };

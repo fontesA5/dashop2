@@ -253,14 +253,14 @@
                             </div>
                         </a>
 
-                        <!-- Manage Promos -->
+                        <!-- Manage Promos & Carousel Banners -->
                         <button onclick="openManagePromosModal()" class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-sm text-left active:scale-[0.98]">
                             <div class="w-10 h-10 rounded-xl bg-tertiary text-on-primary flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">loyalty</span>
+                                <span class="material-symbols-outlined text-[20px]">campaign</span>
                             </div>
                             <div class="min-w-0">
-                                <span class="font-label-md text-on-surface block truncate font-bold" data-i18n="manage_promos">Promos</span>
-                                <span class="font-label-sm text-on-surface-variant truncate block">Discounts</span>
+                                <span class="font-label-md text-on-surface block truncate font-bold">Promos & Banners</span>
+                                <span class="font-label-sm text-on-surface-variant truncate block">Seasonal & Ads</span>
                             </div>
                         </button>
                     </div>
@@ -449,35 +449,182 @@
         </div>
     </div>
 
-    <!-- Modal: Manage Promos -->
+    <!-- Modal: Manage Promos & Banners -->
     <div id="manage-promos-modal" class="fixed inset-0 z-[100] hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeManagePromosModal()"></div>
-        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-            <div class="w-full max-w-lg bg-surface-container-lowest rounded-2xl shadow-2xl flex flex-col max-h-[90vh] pointer-events-auto overflow-hidden">
+        <div class="absolute inset-0 flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+            <div class="w-full max-w-2xl bg-surface-container-lowest rounded-2xl shadow-2xl flex flex-col max-h-[92vh] pointer-events-auto overflow-hidden border border-surface-container/60">
                 <div class="flex items-center justify-between p-4 border-b border-surface-container">
-                    <h3 class="font-headline-md font-bold text-on-surface" data-i18n="manage_promos">Manage Promos & Discounts</h3>
-                    <button onclick="closeManagePromosModal()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[24px]">campaign</span>
+                        <h3 class="font-headline-md font-bold text-on-surface">Promos & Carousel Banners</h3>
+                    </div>
+                    <button onclick="closeManagePromosModal()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition active:scale-95">
                         <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
-                <div class="p-4 overflow-y-auto flex flex-col gap-4">
-                    <!-- Create Form -->
-                    <form onsubmit="handleCreatePromo(event)" class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-3">
-                        <span class="font-title-md font-bold text-on-surface" data-i18n="create_promo">Create Promo Code</span>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input id="promo-code" type="text" required placeholder="Code (e.g. SAVE20)" class="px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface uppercase font-bold text-sm outline-none border border-surface-container"/>
-                            <input id="promo-value" type="number" required placeholder="Discount % (e.g. 20)" class="px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container"/>
-                        </div>
-                        <input id="promo-title" type="text" placeholder="Offer Title (e.g. Summer Special)" class="px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container"/>
-                        <textarea id="promo-desc" rows="2" placeholder="Promo description or conditions..." class="px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-xs outline-none border border-surface-container"></textarea>
-                        <button type="submit" class="py-2 bg-primary text-on-primary rounded-lg font-bold text-sm shadow hover:bg-primary-container">Create Promo</button>
-                    </form>
 
-                    <!-- Promos List -->
-                    <div class="flex flex-col gap-2">
-                        <span class="font-title-md font-semibold text-on-surface">Active Promos</span>
-                        <div id="promos-list-container" class="flex flex-col gap-2"></div>
+                <!-- Tab Navigation Switcher -->
+                <div class="flex items-center border-b border-surface-container px-4 bg-surface-container-low/50">
+                    <button id="promo-tab-btn-banners" onclick="switchPromoTab('banners')" class="py-3 px-4 font-title-md font-bold text-sm border-b-2 border-primary text-primary flex items-center gap-2 transition-all">
+                        <span class="material-symbols-outlined text-[18px]">view_carousel</span>
+                        <span>Carousel Banners & Ads</span>
+                        <span id="active-banners-count-badge" class="px-1.5 py-0.5 rounded-full text-[11px] bg-primary/10 text-primary font-bold">0</span>
+                    </button>
+                    <button id="promo-tab-btn-codes" onclick="switchPromoTab('codes')" class="py-3 px-4 font-title-md font-bold text-sm border-b-2 border-transparent text-on-surface-variant hover:text-on-surface flex items-center gap-2 transition-all">
+                        <span class="material-symbols-outlined text-[18px]">loyalty</span>
+                        <span>Discount Codes</span>
+                    </button>
+                </div>
+
+                <!-- Tab Panels Container -->
+                <div class="p-4 overflow-y-auto flex flex-col gap-5">
+                    
+                    <!-- TAB 1: Banners & Seasonal Ads -->
+                    <div id="promo-panel-banners" class="flex flex-col gap-4">
+                        <!-- Add Banner Form -->
+                        <form onsubmit="handleCreateBanner(event)" class="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-3.5">
+                            <div class="flex items-center justify-between">
+                                <span class="font-title-md font-bold text-on-surface flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-primary text-[20px]">add_photo_alternate</span>
+                                    <span>Create Promo Banner</span>
+                                </span>
+                                <span class="text-xs text-on-surface-variant">Live in Homepage Carousel</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">Banner Title *</label>
+                                    <input id="banner-title" type="text" required placeholder="e.g. Summer Super Sale" class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface font-semibold text-sm outline-none border border-surface-container focus:border-primary"/>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">Subtitle / Details</label>
+                                    <input id="banner-subtitle" type="text" placeholder="e.g. Save 20% on all essentials this weekend" class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary"/>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">Seasonal Tag / Badge</label>
+                                    <input id="banner-tag" type="text" placeholder="e.g. Limited Time, Easter Deal" value="Limited Time" class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary"/>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">Badge Icon</label>
+                                    <select id="banner-icon" class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary">
+                                        <option value="local_fire_department">🔥 Hot / Fire (Limited Time)</option>
+                                        <option value="celebration">🎉 Celebration / Holiday</option>
+                                        <option value="bolt">⚡ Flash Deal / Quick</option>
+                                        <option value="spa">🌿 Spa / Beauty & Care</option>
+                                        <option value="eco">🌱 Eco / Seasonal Spring</option>
+                                        <option value="campaign">📢 Announcement</option>
+                                        <option value="favorite">❤️ Valentine / Special</option>
+                                        <option value="star">⭐ Star / Featured</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">Promo Code (Optional)</label>
+                                    <input id="banner-promo-code" type="text" placeholder="e.g. SAVE20" class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface uppercase font-mono font-bold text-sm outline-none border border-surface-container focus:border-primary"/>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">Target Link URL</label>
+                                    <input id="banner-link" type="text" placeholder="e.g. /catalog or /catalog?category=Personal+Care" value="/catalog" class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary"/>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">Button Label</label>
+                                    <input id="banner-btn-text" type="text" placeholder="e.g. Shop now, Claim Offer" value="Shop now" class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary"/>
+                                </div>
+                            </div>
+
+                            <!-- Color Theme Selector -->
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1.5">Color Theme Gradient</label>
+                                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                    <label class="flex flex-col items-center gap-1 cursor-pointer">
+                                        <input type="radio" name="banner-theme" value="primary" checked class="hidden peer"/>
+                                        <div class="w-full h-8 rounded-lg bg-gradient-to-r from-teal-700 to-emerald-600 peer-checked:ring-2 peer-checked:ring-primary peer-checked:scale-105 shadow-sm transition"></div>
+                                        <span class="text-[11px] font-medium text-on-surface-variant">Ocean</span>
+                                    </label>
+                                    <label class="flex flex-col items-center gap-1 cursor-pointer">
+                                        <input type="radio" name="banner-theme" value="sunset" class="hidden peer"/>
+                                        <div class="w-full h-8 rounded-lg bg-gradient-to-r from-amber-600 to-rose-600 peer-checked:ring-2 peer-checked:ring-primary peer-checked:scale-105 shadow-sm transition"></div>
+                                        <span class="text-[11px] font-medium text-on-surface-variant">Sunset</span>
+                                    </label>
+                                    <label class="flex flex-col items-center gap-1 cursor-pointer">
+                                        <input type="radio" name="banner-theme" value="emerald" class="hidden peer"/>
+                                        <div class="w-full h-8 rounded-lg bg-gradient-to-r from-emerald-700 to-cyan-700 peer-checked:ring-2 peer-checked:ring-primary peer-checked:scale-105 shadow-sm transition"></div>
+                                        <span class="text-[11px] font-medium text-on-surface-variant">Emerald</span>
+                                    </label>
+                                    <label class="flex flex-col items-center gap-1 cursor-pointer">
+                                        <input type="radio" name="banner-theme" value="berry" class="hidden peer"/>
+                                        <div class="w-full h-8 rounded-lg bg-gradient-to-r from-purple-800 to-pink-600 peer-checked:ring-2 peer-checked:ring-primary peer-checked:scale-105 shadow-sm transition"></div>
+                                        <span class="text-[11px] font-medium text-on-surface-variant">Berry</span>
+                                    </label>
+                                    <label class="flex flex-col items-center gap-1 cursor-pointer">
+                                        <input type="radio" name="banner-theme" value="midnight" class="hidden peer"/>
+                                        <div class="w-full h-8 rounded-lg bg-gradient-to-r from-slate-900 to-indigo-900 peer-checked:ring-2 peer-checked:ring-primary peer-checked:scale-105 shadow-sm transition"></div>
+                                        <span class="text-[11px] font-medium text-on-surface-variant">Midnight</span>
+                                    </label>
+                                    <label class="flex flex-col items-center gap-1 cursor-pointer">
+                                        <input type="radio" name="banner-theme" value="ruby" class="hidden peer"/>
+                                        <div class="w-full h-8 rounded-lg bg-gradient-to-r from-rose-800 to-red-600 peer-checked:ring-2 peer-checked:ring-primary peer-checked:scale-105 shadow-sm transition"></div>
+                                        <span class="text-[11px] font-medium text-on-surface-variant">Ruby</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-center">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">Optional Image URL (right graphic)</label>
+                                    <input id="banner-image" type="url" placeholder="https://example.com/banner-art.png" class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary"/>
+                                </div>
+                                <div class="flex items-center gap-2 pt-2 sm:pt-4">
+                                    <input id="banner-active" type="checkbox" checked class="w-5 h-5 rounded text-primary focus:ring-primary cursor-pointer"/>
+                                    <label for="banner-active" class="text-xs font-bold text-on-surface cursor-pointer select-none">Active / Show in Store</label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 bg-primary text-on-primary rounded-xl font-bold text-sm shadow hover:bg-primary-container active:scale-95 transition-all flex items-center justify-center gap-1.5 mt-1">
+                                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                                <span>Add Banner to Carousel</span>
+                            </button>
+                        </form>
+
+                        <!-- Banners List -->
+                        <div class="flex flex-col gap-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="font-title-md font-bold text-on-surface">Store Banners & Seasonal Ads</span>
+                                <span class="text-xs text-on-surface-variant">Toggle ON/OFF or delete below</span>
+                            </div>
+                            <div id="banners-list-container" class="flex flex-col gap-3">
+                                <div class="text-center py-6 text-on-surface-variant">Loading banners...</div>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- TAB 2: Discount Codes (Checkout Promos) -->
+                    <div id="promo-panel-codes" class="flex flex-col gap-4 hidden">
+                        <!-- Create Promo Form -->
+                        <form onsubmit="handleCreatePromo(event)" class="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-3">
+                            <span class="font-title-md font-bold text-on-surface" data-i18n="create_promo">Create Promo Code</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input id="promo-code" type="text" required placeholder="Code (e.g. SAVE20)" class="px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface uppercase font-bold text-sm outline-none border border-surface-container focus:border-primary"/>
+                                <input id="promo-value" type="number" required placeholder="Discount % (e.g. 20)" class="px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary"/>
+                            </div>
+                            <input id="promo-title" type="text" placeholder="Offer Title (e.g. Summer Special)" class="px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary"/>
+                            <textarea id="promo-desc" rows="2" placeholder="Promo description or conditions..." class="px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-xs outline-none border border-surface-container focus:border-primary"></textarea>
+                            <button type="submit" class="py-2.5 bg-primary text-on-primary rounded-xl font-bold text-sm shadow hover:bg-primary-container active:scale-95 transition-all">Create Promo Code</button>
+                        </form>
+
+                        <!-- Promos List -->
+                        <div class="flex flex-col gap-2">
+                            <span class="font-title-md font-semibold text-on-surface">Active Promo Codes</span>
+                            <div id="promos-list-container" class="flex flex-col gap-2"></div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
