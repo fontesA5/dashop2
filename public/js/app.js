@@ -6,6 +6,7 @@ const STORAGE_KEY = 'dashop_cart';
 document.addEventListener('DOMContentLoaded', () => {
     initCart();
     loadProducts();
+    loadProductDetail();
 });
 
 // Load cart from localStorage or initialize empty
@@ -219,78 +220,7 @@ async function syncOrderToSupabase(orderData) {
 }
 
 // Load products from Supabase or use demo data
-async function loadProducts() {
-    const productGrid = document.getElementById('product-grid');
-    
-    try {
-        const supabaseUrl = window.supabaseUrl;
-        const supabaseKey = window.supabaseAnonKey;
-        
-        let products = [];
-        
-        if (supabaseUrl && supabaseKey) {
-            const supabase = window.supabaseClient;
-            const { data, error } = await supabase
-                .from('products')
-                .select('*')
-                .order('created_at', { ascending: false });
-            
-            if (error) throw error;
-            products = data;
-        } else {
-            // Demo products for initial load
-            products = [
-                { id: 1, name: 'Wireless Bluetooth Earbuds', price: 49.99, image: '🎧' },
-                { id: 2, name: 'Smartphone Stand', price: 19.99, image: '📱' },
-                { id: 3, name: 'USB-C Cable 6ft', price: 12.99, image: '🔌' },
-                { id: 4, name: 'Portable Power Bank', price: 34.99, image: '🔋' },
-                { id: 5, name: 'Laptop Sleeve 13"', price: 24.99, image: '💼' },
-                { id: 6, name: 'Mechanical Keyboard', price: 89.99, image: '⌨️' },
-                { id: 7, name: 'Gaming Mouse', price: 39.99, image: '🖱️' },
-                { id: 8, name: 'Monitor Stand', price: 29.99, image: '🪑' }
-            ];
-        }
-        
-        // Render product cards
-        let html = '';
-        products.forEach(product => {
-            const isEmoji = product.image && (product.image.length <= 4 || !product.image.startsWith('http'));
-            const imageHtml = isEmoji || !product.image
-                ? `<div style="font-size: 4rem; text-align: center; line-height: 7rem;">${product.image || getPlaceholderEmoji(product.name)}</div>`
-                : `<img class="h-28 w-auto object-contain" src="${product.image}" alt="${product.name}">`;
-                
-            const category = product.category || 'General';
 
-            html += `
-            <div class="flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md cursor-pointer" onclick="viewProduct(${product.id})">
-                <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-space-xs overflow-hidden mb-space-xs">
-                    ${imageHtml}
-                </div>
-                <div class="flex flex-col flex-1 justify-between">
-                    <div>
-                        <span class="font-label-sm text-label-sm text-on-surface-variant">${category}</span>
-                        <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 leading-snug">
-                            ${product.name}
-                        </h4>
-                    </div>
-                    <div class="flex items-center justify-between pt-space-sm">
-                        <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${product.price.toFixed(2)}</span>
-                        <button class="w-8 h-8 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick='event.stopPropagation(); addToCart(${JSON.stringify(product).replace(/'/g, "&#39;")})' type="button">
-                            <span class="material-symbols-outlined text-[18px]">add</span>
-                        </button>
-                    </div>
-                </div>
-            </div>`;
-        });
-        
-        const grid = document.getElementById('product-grid') || document.getElementById('catalog-grid');
-        if (grid) {
-            grid.innerHTML = html;
-        }
-    } catch (error) {
-        console.error('Error loading products:', error);
-    }
-}
 
 // Helper to get emoji based on product name
 function getPlaceholderEmoji(name) {
@@ -299,10 +229,7 @@ function getPlaceholderEmoji(name) {
 }
 
 // View product (placeholder for detail page)
-function viewProduct(productId) {
-    console.log('Viewing product:', productId);
-    // TODO: Implement product detail page
-}
+
 
 // Show notification
 function showNotification(message, duration = 3000) {
@@ -358,3 +285,173 @@ window.openCart = openCart;
 window.closeCart = closeCart;
 window.proceedToCheckout = proceedToCheckout;
 window.handleCheckout = handleCheckout;
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(registration => {
+      console.log('SW registered:', registration.scope);
+    }).catch(error => {
+      console.log('SW registration failed:', error);
+    });
+  });
+}
+
+// Global variable to store fetched products for filtering
+let allProducts = [];
+
+// Load products from Supabase
+async function loadProducts() {
+    const grid = document.getElementById('product-grid') || document.getElementById('catalog-grid');
+    if (!grid) return;
+    
+    try {
+        const supabaseUrl = window.supabaseUrl;
+        const supabaseKey = window.supabaseAnonKey;
+        
+        if (!supabaseUrl || !supabaseKey) {
+            console.error("Supabase not configured!");
+            return;
+        }
+
+        const supabase = window.supabaseClient;
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        allProducts = data;
+        
+        renderProducts(allProducts, grid);
+    } catch (error) {
+        console.error('Error loading products:', error);
+        grid.innerHTML = '<p class="p-4 text-error">Failed to load products. Check console.</p>';
+    }
+}
+
+function renderProducts(products, grid) {
+    let html = '';
+    products.forEach(product => {
+        const isEmoji = product.image && (product.image.length <= 4 || !product.image.startsWith('http'));
+        const imageHtml = isEmoji || !product.image
+            ? \`<div style="font-size: 4rem; text-align: center; line-height: 7rem;">\${product.image || getPlaceholderEmoji(product.name)}</div>\`
+            : \`<img class="h-28 w-auto object-contain" src="\${product.image}" alt="\${product.name}">\`;
+            
+        const category = product.category || 'General';
+
+        html += \`
+        <div class="flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md cursor-pointer" onclick="viewProduct(\${product.id})">
+            <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-space-xs overflow-hidden mb-space-xs">
+                \${imageHtml}
+            </div>
+            <div class="flex flex-col flex-1 justify-between">
+                <div>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">\${category}</span>
+                    <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 leading-snug">
+                        \${product.name}
+                    </h4>
+                </div>
+                <div class="flex items-center justify-between pt-space-sm">
+                    <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$\${product.price.toFixed(2)}</span>
+                    <button class="w-8 h-8 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick='event.stopPropagation(); addToCart(\${JSON.stringify(product).replace(/'/g, "&#39;")})' type="button">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
+                    </button>
+                </div>
+            </div>
+        </div>\`;
+    });
+    
+    grid.innerHTML = html;
+}
+
+// Implement search logic for catalog
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('catalog-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const grid = document.getElementById('catalog-grid');
+            if (!grid) return;
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term) || (p.category && p.category.toLowerCase().includes(term)));
+            renderProducts(filtered, grid);
+        });
+    }
+
+    // Filter chips
+    const chips = document.querySelectorAll('.category-chip');
+    chips.forEach(chip => {
+        chip.addEventListener('click', (e) => {
+            const cat = e.target.innerText.trim();
+            const grid = document.getElementById('catalog-grid');
+            if (!grid) return;
+            
+            // Toggle active styling
+            chips.forEach(c => {
+                c.classList.remove('bg-secondary', 'text-on-secondary');
+                c.classList.add('bg-surface-container-low', 'text-on-surface');
+            });
+            e.target.classList.remove('bg-surface-container-low', 'text-on-surface');
+            e.target.classList.add('bg-secondary', 'text-on-secondary');
+
+            if (cat === 'All') {
+                renderProducts(allProducts, grid);
+            } else {
+                const filtered = allProducts.filter(p => p.category && p.category.toLowerCase() === cat.toLowerCase());
+                renderProducts(filtered, grid);
+            }
+        });
+    });
+});
+
+// Load individual product details
+async function loadProductDetail() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (!id) return;
+
+    try {
+        const supabase = window.supabaseClient;
+        const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
+        
+        if (error) throw error;
+        
+        const nameEl = document.getElementById('detail-name');
+        const priceEl = document.getElementById('detail-price');
+        const catEl = document.getElementById('detail-category');
+        const descEl = document.getElementById('detail-description');
+        const imgEl = document.getElementById('detail-image');
+        const addBtn = document.getElementById('addToCartBtn');
+        
+        if (nameEl) nameEl.innerText = data.name;
+        if (priceEl) priceEl.innerText = '$' + data.price.toFixed(2);
+        if (catEl) catEl.innerText = data.category || 'General';
+        if (descEl) descEl.innerText = data.description || 'No description available.';
+        
+        if (imgEl) {
+            const isEmoji = data.image && (data.image.length <= 4 || !data.image.startsWith('http'));
+            if (isEmoji || !data.image) {
+                imgEl.outerHTML = \`<div id="detail-image" style="font-size: 8rem; text-align: center; height: 100%; display: flex; align-items: center; justify-content: center;">\${data.image || getPlaceholderEmoji(data.name)}</div>\`;
+            } else {
+                imgEl.src = data.image;
+            }
+        }
+        
+        if (addBtn) {
+            addBtn.onclick = () => {
+                addToCart(data, window.currentQty || 1);
+                addToCartAnimation();
+            };
+        }
+    } catch (error) {
+        console.error('Error loading product detail:', error);
+    }
+}
+
+// Overwrite viewProduct
+function viewProduct(productId) {
+    window.location.href = '/product.html?id=' + productId;
+}
+
+// Export for module use if needed
+window.viewProduct = viewProduct;
+window.loadProductDetail = loadProductDetail;
