@@ -64,16 +64,53 @@
         };
     </script>
     <style>
+        /* ── Dark Mode ─────────────────────────────────────────────── */
         .dark body { background-color: #0d131f; color: #e2e8f0; }
-        .dark .bg-surface { background-color: #0d131f; }
-        .dark .bg-surface-container-lowest { background-color: #172033; color: #f8fafc; }
-        .dark .bg-surface-container-low { background-color: #1e293b; }
-        .dark .bg-surface-container { background-color: #27354f; }
-        .dark .bg-surface-container-high { background-color: #334155; }
-        .dark .text-on-surface { color: #f8fafc; }
-        .dark .text-on-surface-variant { color: #94a3b8; }
-        .dark .border-surface-container { border-color: #334155; }
+        .dark .bg-surface { background-color: #0d131f !important; }
+        .dark .bg-surface-container-lowest { background-color: #172033 !important; color: #f8fafc; }
+        .dark .bg-surface-container-low { background-color: #1e293b !important; }
+        .dark .bg-surface-container { background-color: #27354f !important; }
+        .dark .bg-surface-container-high { background-color: #334155 !important; }
+        .dark .text-on-surface { color: #f8fafc !important; }
+        .dark .text-on-surface-variant { color: #94a3b8 !important; }
+        .dark .text-outline { color: #64748b !important; }
+        .dark .border-surface-container { border-color: #334155 !important; }
+        /* Header */
+        .dark header { background-color: rgba(23,32,51,0.95) !important; border-color: #27354f; }
+        /* Inputs & textareas */
+        .dark input, .dark textarea, .dark select {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+            border-color: #334155 !important;
+        }
+        .dark input::placeholder, .dark textarea::placeholder { color: #64748b !important; }
+        /* Cards / product tiles */
+        .dark .rounded-2xl, .dark .rounded-xl { border-color: #27354f; }
+        /* Dock */
+        .dark nav.fixed { background-color: rgba(23,32,51,0.97) !important; border-color: #27354f !important; }
+        /* Category chips */
+        .dark .bg-surface-container-low.rounded-full { background-color: #1e293b !important; color: #94a3b8; }
+        /* Modals */
+        .dark [id$="-modal"] .bg-surface-container-lowest { background-color: #172033 !important; }
+        /* Outline/dividers */
+        .dark .shadow-sm { box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+        /* Search bar */
+        .dark #index-search-input { color: #f8fafc !important; }
+        /* Scroll hint */
+        .scroll-fade-wrap { position: relative; }
+        .scroll-fade-wrap::after {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            width: 64px;
+            background: linear-gradient(to left, var(--fade-color, #faf8ff), transparent);
+            z-index: 1;
+        }
+        .dark .scroll-fade-wrap::after { --fade-color: #0d131f; }
+        /* Hide scrollbars */
         ::-webkit-scrollbar { display: none; }
+        * { scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen">
@@ -107,11 +144,6 @@
                 <button type="button" onclick="window.themeManager.toggle()" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low active:scale-90 transition-all" title="Toggle theme">
                     <span class="material-symbols-outlined text-[20px] theme-toggle-icon">dark_mode</span>
                 </button>
-
-                <!-- Search Link Button -->
-                <a aria-label="Search" href="/catalog.html" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low active:scale-90 transition-all">
-                    <span class="material-symbols-outlined text-[20px]">search</span>
-                </a>
 
                 <!-- Cart Button -->
                 <button aria-label="Shopping Cart" class="relative w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low active:scale-90 transition-all" onclick="openCart()">
@@ -236,8 +268,16 @@
                         <span class="material-symbols-outlined text-[16px]">chevron_right</span>
                     </a>
                 </div>
-                <div id="new-arrivals-container" class="flex gap-space-md overflow-x-auto px-margin py-space-xs no-scrollbar">
-                    <div class="p-8 text-on-surface-variant text-sm">Loading live products...</div>
+                <!-- Scroll hint wrapper: right-fade gradient shows more content exists -->
+                <div class="scroll-fade-wrap">
+                    <div id="new-arrivals-container" class="flex gap-space-md overflow-x-auto px-margin py-space-xs no-scrollbar">
+                        <div class="p-8 text-on-surface-variant text-sm">Loading live products...</div>
+                    </div>
+                    <!-- Scroll cue label -->
+                    <div class="flex items-center justify-end gap-1 px-margin pb-1 text-[11px] text-on-surface-variant opacity-60 select-none" aria-hidden="true">
+                        <span>scroll</span>
+                        <span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+                    </div>
                 </div>
             </section>
 
@@ -323,10 +363,6 @@
                     <div class="flex flex-col gap-1">
                         <label class="font-label-md text-on-surface font-semibold" data-i18n="phone">Phone Number *</label>
                         <input type="tel" id="phone" name="phone" required placeholder="+1 (555) 000-0000" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container">
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="font-label-md text-on-surface font-semibold" data-i18n="address">Delivery Address *</label>
-                        <textarea id="address" name="address" required placeholder="123 Main St, Apt 4B, City, State" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container min-h-[60px]"></textarea>
                     </div>
 
                     <!-- Discount Code Section -->

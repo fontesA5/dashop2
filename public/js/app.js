@@ -343,7 +343,6 @@ async function handleCheckout(event) {
         customer_name: formData.get('name') || 'Guest Customer',
         customer_email: formData.get('email') || '',
         customer_phone: formData.get('phone') || '',
-        address: formData.get('address') || '',
         total: finalTotal,
         discount_code: appliedPromo ? appliedPromo.promo_code : null,
         items_json: JSON.stringify({
@@ -640,7 +639,7 @@ window.searchCustomerOrder = async function() {
                         <span class="${statusClass} uppercase text-[10px]">${o.status || 'Pending'}</span>
                     </div>
                     <div class="flex justify-between items-center text-on-surface-variant text-[11px]">
-                        <span>${dateStr} • ${o.address || 'Delivery'}</span>
+                        <span>${dateStr} · ${o.customer_phone || 'Order'}</span>
                         <span class="font-extrabold text-on-surface">$${parseFloat(o.total || 0).toFixed(2)}</span>
                     </div>
                 </div>
