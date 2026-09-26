@@ -142,22 +142,32 @@
                     <!-- Carousel Slides Track -->
                     <div id="hero-banner-track" class="flex transition-transform duration-500 ease-out will-change-transform">
                         <!-- Initial slide rendered dynamically by app.js -->
-                        <div class="min-w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-container to-secondary text-on-primary min-h-[220px] sm:min-h-[260px] md:min-h-[300px] p-5 sm:p-7 md:p-8 flex items-center shadow-md">
-                            <div class="absolute -right-8 -bottom-10 w-44 h-44 rounded-full bg-tertiary-fixed opacity-20 blur-2xl pointer-events-none"></div>
-                            <div class="relative z-10 flex flex-col items-start max-w-[85%]">
-                                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm uppercase tracking-wider mb-space-xs shadow-sm font-bold">
-                                    <span class="material-symbols-outlined text-[14px]">local_fire_department</span>
+                        <div class="min-w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-container to-secondary text-on-primary min-h-[230px] sm:min-h-[270px] md:min-h-[320px] p-4 pt-12 pb-14 sm:p-7 sm:pt-16 sm:pb-16 md:p-8 md:pt-18 md:pb-18 flex items-center shadow-md">
+                            <div class="absolute -right-8 -bottom-10 w-52 h-52 rounded-full bg-tertiary-fixed opacity-20 blur-3xl pointer-events-none"></div>
+                            
+                            <!-- Tag Badge: Top Left & Smaller -->
+                            <div class="absolute top-3 left-4 sm:top-4 sm:left-7 md:top-5 md:left-8 z-20">
+                                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider shadow-sm">
+                                    <span class="material-symbols-outlined text-[13px] sm:text-[14px]">local_fire_department</span>
                                     <span data-i18n="limited_time">Limited Time</span>
                                 </div>
-                                <h2 class="font-headline-xl-mobile text-on-primary font-extrabold leading-tight mb-space-2xs">
+                            </div>
+
+                            <!-- Content: Bigger Title & Details -->
+                            <div class="relative z-10 flex flex-col items-start max-w-[70%] sm:max-w-[65%] md:max-w-[60%] text-white my-auto">
+                                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight tracking-tight mb-1.5 sm:mb-2 text-on-primary drop-shadow-md">
                                     Save Big on Your Essentials
                                 </h2>
-                                <p class="font-body-md text-on-primary-container font-medium mb-space-md">
+                                <p class="text-xs sm:text-sm md:text-base text-on-primary-container font-medium leading-relaxed line-clamp-2 drop-shadow-sm max-w-xl mb-2 sm:mb-3">
                                     Use code <span class="font-mono font-bold px-1.5 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded">SAVE10</span> for instant discounts!
                                 </p>
-                                <a href="/catalog" class="h-10 px-space-lg rounded-full bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed font-title-md font-bold shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-space-xs">
+                            </div>
+
+                            <!-- Action Button: Bottom Right -->
+                            <div class="absolute right-4 bottom-3.5 sm:right-7 sm:bottom-5 md:right-8 md:bottom-6 z-20">
+                                <a href="/catalog" class="h-9 sm:h-11 px-4 sm:px-6 rounded-full bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed text-xs sm:text-sm md:text-base font-bold shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center gap-1.5">
                                     <span data-i18n="shop_now">Shop now</span>
-                                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                                    <span class="material-symbols-outlined text-[16px] sm:text-[18px]">arrow_forward</span>
                                 </a>
                             </div>
                         </div>

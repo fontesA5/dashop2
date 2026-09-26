@@ -821,43 +821,50 @@ function renderHeroCarouselSlides() {
         const slide = document.createElement('div');
         const hasImage = b.image_url && b.image_url.trim() !== '';
 
-        slide.className = `min-w-full relative overflow-hidden rounded-2xl ${hasImage ? 'bg-surface-container-high' : themeStyle.bg} min-h-[220px] sm:min-h-[260px] md:min-h-[300px] p-5 sm:p-7 md:p-8 shadow-md flex items-center justify-between transition-all group`;
+        slide.className = `min-w-full relative overflow-hidden rounded-2xl ${hasImage ? 'bg-surface-container-high' : themeStyle.bg} min-h-[230px] sm:min-h-[270px] md:min-h-[320px] p-4 pt-12 pb-14 sm:p-7 sm:pt-16 sm:pb-16 md:p-8 md:pt-18 md:pb-18 shadow-md flex items-center transition-all group`;
 
         slide.innerHTML = `
             ${hasImage ? `
             <!-- Full Fill Banner Image Background (Mobile & PC) -->
-            <div class="absolute inset-0 w-full h-full z-0 overflow-hidden">
+            <div class="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
                 <img src="${b.image_url}" alt="${b.title || 'Banner'}" class="w-full h-full object-cover object-center transform transition-transform duration-700 ease-out group-hover:scale-105" loading="eager"/>
                 <!-- Scrim gradient overlay to ensure text readability -->
-                <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/30 sm:from-black/80 sm:via-black/50 sm:to-black/20"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/35 sm:from-black/80 sm:via-black/50 sm:to-black/25"></div>
             </div>
             ` : `
-            <div class="absolute -right-8 -bottom-10 w-48 h-48 rounded-full ${themeStyle.blurColor} opacity-20 blur-3xl pointer-events-none"></div>
+            <div class="absolute -right-8 -bottom-10 w-52 h-52 rounded-full ${themeStyle.blurColor} opacity-20 blur-3xl pointer-events-none"></div>
             `}
 
-            <div class="relative z-10 flex flex-col items-start max-w-full sm:max-w-[85%] text-white">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full ${hasImage ? 'bg-white/20 text-white border border-white/30 backdrop-blur-sm' : themeStyle.tagBg} font-label-sm uppercase tracking-wider mb-space-xs shadow-sm font-bold">
-                    <span class="material-symbols-outlined text-[14px]">${b.tag_icon || 'local_fire_department'}</span>
+            <!-- Tag Badge: Top Left & Smaller -->
+            <div class="absolute top-3 left-4 sm:top-4 sm:left-7 md:top-5 md:left-8 z-20">
+                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full ${hasImage ? 'bg-white/20 text-white border border-white/30 backdrop-blur-md' : themeStyle.tagBg} text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider shadow-sm">
+                    <span class="material-symbols-outlined text-[13px] sm:text-[14px]">${b.tag_icon || 'local_fire_department'}</span>
                     <span>${b.tag || 'Special Offer'}</span>
                 </div>
-                <h2 class="font-headline-xl-mobile sm:font-headline-lg font-extrabold leading-tight mb-space-2xs text-white drop-shadow-md">
+            </div>
+
+            <!-- Content: Bigger Title & Details -->
+            <div class="relative z-10 flex flex-col items-start max-w-[70%] sm:max-w-[65%] md:max-w-[60%] text-white my-auto">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight tracking-tight mb-1.5 sm:mb-2 text-white drop-shadow-md">
                     ${b.title}
                 </h2>
-                <p class="font-body-md text-white/90 font-medium mb-space-md leading-relaxed line-clamp-2 drop-shadow-sm max-w-xl">
+                <p class="text-xs sm:text-sm md:text-base text-white/90 font-medium leading-relaxed line-clamp-2 drop-shadow-sm max-w-xl mb-2 sm:mb-3">
                     ${b.subtitle || ''}
                 </p>
-                <div class="flex flex-wrap items-center gap-3">
-                    <a href="${b.link_url || '/catalog'}" class="h-10 px-space-lg rounded-full ${hasImage ? 'bg-white hover:bg-white/90 text-neutral-900' : themeStyle.btnBg} font-title-md font-bold shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-space-xs">
-                        <span>${b.button_text || 'Shop now'}</span>
-                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-                    </a>
-                    ${b.promo_code ? `
-                    <div onclick="copyBannerPromoCode('${b.promo_code}', event)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${hasImage ? 'bg-white/25 text-white border border-white/30 backdrop-blur-md' : themeStyle.badgeBg} cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-sm font-bold text-xs uppercase" title="Click to copy code">
-                        <span>Code:</span>
-                        <span class="font-mono tracking-wider">${b.promo_code}</span>
-                        <span class="material-symbols-outlined text-[14px]">content_copy</span>
-                    </div>` : ''}
-                </div>
+                ${b.promo_code ? `
+                <div onclick="copyBannerPromoCode('${b.promo_code}', event)" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${hasImage ? 'bg-white/25 text-white border border-white/30 backdrop-blur-md' : themeStyle.badgeBg} cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-sm font-bold text-[11px] sm:text-xs uppercase" title="Click to copy code">
+                    <span class="opacity-80">Code:</span>
+                    <span class="font-mono tracking-wider">${b.promo_code}</span>
+                    <span class="material-symbols-outlined text-[13px]">content_copy</span>
+                </div>` : ''}
+            </div>
+
+            <!-- Action Button: Bottom Right -->
+            <div class="absolute right-4 bottom-3.5 sm:right-7 sm:bottom-5 md:right-8 md:bottom-6 z-20">
+                <a href="${b.link_url || '/catalog'}" class="h-9 sm:h-11 px-4 sm:px-6 rounded-full ${hasImage ? 'bg-white hover:bg-white/90 text-neutral-900' : themeStyle.btnBg} text-xs sm:text-sm md:text-base font-bold shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center gap-1.5">
+                    <span>${b.button_text || 'Shop now'}</span>
+                    <span class="material-symbols-outlined text-[16px] sm:text-[18px]">arrow_forward</span>
+                </a>
             </div>
         `;
         track.appendChild(slide);
