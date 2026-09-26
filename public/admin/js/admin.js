@@ -10,11 +10,25 @@ let uploadedImageFiles = [];
 
 // Admin Session Verification — always requires login
 function checkAdminAuth() {
-    const raw = localStorage.getItem('dashop_admin_session');
+    let raw = null;
+    try { raw = localStorage.getItem('dashop_admin_session'); } catch(e) {}
+
+    // Cookie fallback in case localStorage was not shared across contexts
+    if (!raw) {
+        const match = document.cookie.match(/(?:^|;\s*)dashop_admin_session=([^;]*)/);
+        if (match) {
+            try {
+                raw = decodeURIComponent(match[1]);
+                localStorage.setItem('dashop_admin_session', raw);
+            } catch(e) {}
+        }
+    }
+
+    const isLoginPage = window.location.pathname.includes('login');
 
     if (!raw) {
-        if (!window.location.pathname.includes('login.html')) {
-            window.location.replace('/admin/login.html');
+        if (!isLoginPage) {
+            window.location.replace('/admin/login');
             return false;
         }
         return false;
@@ -25,20 +39,25 @@ function checkAdminAuth() {
     try {
         session = JSON.parse(raw);
     } catch(e) {
-        localStorage.removeItem('dashop_admin_session');
-        if (!window.location.pathname.includes('login.html')) {
-            window.location.replace('/admin/login.html');
+        try { localStorage.removeItem('dashop_admin_session'); } catch(err) {}
+        document.cookie = 'dashop_admin_session=; path=/; max-age=0';
+        if (!isLoginPage) {
+            window.location.replace('/admin/login');
         }
         return false;
     }
 
     if (!session || !session.email) {
-        localStorage.removeItem('dashop_admin_session');
-        if (!window.location.pathname.includes('login.html')) {
-            window.location.replace('/admin/login.html');
+        try { localStorage.removeItem('dashop_admin_session'); } catch(err) {}
+        document.cookie = 'dashop_admin_session=; path=/; max-age=0';
+        if (!isLoginPage) {
+            window.location.replace('/admin/login');
         }
         return false;
     }
+
+    // Sync cookie for domain
+    document.cookie = `dashop_admin_session=${encodeURIComponent(raw)}; path=/; max-age=86400; SameSite=Lax`;
 
     // Update email badge in admin UI if present
     const emailEl = document.getElementById('admin-user-email');
@@ -48,11 +67,12 @@ function checkAdminAuth() {
 }
 
 window.handleAdminSignOut = function() {
-    localStorage.removeItem('dashop_admin_session');
+    try { localStorage.removeItem('dashop_admin_session'); } catch(e) {}
+    document.cookie = 'dashop_admin_session=; path=/; max-age=0';
     if (window.supabaseClient && window.supabaseClient.auth) {
         window.supabaseClient.auth.signOut().catch(() => {});
     }
-    window.location.replace('/admin/login.html');
+    window.location.replace('/admin/login');
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
