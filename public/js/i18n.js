@@ -93,7 +93,10 @@ const translations = {
         track: "Track",
         enter_phone_to_track: "Please enter your phone number to track your order.",
         no_order_phone_found: "No order found matching this phone number.",
-        looking_up_order: "Looking up order..."
+        looking_up_order: "Looking up order...",
+        out_of_stock: "Out of Stock",
+        product_out_of_stock: "Sorry, this product is out of stock!",
+        stock_limit_reached: "Stock limit reached for this product."
     },
     es: {
         store: "Tienda",
@@ -184,7 +187,10 @@ const translations = {
         track: "Rastrear",
         enter_phone_to_track: "Por favor, ingresa tu número de teléfono para rastrear tu pedido.",
         no_order_phone_found: "No se encontró ningún pedido con este número de teléfono.",
-        looking_up_order: "Buscando pedido..."
+        looking_up_order: "Buscando pedido...",
+        out_of_stock: "Agotado",
+        product_out_of_stock: "¡Este producto está agotado!",
+        stock_limit_reached: "Límite de existencias alcanzado para este producto."
     },
     pt: {
         store: "Loja",
@@ -275,7 +281,10 @@ const translations = {
         track: "Rastrear",
         enter_phone_to_track: "Por favor, digite seu número de telefone para rastrear seu pedido.",
         no_order_phone_found: "Nenhum pedido encontrado com este número de telefone.",
-        looking_up_order: "Buscando pedido..."
+        looking_up_order: "Buscando pedido...",
+        out_of_stock: "Esgotado",
+        product_out_of_stock: "Este produto está esgotado!",
+        stock_limit_reached: "Limite de estoque atingido para este produto."
     }
 };
 

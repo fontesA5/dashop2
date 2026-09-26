@@ -120,11 +120,32 @@ function triggerAddToCartAnimation(startElement) {
 
 // Add product to cart with animation
 async function addToCart(product, quantity = 1, triggerBtn = null) {
-    if (!product) return;
+    if (!product) return false;
+    
+    // Strict stock check
+    const availableStock = typeof product.stock !== 'undefined' ? parseInt(product.stock) : 999;
+    if (availableStock <= 0) {
+        const outMsg = window.i18n ? window.i18n.t('product_out_of_stock') : 'Sorry, this product is out of stock!';
+        showNotification(outMsg);
+        return false;
+    }
+
     const existingItem = cart.find(item => item.id === product.id);
+    const currentQtyInCart = existingItem ? existingItem.quantity : 0;
+
+    if (currentQtyInCart + quantity > availableStock) {
+        const remaining = Math.max(0, availableStock - currentQtyInCart);
+        if (remaining <= 0) {
+            const limitMsg = window.i18n ? window.i18n.t('stock_limit_reached') : `Stock limit reached (${availableStock} available).`;
+            showNotification(limitMsg);
+            return false;
+        }
+        quantity = remaining;
+    }
     
     if (existingItem) {
         existingItem.quantity += quantity;
+        existingItem.stock = availableStock;
     } else {
         const primaryImage = getProductPrimaryImage(product);
         cart.push({
@@ -132,7 +153,8 @@ async function addToCart(product, quantity = 1, triggerBtn = null) {
             name: product.name,
             price: parseFloat(product.price) || 0,
             image: primaryImage,
-            quantity: quantity
+            quantity: quantity,
+            stock: availableStock
         });
     }
     
@@ -142,11 +164,18 @@ async function addToCart(product, quantity = 1, triggerBtn = null) {
     }
     const msg = window.i18n ? window.i18n.t('product_added') : 'Added to cart!';
     showNotification(`${product.name}: ${msg}`);
+    return true;
 }
 
 window.addToCartById = function(id, btnElement = null) {
     const product = allProducts.find(p => String(p.id) === String(id));
     if (product) {
+        const stock = typeof product.stock !== 'undefined' ? parseInt(product.stock) : 999;
+        if (stock <= 0) {
+            const outMsg = window.i18n ? window.i18n.t('product_out_of_stock') : 'Sorry, this product is out of stock!';
+            showNotification(outMsg);
+            return;
+        }
         addToCart(product, 1, btnElement);
     } else {
         console.error('Product not found for ID:', id);
@@ -164,6 +193,11 @@ function removeFromCart(productId) {
 function updateQuantity(productId, delta) {
     const item = cart.find(item => String(item.id) === String(productId));
     if (item) {
+        if (delta > 0 && typeof item.stock !== 'undefined' && item.quantity + delta > item.stock) {
+            const limitMsg = window.i18n ? window.i18n.t('stock_limit_reached') : `Only ${item.stock} available in stock`;
+            showNotification(limitMsg);
+            return;
+        }
         item.quantity += delta;
         if (item.quantity <= 0) {
             removeFromCart(productId);
@@ -986,11 +1020,20 @@ function renderProductGrid(products, grid) {
 
         const slug = getProductSlug(p);
         const category = p.category || 'General';
+        const stockQty = typeof p.stock !== 'undefined' ? parseInt(p.stock) : 999;
+        const isOutOfStock = stockQty <= 0;
+        const outOfStockLabel = window.i18n ? window.i18n.t('out_of_stock') : 'Out of Stock';
 
         html += `
-        <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="viewProduct('${slug}', ${p.id})">
+        <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer ${isOutOfStock ? 'opacity-75' : ''}" onclick="viewProduct('${slug}', ${p.id})">
             <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
+                ${isOutOfStock ? `
+                <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-2">
+                    <span class="px-2.5 py-1 rounded-full bg-error text-white font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider shadow-md text-center">
+                        ${outOfStockLabel}
+                    </span>
+                </div>` : ''}
             </div>
             <div class="flex flex-col flex-1 justify-between">
                 <div>
@@ -1001,9 +1044,13 @@ function renderProductGrid(products, grid) {
                 </div>
                 <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
                     <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${parseFloat(p.price).toFixed(2)}</span>
+                    ${isOutOfStock ? `
+                    <button class="cart-btn w-9 h-9 rounded-full bg-surface-container-highest text-outline flex items-center justify-center shadow-none cursor-not-allowed opacity-60" onclick="event.stopPropagation(); window.showNotification('${outOfStockLabel}')" type="button" title="${outOfStockLabel}">
+                        <span class="material-symbols-outlined text-[18px]">remove_shopping_cart</span>
+                    </button>` : `
                     <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="event.stopPropagation(); window.addToCartById(${p.id}, this)" type="button">
                         <span class="material-symbols-outlined text-[18px]">add</span>
-                    </button>
+                    </button>`}
                 </div>
             </div>
         </div>`;
@@ -1027,11 +1074,20 @@ function initNewArrivals() {
             : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${p.name}">`;
 
         const slug = getProductSlug(p);
+        const stockQty = typeof p.stock !== 'undefined' ? parseInt(p.stock) : 999;
+        const isOutOfStock = stockQty <= 0;
+        const outOfStockLabel = window.i18n ? window.i18n.t('out_of_stock') : 'Out of Stock';
 
         html += `
-        <div class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1 cursor-pointer" onclick="viewProduct('${slug}', ${p.id})">
+        <div class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1 cursor-pointer ${isOutOfStock ? 'opacity-75' : ''}" onclick="viewProduct('${slug}', ${p.id})">
             <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
+                ${isOutOfStock ? `
+                <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-2">
+                    <span class="px-2 py-0.5 rounded-full bg-error text-white font-extrabold text-[10px] uppercase tracking-wider shadow-md text-center">
+                        ${outOfStockLabel}
+                    </span>
+                </div>` : ''}
             </div>
             <div class="flex flex-col flex-1 justify-between">
                 <div>
@@ -1040,9 +1096,13 @@ function initNewArrivals() {
                 </div>
                 <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
                     <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${parseFloat(p.price).toFixed(2)}</span>
+                    ${isOutOfStock ? `
+                    <button class="cart-btn w-9 h-9 rounded-full bg-surface-container-highest text-outline flex items-center justify-center shadow-none cursor-not-allowed opacity-60" onclick="event.stopPropagation(); window.showNotification('${outOfStockLabel}')" type="button" title="${outOfStockLabel}">
+                        <span class="material-symbols-outlined text-[18px]">remove_shopping_cart</span>
+                    </button>` : `
                     <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="event.stopPropagation(); window.addToCartById(${p.id}, this)" type="button">
                         <span class="material-symbols-outlined text-[20px]">add</span>
-                    </button>
+                    </button>`}
                 </div>
             </div>
         </div>`;
@@ -1398,13 +1458,44 @@ async function loadProductDetail() {
     if (catEl) catEl.textContent = product.category || 'General';
     if (descEl) descEl.textContent = getProductCleanDescription(product) || 'High quality product from DaShop.';
 
-    // Stock Badge
+    // Stock Badge & Add Button Logic
     const stockBadge = document.getElementById('detail-stock-badge');
+    const stockQty = typeof product.stock !== 'undefined' ? parseInt(product.stock) : 999;
+    window.maxStock = stockQty;
+    const outOfStockText = window.i18n ? window.i18n.t('out_of_stock') : 'Out of Stock';
+
+    function updateDetailAddButton(isOutOfStock) {
+        if (!addBtn) return;
+        const addBtnText = addBtn.querySelector('[data-i18n="add_to_cart"]') || addBtn.querySelector('span:not(.material-symbols-outlined)');
+        const btnPriceEl = document.getElementById('btnPriceTotal');
+        const stepperDisplay = document.getElementById('quantityDisplay');
+
+        if (isOutOfStock) {
+            addBtn.disabled = true;
+            addBtn.classList.remove('bg-primary', 'hover:bg-primary-container', 'active:scale-[0.98]', 'cursor-pointer');
+            addBtn.classList.add('bg-surface-container-highest', 'text-outline', 'cursor-not-allowed', 'opacity-60');
+            if (addBtnText) addBtnText.textContent = outOfStockText;
+            if (btnPriceEl) btnPriceEl.classList.add('hidden');
+            if (stepperDisplay) stepperDisplay.textContent = '0';
+            window.currentQty = 0;
+        } else {
+            addBtn.disabled = false;
+            addBtn.classList.add('bg-primary', 'hover:bg-primary-container', 'active:scale-[0.98]', 'cursor-pointer');
+            addBtn.classList.remove('bg-surface-container-highest', 'text-outline', 'cursor-not-allowed', 'opacity-60');
+            const cartText = window.i18n ? window.i18n.t('add_to_cart') : 'Add to Cart';
+            if (addBtnText) addBtnText.textContent = cartText;
+            if (btnPriceEl) btnPriceEl.classList.remove('hidden');
+            if (stepperDisplay && (window.currentQty === 0 || stepperDisplay.textContent === '0')) {
+                window.currentQty = 1;
+                stepperDisplay.textContent = '1';
+            }
+        }
+    }
+
     if (stockBadge) {
-        const stockQty = parseInt(product.stock) || 0;
         if (stockQty <= 0) {
             stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-error-container text-error font-label-sm font-bold';
-            stockBadge.textContent = 'Out of Stock';
+            stockBadge.textContent = outOfStockText;
         } else if (stockQty <= 3) {
             stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-label-sm font-bold';
             stockBadge.textContent = `Only ${stockQty} left`;
@@ -1413,6 +1504,8 @@ async function loadProductDetail() {
             stockBadge.textContent = 'In Stock';
         }
     }
+
+    updateDetailAddButton(stockQty <= 0);
 
     const images = getProductAllImages(product);
     const mainImg = images[0] || '📦';
@@ -1455,18 +1548,26 @@ async function loadProductDetail() {
         let varHtml = '';
         meta.variations.forEach((v, idx) => {
             const vPrice = parseFloat(v.price) || parseFloat(product.price);
+            const vStock = typeof v.stock !== 'undefined' ? parseInt(v.stock) : stockQty;
+            const isVOutOfStock = vStock <= 0;
             varHtml += `
-                <button type="button" class="variation-pill px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all ${idx === 0 ? 'border-primary bg-primary text-on-primary shadow-sm' : 'border-surface-container bg-surface-container-low text-on-surface hover:bg-surface-container'}" data-var-idx="${idx}">
+                <button type="button" class="variation-pill px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all ${idx === 0 ? 'border-primary bg-primary text-on-primary shadow-sm' : 'border-surface-container bg-surface-container-low text-on-surface hover:bg-surface-container'} ${isVOutOfStock ? 'opacity-60' : ''}" data-var-idx="${idx}">
                     <span>${v.name}</span>
                     <span class="font-bold ml-1">$${vPrice.toFixed(2)}</span>
+                    ${isVOutOfStock ? `<span class="ml-1 text-[10px] text-error font-bold">(${outOfStockText})</span>` : ''}
                 </button>
             `;
         });
         varsList.innerHTML = varHtml;
 
         selectedVariation = meta.variations[0];
-        if (selectedVariation && selectedVariation.price && priceEl) {
-            priceEl.textContent = '$' + parseFloat(selectedVariation.price).toFixed(2);
+        if (selectedVariation) {
+            const vStock = typeof selectedVariation.stock !== 'undefined' ? parseInt(selectedVariation.stock) : stockQty;
+            window.maxStock = vStock;
+            updateDetailAddButton(vStock <= 0);
+            if (selectedVariation.price && priceEl) {
+                priceEl.textContent = '$' + parseFloat(selectedVariation.price).toFixed(2);
+            }
         }
 
         varsList.querySelectorAll('.variation-pill').forEach((pill, idx) => {
@@ -1479,11 +1580,17 @@ async function loadProductDetail() {
                 pill.classList.add('border-primary', 'bg-primary', 'text-on-primary', 'shadow-sm');
 
                 selectedVariation = meta.variations[idx];
-                if (selectedVariation && selectedVariation.price && priceEl) {
-                    priceEl.textContent = '$' + parseFloat(selectedVariation.price).toFixed(2);
-                }
-                if (selectedVariation && selectedVariation.imageUrl) {
-                    window.switchProductDetailImage(selectedVariation.imageUrl);
+                if (selectedVariation) {
+                    const currentVarStock = typeof selectedVariation.stock !== 'undefined' ? parseInt(selectedVariation.stock) : stockQty;
+                    window.maxStock = currentVarStock;
+                    updateDetailAddButton(currentVarStock <= 0);
+
+                    if (selectedVariation.price && priceEl) {
+                        priceEl.textContent = '$' + parseFloat(selectedVariation.price).toFixed(2);
+                    }
+                    if (selectedVariation.imageUrl) {
+                        window.switchProductDetailImage(selectedVariation.imageUrl);
+                    }
                 }
             };
         });
@@ -1493,6 +1600,11 @@ async function loadProductDetail() {
 
     if (addBtn) {
         addBtn.onclick = () => {
+            const currentStock = typeof window.maxStock !== 'undefined' ? window.maxStock : stockQty;
+            if (currentStock <= 0) {
+                showNotification(window.i18n ? window.i18n.t('product_out_of_stock') : 'Sorry, this product is out of stock!');
+                return;
+            }
             const qty = window.currentQty || 1;
             if (selectedVariation) {
                 const varProduct = {
@@ -1500,7 +1612,8 @@ async function loadProductDetail() {
                     id: `${product.id}-${(selectedVariation.id || selectedVariation.name).replace(/\s+/g, '-')}`,
                     name: `${product.name} (${selectedVariation.name})`,
                     price: parseFloat(selectedVariation.price) || parseFloat(product.price),
-                    image: selectedVariation.imageUrl || getProductPrimaryImage(product)
+                    image: selectedVariation.imageUrl || getProductPrimaryImage(product),
+                    stock: currentStock
                 };
                 addToCart(varProduct, qty, addBtn);
             } else {
@@ -1558,11 +1671,20 @@ async function renderDiscoverMore(currentProduct) {
 
         const slug = getProductSlug(p);
         const category = p.category || 'General';
+        const stockQty = typeof p.stock !== 'undefined' ? parseInt(p.stock) : 999;
+        const isOutOfStock = stockQty <= 0;
+        const outOfStockLabel = window.i18n ? window.i18n.t('out_of_stock') : 'Out of Stock';
 
         html += `
-        <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="viewProduct('${slug}', ${p.id})">
+        <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer ${isOutOfStock ? 'opacity-75' : ''}" onclick="viewProduct('${slug}', ${p.id})">
             <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
+                ${isOutOfStock ? `
+                <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-2">
+                    <span class="px-2 py-0.5 rounded-full bg-error text-white font-extrabold text-[10px] uppercase tracking-wider shadow-md text-center">
+                        ${outOfStockLabel}
+                    </span>
+                </div>` : ''}
             </div>
             <div class="flex flex-col flex-1 justify-between">
                 <div>
@@ -1573,9 +1695,13 @@ async function renderDiscoverMore(currentProduct) {
                 </div>
                 <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
                     <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${parseFloat(p.price).toFixed(2)}</span>
+                    ${isOutOfStock ? `
+                    <button class="cart-btn w-9 h-9 rounded-full bg-surface-container-highest text-outline flex items-center justify-center shadow-none cursor-not-allowed opacity-60" onclick="event.stopPropagation(); window.showNotification('${outOfStockLabel}')" type="button" title="${outOfStockLabel}">
+                        <span class="material-symbols-outlined text-[18px]">remove_shopping_cart</span>
+                    </button>` : `
                     <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="event.stopPropagation(); window.addToCartById(${p.id}, this)" type="button">
                         <span class="material-symbols-outlined text-[18px]">add</span>
-                    </button>
+                    </button>`}
                 </div>
             </div>
         </div>`;

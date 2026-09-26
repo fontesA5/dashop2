@@ -346,11 +346,21 @@
         window.currentQty = 1;
 
         function updateQty(delta) {
+            const max = typeof window.maxStock !== 'undefined' ? window.maxStock : 99;
+            if (max <= 0) {
+                window.currentQty = 0;
+                const qDisplay = document.getElementById('quantityDisplay');
+                if (qDisplay) qDisplay.textContent = '0';
+                return;
+            }
             const next = window.currentQty + delta;
-            if (next >= 1 && next <= 99) {
+            if (next >= 1 && next <= max) {
                 window.currentQty = next;
                 document.getElementById('quantityDisplay').textContent = window.currentQty;
                 recalculateBtnTotal();
+            } else if (next > max) {
+                const limitMsg = window.i18n ? window.i18n.t('stock_limit_reached') : `Stock limit reached (${max} available)`;
+                if (window.showNotification) window.showNotification(limitMsg);
             }
         }
 
