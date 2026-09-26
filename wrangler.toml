@@ -1,5 +1,0 @@
-[[routes]]
-path = "/*"
-params = { fallback_config: 'serve-all' }
-
-# Enable environment variables from .env file for production

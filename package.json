@@ -5,8 +5,9 @@
   "main": "public/index.html",
   "scripts": {
     "dev": "npx serve public -l 3000",
-    "deploy": "./deploy.sh",
-    "build": "echo 'Static site - no build needed'"
+    "deploy": "wrangler deploy",
+    "build": "echo 'Static site - no build needed'",
+    "preview": "wrangler dev"
   },
   "keywords": [
     "ecommerce",
@@ -16,5 +17,8 @@
     "cloudflare"
   ],
   "author": "Dashop Team",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^4.141.0"
+  }
 }
