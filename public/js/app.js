@@ -9,11 +9,12 @@ const STORAGE_KEY = 'dashop_cart';
 let appliedPromo = null;
 let allProducts = [];
 
-// Service Worker Registration
+// Service Worker Registration with auto-update
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').then(reg => {
             console.log('SW registered:', reg.scope);
+            reg.update();
         }).catch(err => {
             console.log('SW registration failed:', err);
         });
@@ -21,14 +22,20 @@ if ('serviceWorker' in navigator) {
 }
 
 // Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
+async function startApp() {
     initCart();
     await loadProducts();
     await loadProductDetail();
     initSearchAutocomplete();
     initPromoBanner();
     initNewArrivals();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startApp);
+} else {
+    startApp();
+}
 
 // Load cart from localStorage
 function initCart() {
@@ -926,9 +933,9 @@ window.switchProductDetailImage = function(url, thumbBtn) {
 // Route to product page by slug or id
 function viewProduct(slug, id) {
     if (slug) {
-        window.location.href = `/product.html?slug=${encodeURIComponent(slug)}`;
+        window.location.href = `/product?slug=${encodeURIComponent(slug)}`;
     } else {
-        window.location.href = `/product.html?id=${id}`;
+        window.location.href = `/product?id=${id}`;
     }
 }
 

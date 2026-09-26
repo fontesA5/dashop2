@@ -75,11 +75,17 @@ window.handleAdminSignOut = function() {
     window.location.replace('/admin/login');
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function initAdmin() {
     if (!checkAdminAuth()) return;
     await loadAdminData();
     initAdminModals();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAdmin);
+} else {
+    initAdmin();
+}
 
 // Load all data from Supabase for Admin
 async function loadAdminData() {

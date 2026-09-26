@@ -123,8 +123,8 @@
             <section class="px-margin pt-space-xs pb-space-sm">
                 <div class="relative flex items-center w-full h-12 bg-surface-container-low rounded-xl px-space-md shadow-sm border border-surface-container/50">
                     <span class="material-symbols-outlined text-outline text-[22px] mr-space-sm">search</span>
-                    <input id="index-search-input" class="w-full bg-transparent border-0 outline-none text-on-surface placeholder:text-outline font-body-md" placeholder="Search groceries, essentials..." data-i18n-placeholder="search_placeholder" type="search" onkeypress="if(event.key === 'Enter') window.location.href='/catalog.html?q='+encodeURIComponent(this.value)"/>
-                    <a aria-label="Catalog" href="/catalog.html" class="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-variant text-primary active:scale-95 transition">
+                    <input id="index-search-input" class="w-full bg-transparent border-0 outline-none text-on-surface placeholder:text-outline font-body-md" placeholder="Search groceries, essentials..." data-i18n-placeholder="search_placeholder" type="search" onkeypress="if(event.key === 'Enter') window.location.href='/catalog?q='+encodeURIComponent(this.value)"/>
+                    <a aria-label="Catalog" href="/catalog" class="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-variant text-primary active:scale-95 transition">
                         <span class="material-symbols-outlined text-[20px]">grid_view</span>
                     </a>
                     <!-- Autocomplete dropdown rendered here by app.js -->
@@ -147,7 +147,7 @@
                         <p id="hero-promo-sub" class="font-body-md text-on-primary-container font-medium mb-space-md">
                             Use code <span id="hero-promo-code" class="font-mono font-bold px-1.5 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded">SAVE10</span> for instant discounts!
                         </p>
-                        <a href="/catalog.html" class="h-10 px-space-lg rounded-full bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed font-title-md font-bold shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-space-xs">
+                        <a href="/catalog" class="h-10 px-space-lg rounded-full bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed font-title-md font-bold shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-space-xs">
                             <span data-i18n="shop_now">Shop now</span>
                             <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                         </a>
@@ -159,11 +159,11 @@
             <section class="px-margin py-space-sm">
                 <div class="flex items-center justify-between mb-space-sm">
                     <h3 class="font-headline-md text-headline-md text-on-surface font-bold" data-i18n="explore_categories">Explore Categories</h3>
-                    <a href="/catalog.html" class="font-label-md text-primary font-semibold hover:underline" data-i18n="view_all">View All</a>
+                    <a href="/catalog" class="font-label-md text-primary font-semibold hover:underline" data-i18n="view_all">View All</a>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 sm:gap-3">
                     <!-- Household Essentials -->
-                    <a href="/catalog.html?category=Household+Essentials" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
+                    <a href="/catalog?category=Household+Essentials" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
                         <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
                             <span class="material-symbols-outlined text-[26px]">cleaning_services</span>
                         </div>
@@ -172,7 +172,7 @@
                     </a>
 
                     <!-- Personal Care -->
-                    <a href="/catalog.html?category=Personal+Care" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
+                    <a href="/catalog?category=Personal+Care" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
                         <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
                             <span class="material-symbols-outlined text-[26px]">sanitizer</span>
                         </div>
@@ -181,7 +181,7 @@
                     </a>
 
                     <!-- Beauty -->
-                    <a href="/catalog.html?category=Beauty" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
+                    <a href="/catalog?category=Beauty" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
                         <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
                             <span class="material-symbols-outlined text-[26px]">face</span>
                         </div>
@@ -190,7 +190,7 @@
                     </a>
 
                     <!-- Health & Care -->
-                    <a href="/catalog.html?category=Health+%26+Care" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
+                    <a href="/catalog?category=Health+%26+Care" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
                         <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
                             <span class="material-symbols-outlined text-[26px]">health_and_safety</span>
                         </div>
@@ -199,7 +199,7 @@
                     </a>
 
                     <!-- Flash Deals -->
-                    <a href="/catalog.html?flash=true" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
+                    <a href="/catalog?flash=true" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
                         <div class="relative w-12 h-12 rounded-xl bg-error-container text-on-error-container flex items-center justify-center group-hover:scale-105 transition-all mb-1.5">
                             <span class="material-symbols-outlined text-[26px]">bolt</span>
                             <span class="absolute -top-1.5 -right-1 px-1 py-0.2 rounded-full bg-error text-on-error text-[9px] font-bold">HOT</span>
@@ -209,7 +209,7 @@
                     </a>
 
                     <!-- All Products -->
-                    <a href="/catalog.html" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
+                    <a href="/catalog" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
                         <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
                             <span class="material-symbols-outlined text-[26px]">apps</span>
                         </div>
@@ -227,7 +227,7 @@
                         <span class="material-symbols-outlined text-primary text-[22px]">auto_awesome</span>
                         <h3 class="font-headline-md text-headline-md text-on-surface font-bold" data-i18n="new_arrivals">New Arrivals</h3>
                     </div>
-                    <a href="/catalog.html" class="font-label-md text-primary font-bold hover:underline flex items-center gap-0.5">
+                    <a href="/catalog" class="font-label-md text-primary font-bold hover:underline flex items-center gap-0.5">
                         <span data-i18n="see_all">See All</span>
                         <span class="material-symbols-outlined text-[16px]">chevron_right</span>
                     </a>
@@ -249,7 +249,7 @@
             <section class="px-margin pt-space-xs pb-space-md">
                 <div class="flex items-center justify-between mb-space-sm">
                     <h3 class="font-headline-md text-headline-md text-on-surface font-bold" data-i18n="all_products">Featured Products</h3>
-                    <a href="/catalog.html" class="font-label-md text-primary font-semibold hover:underline" data-i18n="view_all">View All</a>
+                    <a href="/catalog" class="font-label-md text-primary font-semibold hover:underline" data-i18n="view_all">View All</a>
                 </div>
                 <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-space-sm">
                     <div class="col-span-full p-8 text-center text-on-surface-variant font-medium">Loading live catalog...</div>
@@ -265,7 +265,7 @@
                 <span class="material-symbols-outlined text-[22px]">storefront</span>
                 <span class="font-label-sm text-label-sm" data-i18n="store">Store</span>
             </a>
-            <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-all active:scale-90" href="/catalog.html">
+            <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-all active:scale-90" href="/catalog">
                 <span class="material-symbols-outlined text-[22px]">grid_view</span>
                 <span class="font-label-sm text-label-sm" data-i18n="catalog">Catalog</span>
             </a>
@@ -385,7 +385,7 @@
 
                     <!-- Admin link if session exists -->
                     <div id="admin-orders-link-wrapper" class="pt-2 border-t border-surface-container/60 text-center hidden">
-                        <a href="/admin/orders.html" class="text-xs font-bold text-primary hover:underline flex items-center justify-center gap-1">
+                        <a href="/admin/orders" class="text-xs font-bold text-primary hover:underline flex items-center justify-center gap-1">
                             <span>Open Merchant Orders Management</span>
                             <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                         </a>
