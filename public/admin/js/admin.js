@@ -267,12 +267,16 @@ function renderOrdersPage() {
 
         let items = [];
         let discountCode = o.discount_code || '';
+        let customerPhone = o.customer_phone || '';
+        let orderAddress = o.address || '';
         try {
-            const parsed = JSON.parse(o.items_json);
+            const parsed = typeof o.items_json === 'string' ? JSON.parse(o.items_json) : o.items_json;
             if (Array.isArray(parsed)) items = parsed;
             else if (parsed.items) {
                 items = parsed.items;
                 if (parsed.promo_code) discountCode = parsed.promo_code;
+                if (parsed.phone) customerPhone = parsed.phone;
+                if (parsed.address && !orderAddress) orderAddress = parsed.address;
             }
         } catch (e) {}
 
@@ -315,11 +319,11 @@ function renderOrdersPage() {
                     <div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
                         <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block">Customer Contact</span>
                         <p class="font-body-md text-on-surface font-medium">${o.customer_email || 'No email'}</p>
-                        ${o.customer_phone ? `<p class="font-body-sm text-outline mt-0.5">📞 ${o.customer_phone}</p>` : ''}
+                        ${customerPhone ? `<p class="font-body-sm text-outline mt-0.5">📞 ${customerPhone}</p>` : ''}
                     </div>
                     <div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
                         <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block">Delivery Address</span>
-                        <p class="font-body-md text-on-surface font-medium">${o.address || 'Pickup'}</p>
+                        <p class="font-body-md text-on-surface font-medium">${orderAddress || 'Store Pickup'}</p>
                     </div>
                 </div>
                 <div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">

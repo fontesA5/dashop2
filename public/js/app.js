@@ -336,6 +336,19 @@ async function handleCheckout(event) {
     }
 
     const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnContent = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        submitBtn.innerHTML = `
+            <div class="flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                <span>Placing Order...</span>
+            </div>
+        `;
+    }
+
     const formData = new FormData(form);
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     let discount = 0;
@@ -346,56 +359,217 @@ async function handleCheckout(event) {
     }
     const finalTotal = Math.max(0, subtotal - discount);
 
+    const name = (formData.get('name') || '').trim() || 'Guest Customer';
+    const email = (formData.get('email') || '').trim();
+    const phone = (formData.get('phone') || '').trim();
+    const address = (formData.get('address') || '').trim() || (phone ? `Contact: ${phone}` : 'Store Pickup');
+
+    // Schema-aligned payload for Supabase 'orders' table
     const orderPayload = {
-        customer_name: formData.get('name') || 'Guest Customer',
-        customer_email: formData.get('email') || '',
-        customer_phone: formData.get('phone') || '',
+        customer_name: name,
+        customer_email: email,
+        address: address,
         total: finalTotal,
-        discount_code: appliedPromo ? appliedPromo.promo_code : null,
+        status: 'pending',
         items_json: JSON.stringify({
             items: cart,
             subtotal: subtotal,
             discount: discount,
             promo_code: appliedPromo ? appliedPromo.promo_code : null,
-            phone: formData.get('phone') || ''
-        }),
-        status: 'pending'
+            phone: phone,
+            address: address,
+            customer_name: name,
+            customer_email: email
+        })
     };
 
     try {
+        let createdOrder = null;
+
         if (window.supabaseClient) {
             const { data, error } = await window.supabaseClient.from('orders').insert([orderPayload]).select();
-            if (error) console.error('Order save error:', error);
-            else {
-                console.log('Order created successfully:', data);
-                if (data && data[0]) {
-                    const custOrders = JSON.parse(localStorage.getItem('dashop_customer_orders') || '[]');
-                    custOrders.unshift({
-                        id: data[0].id,
-                        total: data[0].total,
-                        status: data[0].status || 'pending',
-                        items_count: cart.reduce((s, i) => s + (i.quantity || 1), 0),
-                        date: new Date().toISOString()
-                    });
-                    localStorage.setItem('dashop_customer_orders', JSON.stringify(custOrders));
-                }
+            if (error) {
+                console.error('Order save error from Supabase:', error);
+                throw new Error(error.message || 'Database error occurred while saving your order.');
+            }
+            if (data && data[0]) {
+                createdOrder = data[0];
+                console.log('Order created successfully in Supabase:', createdOrder);
             }
         }
 
-        // Reset cart and checkout state
+        if (!createdOrder) {
+            // Local fallback if Supabase client is offline/unconfigured
+            createdOrder = {
+                id: Math.floor(100000 + Math.random() * 900000),
+                customer_name: name,
+                customer_email: email,
+                address: address,
+                total: finalTotal,
+                status: 'pending',
+                created_at: new Date().toISOString(),
+                items_json: orderPayload.items_json
+            };
+        }
+
+        // Save order snapshot to customer's device history
+        const custOrders = JSON.parse(localStorage.getItem('dashop_customer_orders') || '[]');
+        custOrders.unshift({
+            id: createdOrder.id,
+            total: createdOrder.total,
+            status: createdOrder.status || 'pending',
+            items_count: cart.reduce((s, i) => s + (i.quantity || 1), 0),
+            items: [...cart],
+            address: address,
+            date: createdOrder.created_at || new Date().toISOString()
+        });
+        localStorage.setItem('dashop_customer_orders', JSON.stringify(custOrders));
+
+        // Preserve cart items and promo snapshot for the confirmation modal
+        const snapshotItems = [...cart];
+        const snapshotTotal = finalTotal;
+        const snapshotPromo = appliedPromo ? { ...appliedPromo } : null;
+
+        // Reset cart and checkout form
         cart = [];
         appliedPromo = null;
         saveCart();
         closeCheckout();
         form.reset();
 
-        const successMsg = window.i18n ? window.i18n.t('order_success') : 'Order placed successfully!';
-        showNotification(successMsg, 5000);
+        // Display the dedicated Order Success Modal
+        showOrderSuccessModal(createdOrder, snapshotItems, snapshotTotal, snapshotPromo);
+
     } catch (e) {
         console.error('Checkout error:', e);
-        alert('Failed to place order: ' + e.message);
+        alert('Could not place order: ' + e.message);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            submitBtn.innerHTML = originalBtnContent;
+        }
     }
 }
+
+// Display dedicated Order Confirmation Modal
+function showOrderSuccessModal(order, items, total, promo) {
+    const existing = document.getElementById('order-success-modal');
+    if (existing) existing.remove();
+
+    const orderId = '#' + String(order.id).padStart(6, '0');
+    const customerName = order.customer_name || 'Customer';
+    const email = order.customer_email || '';
+    const address = order.address || '';
+    let phone = '';
+    try {
+        const parsed = typeof order.items_json === 'string' ? JSON.parse(order.items_json) : order.items_json;
+        if (parsed?.phone) phone = parsed.phone;
+    } catch (e) {}
+
+    const itemsListHtml = items.map(item => `
+        <div class="flex items-center justify-between py-2 border-b border-surface-container/60 last:border-b-0 text-xs sm:text-sm">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-base shrink-0 overflow-hidden">
+                    ${item.image && item.image.startsWith('http') ? `<img src="${item.image}" class="w-full h-full object-cover"/>` : (item.image || '📦')}
+                </div>
+                <div class="min-w-0">
+                    <p class="font-bold text-on-surface truncate">${item.name}</p>
+                    <p class="text-xs text-on-surface-variant font-mono">Qty: ${item.quantity} × $${parseFloat(item.price).toFixed(2)}</p>
+                </div>
+            </div>
+            <span class="font-extrabold text-on-surface shrink-0 ml-2">$${(item.price * item.quantity).toFixed(2)}</span>
+        </div>
+    `).join('');
+
+    const modal = document.createElement('div');
+    modal.id = 'order-success-modal';
+    modal.className = 'fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-opacity duration-300';
+    modal.innerHTML = `
+        <div class="w-full max-w-lg bg-surface-container-lowest rounded-3xl shadow-2xl border border-surface-container flex flex-col max-h-[92vh] overflow-hidden">
+            <!-- Header with Success Animation/Icon -->
+            <div class="p-6 pb-4 flex flex-col items-center text-center bg-gradient-to-b from-secondary-container/20 to-transparent border-b border-surface-container/40">
+                <div class="w-16 h-16 rounded-full bg-secondary-container/50 text-secondary flex items-center justify-center mb-3 ring-8 ring-secondary/10 shadow-sm">
+                    <span class="material-symbols-outlined text-[36px]">check_circle</span>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-wider mb-2">
+                    <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                    <span data-i18n="order_confirmed">Order Confirmed</span>
+                </span>
+                <h2 class="text-2xl font-black text-on-surface tracking-tight" data-i18n="order_received_title">Thank You for Your Order!</h2>
+                <p class="text-xs sm:text-sm text-on-surface-variant mt-1 max-w-sm">
+                    We've received your order, <strong class="text-on-surface">${customerName}</strong>. Our team is now preparing it for delivery.
+                </p>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="p-5 sm:p-6 overflow-y-auto flex flex-col gap-4">
+                <!-- Order Key Info Grid -->
+                <div class="grid grid-cols-2 gap-2 bg-surface-container-low p-3.5 rounded-2xl border border-surface-container">
+                    <div>
+                        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block" data-i18n="order_reference">Order Reference</span>
+                        <span class="text-sm font-mono font-extrabold text-primary">${orderId}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">Status</span>
+                        <span class="text-xs font-bold text-secondary flex items-center justify-end gap-1">
+                            <span class="material-symbols-outlined text-[14px]">schedule</span> Pending Confirmation
+                        </span>
+                    </div>
+                    ${email ? `
+                    <div class="col-span-2 pt-2 border-t border-surface-container/60">
+                        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">Confirmation Sent To</span>
+                        <span class="text-xs font-medium text-on-surface break-all">${email}${phone ? ` • 📞 ${phone}` : ''}</span>
+                    </div>` : ''}
+                    ${address ? `
+                    <div class="col-span-2 pt-1">
+                        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block" data-i18n="address">Delivery Address</span>
+                        <span class="text-xs font-medium text-on-surface">${address}</span>
+                    </div>` : ''}
+                </div>
+
+                <!-- Purchased Items -->
+                <div class="rounded-2xl border border-surface-container p-3 sm:p-4 bg-surface-container-lowest">
+                    <div class="flex items-center justify-between pb-2 border-b border-surface-container mb-2">
+                        <span class="text-xs font-bold text-on-surface uppercase tracking-wider">Ordered Items (${items.length})</span>
+                        ${promo ? `<span class="text-[11px] font-bold text-secondary bg-secondary-container/40 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">local_offer</span> ${promo.promo_code}</span>` : ''}
+                    </div>
+                    <div class="max-h-40 overflow-y-auto pr-1">
+                        ${itemsListHtml}
+                    </div>
+                    <div class="flex items-center justify-between pt-3 mt-2 border-t border-surface-container font-bold">
+                        <span class="text-sm text-on-surface" data-i18n="order_total_paid">Total Paid</span>
+                        <span class="text-xl font-black text-primary">$${parseFloat(total).toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="p-4 sm:p-5 bg-surface-container-low border-t border-surface-container flex flex-col sm:flex-row gap-2.5">
+                <button onclick="closeOrderSuccessModal(); openCustomerOrdersModal();" class="flex-1 py-3 px-4 rounded-full bg-secondary text-on-secondary font-bold text-xs sm:text-sm shadow-md hover:bg-secondary-container hover:text-on-secondary-container transition-all flex items-center justify-center gap-1.5 active:scale-95">
+                    <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                    <span data-i18n="view_in_my_orders">View in My Orders</span>
+                </button>
+                <button onclick="closeOrderSuccessModal()" class="flex-1 py-3 px-4 rounded-full bg-primary text-on-primary font-bold text-xs sm:text-sm shadow-md hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 active:scale-95">
+                    <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+                    <span data-i18n="continue_shopping">Continue Shopping</span>
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+function closeOrderSuccessModal() {
+    const modal = document.getElementById('order-success-modal');
+    if (modal) {
+        modal.classList.add('opacity-0');
+        setTimeout(() => modal.remove(), 250);
+    }
+}
+window.closeOrderSuccessModal = closeOrderSuccessModal;
+window.showOrderSuccessModal = showOrderSuccessModal;
 
 // Helper: Extract Product Images & Details
 function getProductPrimaryImage(product) {
@@ -653,6 +827,12 @@ window.searchCustomerOrder = async function() {
             const dateStr = new Date(o.created_at).toLocaleDateString();
             const isCompleted = o.status === 'completed';
             const statusClass = isCompleted ? 'text-secondary font-bold' : 'text-primary font-bold';
+            let infoSubtitle = o.address || 'Standard Delivery';
+            try {
+                const parsed = typeof o.items_json === 'string' ? JSON.parse(o.items_json) : o.items_json;
+                if (parsed?.phone) infoSubtitle = `📞 ${parsed.phone}`;
+            } catch (e) {}
+
             html += `
                 <div class="p-2.5 rounded-lg bg-surface-container-lowest border border-surface-container flex flex-col gap-0.5">
                     <div class="flex justify-between items-center font-bold">
@@ -660,7 +840,7 @@ window.searchCustomerOrder = async function() {
                         <span class="${statusClass} uppercase text-[10px]">${o.status || 'Pending'}</span>
                     </div>
                     <div class="flex justify-between items-center text-on-surface-variant text-[11px]">
-                        <span>${dateStr} · ${o.customer_phone || 'Order'}</span>
+                        <span>${dateStr} · ${infoSubtitle}</span>
                         <span class="font-extrabold text-on-surface">$${parseFloat(o.total || 0).toFixed(2)}</span>
                     </div>
                 </div>
