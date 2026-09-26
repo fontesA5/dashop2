@@ -7,6 +7,28 @@ let adminProducts = [];
 let adminOrders = [];
 let editingProductId = null;
 let uploadedImageFiles = [];
+let wasManageProductsOpen = false;
+
+// Notification Toast for Admin
+function showNotification(message, duration = 3000) {
+    const existing = document.querySelector('.dashop-admin-notification');
+    if (existing) existing.remove();
+
+    const notification = document.createElement('div');
+    notification.className = 'dashop-admin-notification fixed bottom-10 left-1/2 -translate-x-1/2 bg-surface-container-highest text-on-surface px-5 py-3 rounded-full shadow-2xl z-[99999] font-medium text-sm border border-primary/20 flex items-center gap-2 transition-all duration-300';
+    notification.innerHTML = `<span class="material-symbols-outlined text-primary text-[18px]">check_circle</span><span>${message}</span>`;
+
+    document.body.appendChild(notification);
+
+    if (duration > 0) {
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translate(-50%, 20px)';
+            setTimeout(() => notification.remove(), 300);
+        }, duration);
+    }
+}
+window.showNotification = showNotification;
 
 // Admin Session Verification — always requires login
 function checkAdminAuth() {
@@ -454,6 +476,12 @@ window.openAddProductModal = function() {
     uploadedImageFiles = [];
     const form = document.getElementById('product-form');
     if (form) form.reset();
+
+    const manageModal = document.getElementById('manage-products-modal');
+    if (manageModal && !manageModal.classList.contains('hidden')) {
+        wasManageProductsOpen = true;
+        manageModal.classList.add('hidden');
+    }
     
     const title = document.getElementById('product-modal-title');
     if (title) title.textContent = window.i18n ? window.i18n.t('add_new_product') : 'Add New Product';
@@ -472,6 +500,12 @@ window.editProduct = function(id) {
 
     editingProductId = id;
     uploadedImageFiles = [];
+
+    const manageModal = document.getElementById('manage-products-modal');
+    if (manageModal && !manageModal.classList.contains('hidden')) {
+        wasManageProductsOpen = true;
+        manageModal.classList.add('hidden');
+    }
 
     const title = document.getElementById('product-modal-title');
     if (title) title.textContent = window.i18n ? window.i18n.t('edit_product') : 'Edit Product';
@@ -511,6 +545,15 @@ window.closeProductModal = function() {
     if (modal) modal.classList.add('hidden');
     editingProductId = null;
     uploadedImageFiles = [];
+
+    if (wasManageProductsOpen) {
+        const manageModal = document.getElementById('manage-products-modal');
+        if (manageModal) {
+            renderProductsList();
+            manageModal.classList.remove('hidden');
+        }
+        wasManageProductsOpen = false;
+    }
 };
 
 // Render previews of uploaded / linked images
