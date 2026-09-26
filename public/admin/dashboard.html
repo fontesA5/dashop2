@@ -347,6 +347,24 @@
                         <input id="prod-category" type="text" placeholder="e.g. Electronics, Household, Personal Care" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container"/>
                     </div>
 
+                    <!-- Barcode / SKU with Camera Scan Button -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center justify-between">
+                            <label class="font-label-md font-semibold text-on-surface" data-i18n="barcode">Barcode / SKU / UPC</label>
+                            <button type="button" onclick="startAdminBarcodeScan()" class="text-xs text-primary font-bold hover:underline flex items-center gap-1 active:scale-95 transition">
+                                <span class="material-symbols-outlined text-[16px]">barcode_scanner</span>
+                                <span>Scan with Camera</span>
+                            </button>
+                        </div>
+                        <div class="relative flex items-center">
+                            <span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[20px]">barcode</span>
+                            <input id="prod-barcode" type="text" placeholder="e.g. 7350053850019 or scan with camera" class="w-full pl-10 pr-12 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container font-mono text-sm"/>
+                            <button type="button" onclick="startAdminBarcodeScan()" class="absolute right-2 px-2 py-1 bg-surface-container hover:bg-surface-variant text-primary rounded-lg text-xs font-bold flex items-center gap-1 active:scale-95 transition" title="Scan with camera">
+                                <span class="material-symbols-outlined text-[18px]">barcode_scanner</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Batch Image Upload: Drag & Drop + URL Input -->
                     <div class="flex flex-col gap-2">
                         <label class="font-label-md font-semibold text-on-surface">Product Images (Batch Upload & Links)</label>
@@ -397,8 +415,11 @@
                 <div class="flex items-center justify-between p-4 border-b border-surface-container">
                     <div class="flex items-center gap-2">
                         <h3 class="font-headline-md font-bold text-on-surface" data-i18n="manage_products">Manage Products</h3>
-                        <button onclick="openAddProductModal()" class="px-3 py-1 bg-primary text-on-primary text-xs font-bold rounded-full flex items-center gap-1">
+                        <button onclick="openAddProductModal()" class="px-3 py-1 bg-primary text-on-primary text-xs font-bold rounded-full flex items-center gap-1 active:scale-95 transition">
                             <span class="material-symbols-outlined text-[14px]">add</span> Add
+                        </button>
+                        <button onclick="adminQuickBarcodeLookup()" class="px-3 py-1 bg-surface-container hover:bg-surface-variant text-primary text-xs font-bold rounded-full flex items-center gap-1 active:scale-95 transition" title="Scan barcode to find product">
+                            <span class="material-symbols-outlined text-[14px]">barcode_scanner</span> Scan Barcode
                         </button>
                     </div>
                     <button onclick="closeManageProductsModal()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant">
@@ -463,6 +484,8 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="/js/scanner.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/supabase-client.js"></script>
     <script src="/js/i18n.js"></script>

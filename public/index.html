@@ -124,6 +124,9 @@
                 <div class="relative flex items-center w-full h-12 bg-surface-container-low rounded-xl px-space-md shadow-sm border border-surface-container/50">
                     <span class="material-symbols-outlined text-outline text-[22px] mr-space-sm">search</span>
                     <input id="index-search-input" class="w-full bg-transparent border-0 outline-none text-on-surface placeholder:text-outline font-body-md" placeholder="Search groceries, essentials..." data-i18n-placeholder="search_placeholder" type="search" onkeypress="if(event.key === 'Enter') window.location.href='/catalog?q='+encodeURIComponent(this.value)"/>
+                    <button type="button" onclick="openBarcodeSearchScanner()" class="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-variant text-primary mr-1 active:scale-95 transition" title="Scan barcode with camera" aria-label="Scan barcode">
+                        <span class="material-symbols-outlined text-[20px]">barcode_scanner</span>
+                    </button>
                     <a aria-label="Catalog" href="/catalog" class="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-variant text-primary active:scale-95 transition">
                         <span class="material-symbols-outlined text-[20px]">grid_view</span>
                     </a>
@@ -401,6 +404,8 @@
     <script src="/js/i18n.js"></script>
     <script src="/js/theme.js"></script>
     <script src="/js/promos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="/js/scanner.js"></script>
     <script src="/js/app.js"></script>
     <script>
         function toggleLangMenu(e) {

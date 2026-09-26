@@ -454,6 +454,18 @@ function getProductSlug(product) {
     return (product.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+function getProductBarcode(product) {
+    if (!product) return '';
+    if (product.barcode) return String(product.barcode).trim();
+    if (product.description && product.description.startsWith('{')) {
+        try {
+            const meta = JSON.parse(product.description);
+            if (meta.barcode) return String(meta.barcode).trim();
+        } catch(e) {}
+    }
+    return '';
+}
+
 let currentActiveCategory = 'All';
 
 window.filterByCategory = function(category, btnElement) {
@@ -479,10 +491,12 @@ window.filterByCategory = function(category, btnElement) {
 
     let filtered = allProducts;
     if (query) {
-        filtered = filtered.filter(p => 
-            p.name.toLowerCase().includes(query) || 
-            (p.category && p.category.toLowerCase().includes(query))
-        );
+        filtered = filtered.filter(p => {
+            const b = getProductBarcode(p).toLowerCase();
+            return p.name.toLowerCase().includes(query) || 
+                   (p.category && p.category.toLowerCase().includes(query)) ||
+                   (b && b.includes(query));
+        });
     }
 
     if (category && category !== 'All') {
@@ -958,6 +972,45 @@ function showNotification(message, duration = 3000) {
         }, duration);
     }
 }
+
+// Open camera barcode scanner to search products
+window.openBarcodeSearchScanner = function() {
+    if (!window.openBarcodeScanner) {
+        alert('Scanner module is loading, please try again in a moment.');
+        return;
+    }
+
+    window.openBarcodeScanner((code) => {
+        if (!code) return;
+        console.log('Scanned barcode:', code);
+
+        // Find exact match in allProducts
+        const match = allProducts.find(p => {
+            const b = getProductBarcode(p);
+            return b && b.toLowerCase() === code.toLowerCase();
+        });
+
+        if (match) {
+            showNotification(`Found product: ${match.name}!`);
+            const slug = getProductSlug(match);
+            setTimeout(() => {
+                viewProduct(slug, match.id);
+            }, 300);
+        } else {
+            // Fill search input and filter catalog
+            showNotification(`Barcode scanned: ${code}`);
+            const searchInput = document.getElementById('catalog-search') || document.getElementById('index-search-input');
+            if (searchInput) {
+                searchInput.value = code;
+            }
+            if (window.location.pathname.includes('catalog')) {
+                window.filterByCategory('All');
+            } else {
+                window.location.href = `/catalog?q=${encodeURIComponent(code)}`;
+            }
+        }
+    }, "Scan Product Barcode to Search");
+};
 
 // Export for global window access
 window.viewProduct = viewProduct;

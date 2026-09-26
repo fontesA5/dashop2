@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dashop-v5';
+const CACHE_NAME = 'dashop-v6';
 
 // Only public storefront assets to cache for offline support
 const STATIC_ASSETS = [
@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
   '/product.html',
   '/css/styles.css',
   '/js/app.js',
+  '/js/scanner.js',
   '/js/supabase-client.js',
   '/js/i18n.js',
   '/js/promos.js',

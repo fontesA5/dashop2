@@ -425,6 +425,7 @@ function renderProductsList() {
     adminProducts.forEach(p => {
         let primaryImg = p.image || '📦';
         let imgCount = 1;
+        let barcode = p.barcode || '';
         if (p.description && p.description.startsWith('{')) {
             try {
                 const meta = JSON.parse(p.description);
@@ -432,6 +433,7 @@ function renderProductsList() {
                     primaryImg = meta.images[0];
                     imgCount = meta.images.length;
                 }
+                if (meta.barcode) barcode = meta.barcode;
             } catch (e) {}
         }
         const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
@@ -443,8 +445,8 @@ function renderProductsList() {
         <tr class="border-b border-surface-container/60 hover:bg-surface-container-low/50 transition-colors">
             <td class="p-3">${imgEl}</td>
             <td class="p-3 font-semibold text-on-surface">
-                ${p.name}
-                ${imgCount > 1 ? `<span class="ml-1 text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded-full font-mono font-bold">${imgCount} photos</span>` : ''}
+                <div>${p.name} ${imgCount > 1 ? `<span class="ml-1 text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded-full font-mono font-bold">${imgCount} photos</span>` : ''}</div>
+                ${barcode ? `<div class="flex items-center gap-1 font-mono text-[11px] text-outline mt-0.5"><span class="material-symbols-outlined text-[13px]">barcode</span><span>${barcode}</span></div>` : ''}
             </td>
             <td class="p-3 text-on-surface-variant text-sm">${p.category || 'General'}</td>
             <td class="p-3 font-bold text-on-surface">$${parseFloat(p.price).toFixed(2)}</td>
@@ -476,6 +478,8 @@ window.openAddProductModal = function() {
     uploadedImageFiles = [];
     const form = document.getElementById('product-form');
     if (form) form.reset();
+    const barcodeInput = document.getElementById('prod-barcode');
+    if (barcodeInput) barcodeInput.value = '';
 
     const manageModal = document.getElementById('manage-products-modal');
     if (manageModal && !manageModal.classList.contains('hidden')) {
@@ -520,6 +524,7 @@ window.editProduct = function(id) {
     let cleanDesc = product.description || '';
     let slug = '';
     let existingImages = [];
+    let barcode = product.barcode || '';
 
     if (product.description && product.description.startsWith('{')) {
         try {
@@ -527,12 +532,15 @@ window.editProduct = function(id) {
             cleanDesc = meta.desc || '';
             slug = meta.slug || '';
             existingImages = meta.images || [];
+            if (meta.barcode) barcode = meta.barcode;
         } catch (e) {}
     }
 
     document.getElementById('prod-desc').value = cleanDesc;
     document.getElementById('prod-slug').value = slug || (product.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
     document.getElementById('prod-batch-images').value = existingImages.join('\n');
+    const barcodeInput = document.getElementById('prod-barcode');
+    if (barcodeInput) barcodeInput.value = barcode;
 
     renderImagePreviews(existingImages);
 
@@ -601,12 +609,14 @@ window.handleProductSubmit = async function(event) {
     });
 
     const primaryImage = allImages[0] ? (allImages[0].length < 50 ? allImages[0] : '📦') : '📦';
+    const barcode = (document.getElementById('prod-barcode')?.value || '').trim();
 
-    // Store metadata in description JSON to support unlimited batch images & slugs
+    // Store metadata in description JSON to support unlimited batch images, slugs & barcodes
     const metadataDesc = JSON.stringify({
         desc: descText,
         slug: slug,
-        images: allImages
+        images: allImages,
+        barcode: barcode
     });
 
     const payload = {
@@ -681,6 +691,51 @@ window.openManageProductsModal = function() {
 window.closeManageProductsModal = function() {
     const modal = document.getElementById('manage-products-modal');
     if (modal) modal.classList.add('hidden');
+};
+
+// Scan Barcode from Admin to populate Product Form
+window.startAdminBarcodeScan = function() {
+    if (!window.openBarcodeScanner) {
+        alert('Scanner module is loading, please try again in a moment.');
+        return;
+    }
+    window.openBarcodeScanner((code) => {
+        const input = document.getElementById('prod-barcode');
+        if (input) {
+            input.value = code;
+            showNotification(`Barcode scanned: ${code}`);
+        }
+    }, "Scan Product Barcode / SKU");
+};
+
+// Quick lookup from Admin to find / edit product by scanning
+window.adminQuickBarcodeLookup = function() {
+    if (!window.openBarcodeScanner) {
+        alert('Scanner module is loading, please try again in a moment.');
+        return;
+    }
+    window.openBarcodeScanner((code) => {
+        const product = adminProducts.find(p => {
+            if (p.barcode && String(p.barcode).trim() === code.trim()) return true;
+            if (p.description && p.description.startsWith('{')) {
+                try {
+                    const meta = JSON.parse(p.description);
+                    if (meta.barcode && String(meta.barcode).trim() === code.trim()) return true;
+                } catch(e) {}
+            }
+            return false;
+        });
+
+        if (product) {
+            showNotification(`Found: ${product.name}`);
+            editProduct(product.id);
+        } else {
+            alert(`No product found with barcode "${code}". You can create a new product with this barcode.`);
+            openAddProductModal();
+            const input = document.getElementById('prod-barcode');
+            if (input) input.value = code;
+        }
+    }, "Scan Barcode to Lookup Product");
 };
 
 // Manage Promos Modal Open / Close
