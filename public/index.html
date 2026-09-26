@@ -1,329 +1,360 @@
 <!-- DaShop - Storefront Home -->
-<!DOCTYPE html><html lang="en" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_tab" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>.cart-item{display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:#f2f3ff;border-radius:0.75rem;}.remove-btn{color:#ba1a1a;font-weight:bold;font-size:0.875rem;padding:0.5rem;background:transparent;border:none;cursor:pointer;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-dim": "#d2d9f4", "inverse-primary": "#80d5cb", "tertiary-fixed": "#acf847", "error-container": "#ffdad6", "on-primary-container": "#a3faef", "on-background": "#131b2e", "surface-container-high": "#e2e7ff", "on-surface": "#131b2e", "secondary-fixed-dim": "#4edea3", "surface-variant": "#dae2fd", "surface-container-lowest": "#ffffff", "inverse-on-surface": "#eef0ff", "secondary": "#006c49", "primary-fixed": "#9cf2e8", "on-primary-fixed": "#00201d", "surface-bright": "#faf8ff", "on-primary": "#ffffff", "tertiary": "#375b00", "on-secondary-fixed-variant": "#005236", "surface": "#faf8ff", "primary-container": "#0f766e", "on-primary-fixed-variant": "#00504a", "on-secondary": "#ffffff", "on-tertiary-fixed": "#102000", "surface-container": "#eaedff", "primary-fixed-dim": "#80d5cb", "inverse-surface": "#283044", "outline": "#6e7977", "secondary-fixed": "#6ffbbe", "tertiary-fixed-dim": "#91db2a", "error": "#ba1a1a", "tertiary-container": "#487500", "on-tertiary-fixed-variant": "#304f00", "on-surface-variant": "#3e4947", "background": "#faf8ff", "secondary-container": "#6cf8bb", "outline-variant": "#bdc9c6", "on-error-container": "#93000a", "surface-tint": "#006a63", "on-error": "#ffffff", "surface-container-highest": "#dae2fd", "on-tertiary-container": "#b5ff56", "on-secondary-fixed": "#002113", "primary": "#005c55", "on-secondary-container": "#00714d", "on-tertiary": "#ffffff", "surface-container-low": "#f2f3ff" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-2xl": "3rem", "gutter-desktop": "1.25rem", "margin": "1rem", "space-xl": "2rem", "space-sm": "0.5rem", "space-2xs": "0.125rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "gutter": "0.75rem", "space-md": "0.75rem", "space-base": "1rem", "margin-desktop": "2rem" }, fontFamily: { "headline-lg": ["Plus Jakarta Sans"], "headline-xl": ["Plus Jakarta Sans"], "title-md": ["Plus Jakarta Sans"], "price-hero": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "headline-xl-mobile": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "price-unit": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"] }, fontSize: { "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "price-hero": ["22px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.04em", "fontWeight": "700" }], "headline-xl-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.025em", "fontWeight": "800" }], "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }], "price-unit": ["11px", { "lineHeight": "14px", "fontWeight": "500" }], "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between gap-space-sm max-w-7xl mx-auto w-full"><a href="/index.html" class="flex items-center gap-space-sm min-w-0 cursor-pointer hover:opacity-80 transition-opacity"><img alt="DaShop Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V5-BCgIk-mBsL_m7yirbzNY-wokmayoYPdc0OX-1-3JcIvSkmOR2sGqQzAaKbCeNc2oGdRpnNJAVQsRpprBucxqrFy5onBbpBGt4JUW8LtE0kRRIZ2MxVafIoJ7jMZ11bj-Eb2oz657W8kegTi1Zx0V_QG_jXXCvskpRZ65a6NHORcaeHbs65QKttWCS6Hq4KIJfxElsoacIsR0AdJAlXNbCyZ6XJcgumYZza-pRwZJdVgXICrUAL2Iw"><div class="flex flex-col min-w-0"><span class="font-headline-md text-headline-md text-primary font-bold tracking-tight leading-none">DaShop</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate uppercase tracking-wider">Store</span></div></a><div class="flex items-center gap-space-xs"><a aria-label="Search" href="/catalog.html" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[22px]">search</span></a>
-<button aria-label="Shopping Cart" class="relative w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors" onclick="openCart()">
-    <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
-    <span id="cart-count" class="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center justify-center">0</span>
-</button></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface max-w-7xl mx-auto"><div class="flex flex-col w-full">
-<!-- Delivery & Address Quick Selector Bar -->
-<section class="px-margin pt-space-sm pb-space-xs flex items-center justify-between"><div class="flex items-center justify-between w-full"><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[18px]">local_shipping</span></div><div class="flex flex-col min-w-0"><span class="font-label-lg text-label-lg text-on-surface font-bold">Official Online Store</span><div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim inline-block animate-pulse"></span><span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Direct to You • Orders 24/7</span></div></div></div><div class="flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-full text-on-surface-variant font-label-sm text-label-sm"><span class="material-symbols-outlined text-[16px] text-tertiary">bolt</span><span class="font-semibold text-on-surface">Fast Dispatch</span></div></div></section>
-<!-- Search & Barcode Bar -->
-<section class="px-margin py-space-xs">
-<div class="relative flex items-center w-full h-12 bg-surface-container-low rounded-xl px-space-md shadow-sm">
-<span class="material-symbols-outlined text-outline text-[22px] mr-space-sm">search</span>
-<input id="index-search-input" class="w-full bg-transparent border-0 outline-none text-on-surface placeholder:text-outline font-body-md text-body-md" placeholder="Search groceries, essentials..." type="search" onkeypress="if(event.key === 'Enter') window.location.href='/catalog.html?q='+encodeURIComponent(this.value)">
-<a aria-label="Scan barcode" href="/catalog.html" class="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-variant text-primary active:scale-95 transition" type="button"><span class="material-symbols-outlined text-[20px]">barcode_scanner</span></a>
-</div>
-</section>
-<!-- Hero Promotional Banner -->
-<section class="px-margin pt-space-xs pb-space-sm">
-<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-container to-secondary text-on-primary p-space-lg shadow-md">
-<!-- Ambient Graphic Accent Rings -->
-<div class="absolute -right-8 -bottom-10 w-44 h-44 rounded-full bg-tertiary-fixed opacity-20 blur-2xl pointer-events-none"></div>
-<div class="absolute right-4 top-2 w-24 h-24 rounded-full bg-primary-fixed opacity-15 blur-xl pointer-events-none"></div>
-<div class="relative z-10 flex flex-col items-start max-w-[75%]">
-<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm uppercase tracking-wider mb-space-xs shadow-sm font-bold">
-<span class="material-symbols-outlined text-[14px]">local_fire_department</span>
-          Limited Time
-        </div>
-<h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-primary font-extrabold leading-tight mb-space-2xs">
-          Save Big on Your Weekly Groceries
-        </h2>
-<p class="font-body-md text-body-md text-on-primary-container font-medium mb-space-md">Up to <span class="font-bold text-tertiary-fixed text-title-md">35% OFF</span> household essentials &amp; pantry favorites</p>
-<button class="h-10 px-space-lg rounded-full bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed font-title-md text-title-md font-bold shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-space-xs" type="button">
-<span class="">Shop now</span>
-<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-</button>
-</div>
-<!-- Hero Visual Accent Floating Tag -->
-<div class="absolute right-3 bottom-3 flex flex-col items-center justify-center w-20 h-20 rounded-2xl bg-surface-container-lowest/15 backdrop-blur-md p-1 text-center border-0"><span class="material-symbols-outlined text-secondary-fixed text-[28px]">local_shipping</span><span class="font-label-sm text-label-sm text-on-primary font-bold leading-tight mt-0.5">Order Online</span></div>
-</div>
-</section>
-<!-- Categories Section -->
-<section class="py-space-xs">
-<div class="px-margin flex items-center justify-between mb-space-xs">
-<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Explore Categories</h3>
-<span class="font-label-md text-label-md text-primary font-semibold cursor-pointer">View All</span>
-</div>
-<div class="flex gap-space-sm overflow-x-auto px-margin no-scrollbar py-space-2xs">
-<!-- Category 1 -->
-<button class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none" type="button">
-<div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200">
-<span class="material-symbols-outlined text-[28px]">cleaning_services</span>
-</div>
-<span class="font-label-md text-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Household Essentials</span>
-</button>
-<!-- Category 2 -->
-<button class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none" type="button">
-<div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200">
-<span class="material-symbols-outlined text-[28px]">sanitizer</span>
-</div>
-<span class="font-label-md text-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Personal Care</span>
-</button>
-<!-- Category 3 -->
-<button class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none" type="button"><div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200"><span class="material-symbols-outlined text-[28px]">face</span></div><span class="font-label-md text-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Beauty</span></button>
-<!-- Category 4 -->
-<button class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none" type="button"><div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200"><span class="material-symbols-outlined text-[28px]">health_and_safety</span></div><span class="font-label-md text-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Health &amp; Care</span></button>
-<!-- Category 5: Flash Deals -->
-<button class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none" type="button">
-<div class="relative w-16 h-16 rounded-2xl bg-error-container text-on-error-container flex items-center justify-center group-hover:scale-105 shadow-sm transition-all duration-200">
-<span class="material-symbols-outlined text-[28px]">bolt</span>
-<span class="absolute -top-1.5 -right-1 px-1 py-0.2 rounded-full bg-error text-on-error font-label-sm text-label-sm font-bold scale-90">HOT</span>
-</div>
-<span class="font-label-md text-label-md text-error font-bold max-w-[70px] text-center leading-tight">Flash Deals</span>
-</button>
-<!-- Category 6: All Products -->
-<button class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none" type="button">
-<div class="w-16 h-16 rounded-2xl bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:text-primary shadow-sm transition-all duration-200">
-<span class="material-symbols-outlined text-[28px]">apps</span>
-</div>
-<span class="font-label-md text-label-md text-on-surface-variant font-medium max-w-[70px] text-center leading-tight">All Products</span>
-</button>
-</div>
-</section>
-<!-- Free Delivery Notification Strip -->
-<section class="px-margin my-space-xs"><div class="flex items-center justify-between px-space-md py-2.5 rounded-xl bg-secondary-container text-on-secondary-container shadow-sm"><div class="flex items-center gap-space-xs min-w-0"><span class="material-symbols-outlined text-secondary text-[22px]">loyalty</span><div class="flex flex-col min-w-0"><span class="font-title-md text-title-md font-bold truncate">Member Rewards: 10% Off</span><span class="font-body-sm text-body-sm text-on-secondary-fixed-variant truncate">Use code SAVE10 on orders over $25</span></div></div><span class="material-symbols-outlined text-secondary shrink-0 text-[18px]">chevron_right</span></div></section>
-<!-- New Arrivals Horizontal Carousel -->
-<section class="pt-space-sm pb-space-xs">
-<div class="px-margin flex items-center justify-between mb-space-xs">
-<div class="flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-tertiary-container text-[22px]">auto_awesome</span>
-<h3 class="font-headline-md text-headline-md text-on-surface font-bold">New Arrivals</h3>
-</div>
-<button class="flex items-center gap-0.5 font-label-md text-label-md text-primary font-bold hover:underline" type="button">
-<span class="">See All</span>
-<span class="material-symbols-outlined text-[16px]">chevron_right</span>
-</button>
-</div>
-<!-- Horizontal Scroll Carousel for Products -->
-<div class="flex gap-space-md overflow-x-auto px-margin py-space-xs no-scrollbar">
-<!-- Product Card 1: Dove FIFA Limited Edition -->
-<div class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1">
-<div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-space-sm overflow-hidden mb-space-xs">
-<span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-bold uppercase tracking-wider shadow-sm">Limited</span>
-<button class="absolute top-2 right-2 text-outline hover:text-error transition-colors" type="button">
-<span class="material-symbols-outlined text-[20px]">favorite</span>
-</button>
-<img class="h-32 w-auto object-contain transition-transform group-hover:scale-105" data-alt="Modern studio packaging shot of a crisp white Dove Limited Edition FIFA Deodorant stick with green Palo Santo and Sage botanical label accents on bright neutral daylight background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUuLoT1Oa2gTC_HjOYmi1i4Zbtw78rKmMy-nwWgAqaUt0lZ5lhg89R4Fr_xyr_Nt3-ZmR1Ai1vKWR-tJ8bq6g1hm63N_TDIeWqxgEL4kZTnMXZIr8fKgnjp5JM7SmDFy-5jUFRuUSkAPCdj5THSCCzB2Si1Ulbq3Z-jlVwrA-Y1zPb_T0iHpEm0jCzSsc8eK18Lkdq9tve7E7rtBiaffpEz5R98m1UhqwkAldVQY4XAkyWLlkLYAg">
-</div>
-<div class="flex flex-col flex-1 justify-between">
-<div>
-<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Personal Care • 2.6 oz</span>
-<h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-0.5 leading-snug">
-              Dove Limited Edition FIFA Deodorant Stick 72H
-            </h4>
-</div>
-<div class="flex items-center justify-between pt-space-sm mt-space-2xs">
-<div class="flex flex-col">
-<span class="font-price-hero text-price-hero text-on-surface font-extrabold leading-none">$4.50</span>
-<span class="font-price-unit text-price-unit text-on-surface-variant">$1.73/oz</span>
-</div>
-<!-- Quick Add Stepper / Add Button -->
-<button aria-label="Add Dove Deodorant to Cart" class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="toggleAdd(this)" type="button">
-<span class="material-symbols-outlined text-[20px]">add</span>
-</button>
-</div>
-</div>
-</div>
-<!-- Product Card 2: Tide Simply -->
-<div class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1">
-<div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-space-sm overflow-hidden mb-space-xs">
-<span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold uppercase tracking-wider shadow-sm">Popular</span>
-<button class="absolute top-2 right-2 text-outline hover:text-error transition-colors" type="button">
-<span class="material-symbols-outlined text-[20px]">favorite</span>
-</button>
-<img class="h-32 w-auto object-contain transition-transform group-hover:scale-105" data-alt="Tide Simply Liquid Laundry Detergent bottle in clear packaging with bright yellow cap and vibrant label, 24 loads clean detergent studio shot on soft white gradient backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDycuaDiUvsa6QL_d6EWFD8JydmJINuYfAR3b7uCZ-IG4AI_AIelKNjJYeS_089YUp_loW1gnxmYJF-fcCra1RnaxbM-UdirKxwfoApjK2yEYG9q_mec54D-oCNqDwawsA2WdjadCfeiSDONBLg9J1Nsw_8-DrwePQ6acRqPHZfm05bpmC126DF5IjRT0eUCRwl5yRYMUu_kU0WMSqbzHk-4KwdAba4TyBYJ25HsTkwKdBVVBbR6dM">
-</div>
-<div class="flex flex-col flex-1 justify-between">
-<div>
-<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Household • 24 Loads</span>
-<h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-0.5 leading-snug">
-              Tide Simply Liquid Laundry Detergent
-            </h4>
-</div>
-<div class="flex items-center justify-between pt-space-sm mt-space-2xs">
-<div class="flex flex-col">
-<span class="font-price-hero text-price-hero text-on-surface font-extrabold leading-none">$3.00</span>
-<span class="font-price-unit text-price-unit text-on-surface-variant">$0.12/load</span>
-</div>
-<button aria-label="Add Tide Detergent to Cart" class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="toggleAdd(this)" type="button">
-<span class="material-symbols-outlined text-[20px]">add</span>
-</button>
-</div>
-</div>
-</div>
-<!-- Product Card 3: Axe Apollo -->
-<div class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1">
-<div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-space-sm overflow-hidden mb-space-xs">
-<button class="absolute top-2 right-2 text-outline hover:text-error transition-colors" type="button">
-<span class="material-symbols-outlined text-[20px]">favorite</span>
-</button>
-<img class="h-32 w-auto object-contain transition-transform group-hover:scale-105" data-alt="Sleek black bottle of Axe Apollo refreshing long lasting mens body wash with cosmic green graphics on white clean illuminated background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKfQKCOqWoGKpJzl1599FFqUdjWP92H2JxGQSSfbKH62DCfsqQeNHZMEsdx5U0indVVe-hG5xN97yMU9ZVOL6TTJANi9xTOOqOcVf_XK5Un7NkhQK2VVi-LVSUuH7bY8sVTuxvExs2WBh0qm5RcUsJLYQsRghPDrPmEb5bLRt9XUNesg_jV8Y5MMwx_xd7NwBNNkmqHYLWpyE6H699Et8UFjEl4UJy5UTA9TL4-rKcp2QicqY-Ysc">
-</div>
-<div class="flex flex-col flex-1 justify-between">
-<div>
-<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Body Wash • 16 fl oz</span>
-<h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-0.5 leading-snug">
-              Axe Apollo Refreshing Men's Body Wash
-            </h4>
-</div>
-<div class="flex items-center justify-between pt-space-sm mt-space-2xs">
-<div class="flex flex-col">
-<span class="font-price-hero text-price-hero text-on-surface font-extrabold leading-none">$3.50</span>
-<span class="font-price-unit text-price-unit text-on-surface-variant">$0.22/fl oz</span>
-</div>
-<button aria-label="Add Axe Apollo to Cart" class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="toggleAdd(this)" type="button">
-<span class="material-symbols-outlined text-[20px]">add</span>
-</button>
-</div>
-</div>
-</div>
-<!-- Product Card 4: Crest Mint Gel -->
-<div class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1">
-<div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-space-sm overflow-hidden mb-space-xs">
-<span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-bold uppercase tracking-wider shadow-sm">Saver</span>
-<button class="absolute top-2 right-2 text-outline hover:text-error transition-colors" type="button">
-<span class="material-symbols-outlined text-[20px]">favorite</span>
-</button>
-<img class="h-32 w-auto object-contain transition-transform group-hover:scale-105" data-alt="Crest Complete Scope Cool Mint toothpaste box and blue tube packaging clean studio retail presentation on crisp white platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq_tGLJ8IMww4CsoFR3Upnk8oqLOc2HDgZMPM32-PR8LtdzZAZIp-jeKZMVLKrgYr1ia_i6nNbf8Gz5ptLwFg8PGBt-mhbAgUo0h0mELaJFIEbiAaayEzThKB6awbJZZ3TguCeDCHjqLf41wVP52HMy9-E66EjTxw9JBn7PdvzIg9XFbLx1RetLUYgmBaTUHo04rrspC4jRNnjV5jd6sNswYG2xfxhxePN9RLopO--PPJI_rVHxhY">
-</div>
-<div class="flex flex-col flex-1 justify-between">
-<div>
-<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Oral Care • 5.4 oz</span>
-<h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-0.5 leading-snug">
-              Crest Complete Whitening Mint Toothpaste
-            </h4>
-</div>
-<div class="flex items-center justify-between pt-space-sm mt-space-2xs">
-<div class="flex flex-col">
-<span class="font-price-hero text-price-hero text-on-surface font-extrabold leading-none">$2.00</span>
-<span class="font-price-unit text-price-unit text-on-surface-variant">$0.37/oz</span>
-</div>
-<button aria-label="Add Crest to Cart" class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="toggleAdd(this)" type="button">
-<span class="material-symbols-outlined text-[20px]">add</span>
-</button>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- Our Products 2-Column Grid -->
-<section class="px-margin pt-space-sm pb-space-lg">
-<!-- Header with Dropdown Filter -->
-<div class="flex items-center justify-between mb-space-sm">
-<div>
-<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Our Products</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Recommended for your weekly pantry</p>
-</div>
-<div class="relative">
-<select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md font-semibold py-1.5 pl-3 pr-8 rounded-full focus:outline-none focus:bg-surface-container shadow-sm">
-<option>Relevance</option>
-<option>Price: Low to High</option>
-<option>Top Rated</option>
-</select>
-<span class="material-symbols-outlined text-outline text-[18px] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">expand_more</span>
-</div>
-</div>
-<!-- 2 Column Grid for Mobile -->
-<div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-space-sm"></div>
-</section>
-<!-- Interactive Script for Micro-Interactions -->
-<script>
-    function toggleAdd(btn) {
-      if (btn.classList.contains('in-cart')) {
-        // Already active - show quick badge feedback
-        const countSpan = btn.querySelector('.item-count');
-        if (countSpan) {
-          let count = parseInt(countSpan.textContent) || 1;
-          countSpan.textContent = count + 1;
-        }
-      } else {
-        // Transform button into quantity pill stepper
-        btn.classList.add('in-cart');
-        btn.classList.remove('w-9', 'w-8', 'rounded-full');
-        btn.classList.add('px-2', 'py-1', 'rounded-full', 'bg-primary-container', 'gap-1.5');
-        btn.innerHTML = `
-          <span class="material-symbols-outlined text-[16px] text-on-primary cursor-pointer active:scale-75" onclick="event.stopPropagation(); changeQty(this, -1)">remove</span>
-          <span class="font-label-md text-label-md text-on-primary font-bold px-1 item-count">1</span>
-          <span class="material-symbols-outlined text-[16px] text-on-primary cursor-pointer active:scale-75" onclick="event.stopPropagation(); changeQty(this, 1)">add</span>
-        `;
-      }
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+    <meta content="mobile_tab" name="shell-type"/>
+    <link rel="manifest" href="/manifest.json"/>
+    <meta name="theme-color" content="#005c55"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-dim": "#d2d9f4",
+                        "inverse-primary": "#80d5cb",
+                        "tertiary-fixed": "#acf847",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#a3faef",
+                        "on-background": "#131b2e",
+                        "surface-container-high": "#e2e7ff",
+                        "on-surface": "#131b2e",
+                        "secondary-fixed-dim": "#4edea3",
+                        "surface-variant": "#dae2fd",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#eef0ff",
+                        "secondary": "#006c49",
+                        "primary-fixed": "#9cf2e8",
+                        "on-primary-fixed": "#00201d",
+                        "surface-bright": "#faf8ff",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#375b00",
+                        "surface": "#faf8ff",
+                        "primary-container": "#0f766e",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#eaedff",
+                        "inverse-surface": "#283044",
+                        "outline": "#6e7977",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#3e4947",
+                        "background": "#faf8ff",
+                        "secondary-container": "#6cf8bb",
+                        "primary": "#005c55",
+                        "surface-container-low": "#f2f3ff"
+                    },
+                    spacing: {
+                        "space-xs": "0.25rem",
+                        "space-sm": "0.5rem",
+                        "space-md": "0.75rem",
+                        "space-base": "1rem",
+                        "space-lg": "1.5rem",
+                        "space-xl": "2rem",
+                        "margin": "1rem",
+                        "gutter": "0.75rem"
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .dark body { background-color: #0d131f; color: #e2e8f0; }
+        .dark .bg-surface { background-color: #0d131f; }
+        .dark .bg-surface-container-lowest { background-color: #172033; color: #f8fafc; }
+        .dark .bg-surface-container-low { background-color: #1e293b; }
+        .dark .bg-surface-container { background-color: #27354f; }
+        .dark .bg-surface-container-high { background-color: #334155; }
+        .dark .text-on-surface { color: #f8fafc; }
+        .dark .text-on-surface-variant { color: #94a3b8; }
+        .dark .border-surface-container { border-color: #334155; }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+        <div class="h-16 px-margin flex items-center justify-between gap-space-sm max-w-7xl mx-auto w-full">
+            <a href="/index.html" class="flex items-center gap-space-sm min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
+                <img alt="DaShop Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V5-BCgIk-mBsL_m7yirbzNY-wokmayoYPdc0OX-1-3JcIvSkmOR2sGqQzAaKbCeNc2oGdRpnNJAVQsRpprBucxqrFy5onBbpBGt4JUW8LtE0kRRIZ2MxVafIoJ7jMZ11bj-Eb2oz657W8kegTi1Zx0V_QG_jXXCvskpRZ65a6NHORcaeHbs65QKttWCS6Hq4KIJfxElsoacIsR0AdJAlXNbCyZ6XJcgumYZza-pRwZJdVgXICrUAL2Iw"/>
+                <div class="flex flex-col min-w-0">
+                    <span class="font-headline-md text-headline-md text-primary font-bold tracking-tight leading-none">DaShop</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant truncate uppercase tracking-wider" data-i18n="store">Store</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-2">
+                <!-- Language Switcher -->
+                <div class="relative group">
+                    <button class="px-2.5 py-1.5 rounded-full bg-surface-container-low text-xs font-bold flex items-center gap-1 text-on-surface hover:bg-surface-container transition-colors">
+                        <span class="material-symbols-outlined text-[16px]">translate</span>
+                        <span id="current-lang-text">EN</span>
+                    </button>
+                    <div class="absolute right-0 top-full mt-1 w-28 bg-surface-container-lowest rounded-xl shadow-xl border border-surface-container py-1 hidden group-hover:block z-50">
+                        <button onclick="window.i18n.setLanguage('en')" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-surface-container-low">English</button>
+                        <button onclick="window.i18n.setLanguage('es')" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-surface-container-low">Español</button>
+                        <button onclick="window.i18n.setLanguage('pt')" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-surface-container-low">Português</button>
+                    </div>
+                </div>
 
-    function changeQty(icon, delta) {
-      const container = icon.closest('.cart-btn') || icon.parentElement;
-      const countSpan = container.querySelector('.item-count');
-      let count = parseInt(countSpan.textContent) || 1;
-      count += delta;
-      if (count <= 0) {
-        // Reset to initial circle + state
-        container.classList.remove('in-cart', 'px-2', 'py-1', 'gap-1.5');
-        container.classList.add('w-9', 'h-9', 'rounded-full', 'bg-primary');
-        container.innerHTML = `<span class="material-symbols-outlined text-[20px]">add</span>`;
-      } else {
-        countSpan.textContent = count;
-      }
-    }
-  </script>
-</div></main><nav class="fixed bottom-0 w-full z-50 pb-safe pointer-events-none" data-active-classes="text-primary-container font-semibold"><div class="px-margin pb-space-sm pt-space-xs"><div class="pointer-events-auto h-16 max-w-md mx-auto w-full rounded-full bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_4px_24px_rgba(15,23,42,0.08)] flex items-center justify-around px-space-xs"><a aria-current="page" class="flex-1 flex flex-col items-center justify-center h-12 rounded-full transition-colors text-primary-container font-semibold" data-path="store" href="/index.html"><span class="material-symbols-outlined text-[22px]">storefront</span><span class="font-label-sm text-label-sm">Store</span></a><a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="catalog" href="/catalog.html"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="font-label-sm text-label-sm">Catalog</span></a><a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="orders" href="/admin/orders.html"><span class="material-symbols-outlined text-[22px]">receipt_long</span><span class="font-label-sm text-label-sm">Orders</span></a></div></div></nav>
+                <!-- Dark Mode Toggle -->
+                <button onclick="window.themeManager.toggle()" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors" title="Toggle theme">
+                    <span class="material-symbols-outlined text-[20px] theme-toggle-icon">dark_mode</span>
+                </button>
 
+                <!-- Search Link -->
+                <a aria-label="Search" href="/catalog.html" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">search</span>
+                </a>
 
-<!-- Cart Modal -->
-<div id="cart-modal" class="fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeCart()"></div>
-    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-surface-container-lowest shadow-2xl flex flex-col transform transition-transform">
-        <div class="flex items-center justify-between p-space-md border-b border-surface-container-high">
-            <h2 class="font-headline-md text-on-surface font-bold">Your Cart</h2>
-            <button onclick="closeCart()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low text-on-surface-variant">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-        <div id="cart-items" class="flex-1 overflow-y-auto p-space-md flex flex-col gap-space-sm"></div>
-        <div class="p-space-md border-t border-surface-container-high bg-surface-container-lowest">
-            <div class="flex justify-between items-center mb-space-md font-title-md font-bold">
-                <span>Total:</span>
-                <span>$<span id="cart-total">0.00</span></span>
+                <!-- Cart Button -->
+                <button aria-label="Shopping Cart" class="relative w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors" onclick="openCart()">
+                    <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+                    <span id="cart-count" class="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-on-primary font-label-sm text-label-sm flex items-center justify-center font-bold">0</span>
+                </button>
             </div>
-            <button onclick="proceedToCheckout()" class="w-full py-3 rounded-full bg-primary text-on-primary font-label-lg font-bold shadow-md hover:bg-primary-container transition-colors">
-                Proceed to Checkout
-            </button>
         </div>
-    </div>
-</div>
+    </header>
 
-<!-- Checkout Modal -->
-<div id="checkout-modal" class="fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeCheckout()"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-space-md pointer-events-none">
-        <div class="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-2xl flex flex-col pointer-events-auto">
-            <div class="flex items-center justify-between p-space-md border-b border-surface-container-high">
-                <h2 class="font-headline-md text-on-surface font-bold">Checkout</h2>
-                <button onclick="closeCheckout()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low text-on-surface-variant">
+    <main class="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface max-w-7xl mx-auto">
+        <div class="flex flex-col w-full">
+            <!-- Delivery & Address Quick Selector Bar -->
+            <section class="px-margin pt-space-sm pb-space-xs flex items-center justify-between">
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-space-xs">
+                        <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined text-[18px]">local_shipping</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="font-label-lg text-label-lg text-on-surface font-bold" data-i18n="official_store">Official Online Store</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim inline-block animate-pulse"></span>
+                                <span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider" data-i18n="direct_to_you">Direct to You • Orders 24/7</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-full text-on-surface-variant font-label-sm text-label-sm">
+                        <span class="material-symbols-outlined text-[16px] text-tertiary">bolt</span>
+                        <span class="font-semibold text-on-surface" data-i18n="fast_dispatch">Fast Dispatch</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search Bar with Dynamic Autocomplete Suggestions -->
+            <section class="px-margin py-space-xs">
+                <div class="relative flex items-center w-full h-12 bg-surface-container-low rounded-xl px-space-md shadow-sm border border-surface-container/50">
+                    <span class="material-symbols-outlined text-outline text-[22px] mr-space-sm">search</span>
+                    <input id="index-search-input" class="w-full bg-transparent border-0 outline-none text-on-surface placeholder:text-outline font-body-md" placeholder="Search groceries, essentials..." data-i18n-placeholder="search_placeholder" type="search" onkeypress="if(event.key === 'Enter') window.location.href='/catalog.html?q='+encodeURIComponent(this.value)"/>
+                    <a aria-label="Catalog" href="/catalog.html" class="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-variant text-primary active:scale-95 transition">
+                        <span class="material-symbols-outlined text-[20px]">grid_view</span>
+                    </a>
+                    <!-- Autocomplete dropdown rendered here by app.js -->
+                    <div id="index-search-suggestions" class="absolute left-0 right-0 top-full mt-1 bg-surface-container-lowest rounded-xl shadow-xl border border-surface-container overflow-hidden z-50 hidden"></div>
+                </div>
+            </section>
+
+            <!-- Dynamic Hero Promotional Banner -->
+            <section class="px-margin pt-space-xs pb-space-sm">
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-container to-secondary text-on-primary p-space-lg shadow-md">
+                    <div class="absolute -right-8 -bottom-10 w-44 h-44 rounded-full bg-tertiary-fixed opacity-20 blur-2xl pointer-events-none"></div>
+                    <div class="relative z-10 flex flex-col items-start max-w-[80%]">
+                        <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm uppercase tracking-wider mb-space-xs shadow-sm font-bold">
+                            <span class="material-symbols-outlined text-[14px]">local_fire_department</span>
+                            <span data-i18n="limited_time">Limited Time</span>
+                        </div>
+                        <h2 id="hero-promo-title" class="font-headline-xl-mobile text-on-primary font-extrabold leading-tight mb-space-2xs">
+                            Save Big on Your Weekly Groceries
+                        </h2>
+                        <p id="hero-promo-sub" class="font-body-md text-on-primary-container font-medium mb-space-md">
+                            Use code <span id="hero-promo-code" class="font-mono font-bold px-1.5 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded">SAVE10</span> for discounts on checkout!
+                        </p>
+                        <a href="/catalog.html" class="h-10 px-space-lg rounded-full bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed font-title-md font-bold shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-space-xs">
+                            <span data-i18n="shop_now">Shop now</span>
+                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Categories Section -->
+            <section class="py-space-xs">
+                <div class="px-margin flex items-center justify-between mb-space-xs">
+                    <h3 class="font-headline-md text-headline-md text-on-surface font-bold" data-i18n="explore_categories">Explore Categories</h3>
+                    <a href="/catalog.html" class="font-label-md text-primary font-semibold hover:underline" data-i18n="view_all">View All</a>
+                </div>
+                <div class="flex gap-space-sm overflow-x-auto px-margin no-scrollbar py-space-2xs">
+                    <a href="/catalog.html?category=Electronics" class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none">
+                        <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200">
+                            <span class="material-symbols-outlined text-[28px]">headphones</span>
+                        </div>
+                        <span class="font-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Electronics</span>
+                    </a>
+                    <a href="/catalog.html?category=Household" class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none">
+                        <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200">
+                            <span class="material-symbols-outlined text-[28px]">cleaning_services</span>
+                        </div>
+                        <span class="font-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Household</span>
+                    </a>
+                    <a href="/catalog.html?category=Peripherals" class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none">
+                        <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200">
+                            <span class="material-symbols-outlined text-[28px]">keyboard</span>
+                        </div>
+                        <span class="font-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Peripherals</span>
+                    </a>
+                    <a href="/catalog.html?category=Accessories" class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none">
+                        <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200">
+                            <span class="material-symbols-outlined text-[28px]">devices</span>
+                        </div>
+                        <span class="font-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Accessories</span>
+                    </a>
+                    <a href="/catalog.html" class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none">
+                        <div class="w-16 h-16 rounded-2xl bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:text-primary shadow-sm transition-all duration-200">
+                            <span class="material-symbols-outlined text-[28px]">apps</span>
+                        </div>
+                        <span class="font-label-md text-on-surface-variant font-medium max-w-[70px] text-center leading-tight" data-i18n="all_products">All Products</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Dynamic New Arrivals Section (Purged static placeholder items) -->
+            <section class="pt-space-sm pb-space-xs">
+                <div class="px-margin flex items-center justify-between mb-space-xs">
+                    <div class="flex items-center gap-space-xs">
+                        <span class="material-symbols-outlined text-primary text-[22px]">auto_awesome</span>
+                        <h3 class="font-headline-md text-headline-md text-on-surface font-bold" data-i18n="new_arrivals">New Arrivals</h3>
+                    </div>
+                    <a href="/catalog.html" class="font-label-md text-primary font-bold hover:underline flex items-center gap-0.5">
+                        <span data-i18n="see_all">See All</span>
+                        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                    </a>
+                </div>
+                <!-- Dynamic New Arrivals Container -->
+                <div id="new-arrivals-container" class="flex gap-space-md overflow-x-auto px-margin py-space-xs no-scrollbar">
+                    <div class="p-8 text-on-surface-variant text-sm">Loading live products...</div>
+                </div>
+            </section>
+
+            <!-- Featured Products Grid -->
+            <section class="px-margin pt-space-xs pb-space-md">
+                <div class="flex items-center justify-between mb-space-sm">
+                    <h3 class="font-headline-md text-headline-md text-on-surface font-bold" data-i18n="all_products">Featured Products</h3>
+                    <a href="/catalog.html" class="font-label-md text-primary font-semibold hover:underline" data-i18n="view_all">View All</a>
+                </div>
+                <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-space-sm">
+                    <div class="col-span-full p-8 text-center text-on-surface-variant">Loading live catalog...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 w-full z-50 pb-safe pointer-events-none">
+        <div class="px-margin pb-space-sm pt-space-xs">
+            <div class="pointer-events-auto h-16 max-w-md mx-auto w-full rounded-full bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_4px_24px_rgba(15,23,42,0.08)] flex items-center justify-around px-space-xs border border-surface-container/50">
+                <a aria-current="page" class="flex-1 flex flex-col items-center justify-center h-12 rounded-full transition-colors text-primary font-semibold" href="/index.html">
+                    <span class="material-symbols-outlined text-[22px]">storefront</span>
+                    <span class="font-label-sm text-label-sm" data-i18n="store">Store</span>
+                </a>
+                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/catalog.html">
+                    <span class="material-symbols-outlined text-[22px]">grid_view</span>
+                    <span class="font-label-sm text-label-sm" data-i18n="catalog">Catalog</span>
+                </a>
+                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/admin/orders.html">
+                    <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+                    <span class="font-label-sm text-label-sm" data-i18n="orders">Orders</span>
+                </a>
+                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/admin/dashboard.html">
+                    <span class="material-symbols-outlined text-[22px]">dashboard</span>
+                    <span class="font-label-sm text-label-sm" data-i18n="admin_hub">Admin Hub</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCart()"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-surface-container-lowest shadow-2xl flex flex-col">
+            <div class="flex items-center justify-between p-space-md border-b border-surface-container">
+                <h2 class="font-headline-md text-on-surface font-bold" data-i18n="cart">Your Cart</h2>
+                <button onclick="closeCart()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low text-on-surface-variant">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            <form id="checkout-form" onsubmit="handleCheckout(event)" class="p-space-md flex flex-col gap-space-md">
-                <div class="flex flex-col gap-1">
-                    <label for="name" class="font-label-md text-on-surface">Full Name</label>
-                    <input type="text" id="name" name="name" required placeholder="John Doe" class="px-3 py-2 rounded-lg bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary">
+            <div id="cart-items" class="flex-1 overflow-y-auto p-space-md flex flex-col gap-space-sm"></div>
+            <div class="p-space-md border-t border-surface-container bg-surface-container-lowest">
+                <div class="flex justify-between items-center mb-space-md font-title-md font-bold">
+                    <span data-i18n="total">Total:</span>
+                    <span>$<span id="cart-total">0.00</span></span>
                 </div>
-                <div class="flex flex-col gap-1">
-                    <label for="email" class="font-label-md text-on-surface">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="john@example.com" class="px-3 py-2 rounded-lg bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary">
-                </div>
-                <div class="flex flex-col gap-1">
-                    <label for="address" class="font-label-md text-on-surface">Address</label>
-                    <textarea id="address" name="address" required placeholder="123 Main St, City" class="px-3 py-2 rounded-lg bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary min-h-[80px]"></textarea>
-                </div>
-                <button type="submit" class="w-full mt-2 py-3 rounded-full bg-primary text-on-primary font-label-lg font-bold shadow-md hover:bg-primary-container transition-colors">
-                    Place Order
+                <button onclick="proceedToCheckout()" class="w-full py-3 rounded-full bg-primary text-on-primary font-label-lg font-bold shadow-md hover:bg-primary-container transition-colors" data-i18n="proceed_to_checkout">
+                    Proceed to Checkout
                 </button>
-            </form>
+            </div>
         </div>
     </div>
-</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/supabase-client.js"></script>
-  <script src="/js/app.js"></script>
-</body></html>
+    <!-- Checkout Modal with Discount Code & Customer Details -->
+    <div id="checkout-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCheckout()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-space-md pointer-events-none">
+            <div class="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-2xl flex flex-col pointer-events-auto max-h-[90vh] overflow-hidden">
+                <div class="flex items-center justify-between p-space-md border-b border-surface-container">
+                    <h2 class="font-headline-md text-on-surface font-bold" data-i18n="checkout">Checkout</h2>
+                    <button onclick="closeCheckout()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low text-on-surface-variant">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <form id="checkout-form" onsubmit="handleCheckout(event)" class="p-space-md flex flex-col gap-space-sm overflow-y-auto">
+                    <div class="flex flex-col gap-1">
+                        <label class="font-label-md text-on-surface font-semibold" data-i18n="full_name">Full Name *</label>
+                        <input type="text" id="name" name="name" required placeholder="John Doe" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-label-md text-on-surface font-semibold" data-i18n="email">Email *</label>
+                        <input type="email" id="email" name="email" required placeholder="john@example.com" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-label-md text-on-surface font-semibold" data-i18n="phone">Phone Number *</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+1 (555) 000-0000" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-label-md text-on-surface font-semibold" data-i18n="address">Delivery Address *</label>
+                        <textarea id="address" name="address" required placeholder="123 Main St, Apt 4B, City, State" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container min-h-[60px]"></textarea>
+                    </div>
+
+                    <!-- Discount Code Section -->
+                    <div class="flex flex-col gap-1 pt-1">
+                        <label class="font-label-md text-on-surface font-semibold" data-i18n="discount_code">Promo / Discount Code</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="promo-code-input" placeholder="e.g. SAVE10" class="flex-1 px-3 py-2 rounded-xl bg-surface-container-low text-on-surface uppercase font-bold text-sm outline-none border border-surface-container">
+                            <button type="button" onclick="applyPromoCode()" class="px-4 py-2 bg-secondary text-on-secondary font-bold text-sm rounded-xl hover:bg-secondary-container transition-colors" data-i18n="apply">Apply</button>
+                        </div>
+                        <span id="promo-code-msg"></span>
+                    </div>
+
+                    <!-- Order Summary in Checkout -->
+                    <div id="checkout-summary" class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-1 mt-1"></div>
+
+                    <button type="submit" class="w-full mt-2 py-3 rounded-full bg-primary text-on-primary font-label-lg font-bold shadow-md hover:bg-primary-container transition-colors" data-i18n="place_order">
+                        Place Order
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/supabase-client.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/promos.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
