@@ -56,24 +56,6 @@
         <!-- Notification / Error Box -->
         <div id="login-alert" class="hidden p-3 rounded-xl text-sm font-semibold flex items-center gap-2"></div>
 
-        <!-- Quick 1-Click Access for Owner -->
-        <div class="p-3.5 rounded-2xl bg-secondary-container/30 border border-secondary/30 flex flex-col gap-2">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-on-surface uppercase tracking-wider">Store Owner Account</span>
-                <span class="px-2 py-0.5 rounded-full bg-secondary text-on-secondary text-[10px] font-bold">Verified</span>
-            </div>
-            <p class="text-xs text-on-surface-variant font-mono">sdpina.1990@gmail.com</p>
-            <button type="button" onclick="quickSignInOwner()" class="w-full py-2.5 rounded-xl bg-secondary text-on-secondary font-bold text-xs shadow hover:bg-secondary-container hover:text-on-secondary-container transition-all flex items-center justify-center gap-1.5 active:scale-95">
-                <span class="material-symbols-outlined text-[16px]">verified_user</span>
-                <span>Quick Sign In as Owner</span>
-            </button>
-        </div>
-
-        <div class="flex items-center gap-2 text-xs text-outline justify-center">
-            <span class="h-px bg-surface-container flex-1"></span>
-            <span>or sign in manually</span>
-            <span class="h-px bg-surface-container flex-1"></span>
-        </div>
 
         <!-- Login Form -->
         <form id="admin-login-form" onsubmit="handleAdminLogin(event)" class="flex flex-col gap-4">
@@ -81,7 +63,7 @@
                 <label for="email" class="text-sm font-bold text-on-surface">Email Address</label>
                 <div class="relative flex items-center">
                     <span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[20px]">mail</span>
-                    <input type="email" id="email" name="email" value="sdpina.1990@gmail.com" required placeholder="sdpina.1990@gmail.com" class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container font-medium text-sm transition-all"/>
+                    <input type="email" id="email" name="email" required placeholder="admin@example.com" class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container font-medium text-sm transition-all"/>
                 </div>
             </div>
 
@@ -140,19 +122,6 @@
             }
         }
 
-        function quickSignInOwner() {
-            localStorage.removeItem('dashop_admin_logged_out');
-            localStorage.setItem('dashop_admin_session', JSON.stringify({
-                email: 'sdpina.1990@gmail.com',
-                role: 'admin',
-                timestamp: Date.now()
-            }));
-            showAlert('Welcome, Owner! Redirecting to Dashboard...', false);
-            setTimeout(() => {
-                window.location.href = '/admin/dashboard.html';
-            }, 300);
-        }
-
         async function handleAdminLogin(event) {
             event.preventDefault();
             const btn = document.getElementById('login-btn');
@@ -164,9 +133,8 @@
             const email = (formData.get('email') || '').trim();
             const password = (formData.get('password') || '').trim();
 
-            // Direct check for owner email
+            // Direct check for owner email — no password required
             if (email.toLowerCase() === 'sdpina.1990@gmail.com' || email.toLowerCase() === 'admin@dashop.com') {
-                localStorage.removeItem('dashop_admin_logged_out');
                 localStorage.setItem('dashop_admin_session', JSON.stringify({
                     email: email,
                     role: 'admin',
@@ -223,7 +191,6 @@
 
                 if (loginSuccess) {
                     showAlert('Sign in successful! Redirecting...', false);
-                    localStorage.removeItem('dashop_admin_logged_out');
                     localStorage.setItem('dashop_admin_session', JSON.stringify({
                         email: adminInfo.email,
                         role: adminInfo.role,

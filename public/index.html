@@ -64,39 +64,7 @@
         };
     </script>
     <style>
-        /* ── Dark Mode ─────────────────────────────────────────────── */
-        .dark body { background-color: #0d131f; color: #e2e8f0; }
-        .dark .bg-surface { background-color: #0d131f !important; }
-        .dark .bg-surface-container-lowest { background-color: #172033 !important; color: #f8fafc; }
-        .dark .bg-surface-container-low { background-color: #1e293b !important; }
-        .dark .bg-surface-container { background-color: #27354f !important; }
-        .dark .bg-surface-container-high { background-color: #334155 !important; }
-        .dark .text-on-surface { color: #f8fafc !important; }
-        .dark .text-on-surface-variant { color: #94a3b8 !important; }
-        .dark .text-outline { color: #64748b !important; }
-        .dark .border-surface-container { border-color: #334155 !important; }
-        /* Header */
-        .dark header { background-color: rgba(23,32,51,0.95) !important; border-color: #27354f; }
-        /* Inputs & textareas */
-        .dark input, .dark textarea, .dark select {
-            background-color: #1e293b !important;
-            color: #f8fafc !important;
-            border-color: #334155 !important;
-        }
-        .dark input::placeholder, .dark textarea::placeholder { color: #64748b !important; }
-        /* Cards / product tiles */
-        .dark .rounded-2xl, .dark .rounded-xl { border-color: #27354f; }
-        /* Dock */
-        .dark nav.fixed { background-color: rgba(23,32,51,0.97) !important; border-color: #27354f !important; }
-        /* Category chips */
-        .dark .bg-surface-container-low.rounded-full { background-color: #1e293b !important; color: #94a3b8; }
-        /* Modals */
-        .dark [id$="-modal"] .bg-surface-container-lowest { background-color: #172033 !important; }
-        /* Outline/dividers */
-        .dark .shadow-sm { box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
-        /* Search bar */
-        .dark #index-search-input { color: #f8fafc !important; }
-        /* Scroll hint */
+        /* Scroll hint fade */
         .scroll-fade-wrap { position: relative; }
         .scroll-fade-wrap::after {
             content: '';
@@ -104,10 +72,9 @@
             position: absolute;
             right: 0; top: 0; bottom: 0;
             width: 64px;
-            background: linear-gradient(to left, var(--fade-color, #faf8ff), transparent);
+            background: linear-gradient(to left, #faf8ff, transparent);
             z-index: 1;
         }
-        .dark .scroll-fade-wrap::after { --fade-color: #0d131f; }
         /* Hide scrollbars */
         ::-webkit-scrollbar { display: none; }
         * { scrollbar-width: none; }
@@ -140,10 +107,6 @@
                     </div>
                 </div>
 
-                <!-- Dark Mode Toggle Button -->
-                <button type="button" onclick="window.themeManager.toggle()" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low active:scale-90 transition-all" title="Toggle theme">
-                    <span class="material-symbols-outlined text-[20px] theme-toggle-icon">dark_mode</span>
-                </button>
 
                 <!-- Cart Button -->
                 <button aria-label="Shopping Cart" class="relative w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low active:scale-90 transition-all" onclick="openCart()">
@@ -245,14 +208,6 @@
                         <span class="text-[11px] text-on-surface-variant font-normal mt-0.5">Special Offers</span>
                     </a>
 
-                    <!-- All Products -->
-                    <a href="/catalog.html" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
-                        <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
-                            <span class="material-symbols-outlined text-[26px]">apps</span>
-                        </div>
-                        <span class="font-title-md text-xs sm:text-sm font-semibold text-on-surface leading-tight" data-i18n="all_products">All Products</span>
-                        <span class="text-[11px] text-on-surface-variant font-normal mt-0.5">Browse Store</span>
-                    </a>
                 </div>
             </section>
 
@@ -300,10 +255,6 @@
             <a aria-current="page" class="flex-1 flex flex-col items-center justify-center h-12 rounded-full transition-all text-primary font-bold active:scale-90" href="/">
                 <span class="material-symbols-outlined text-[22px]">storefront</span>
                 <span class="font-label-sm text-label-sm" data-i18n="store">Store</span>
-            </a>
-            <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-all active:scale-90" href="/catalog.html">
-                <span class="material-symbols-outlined text-[22px]">grid_view</span>
-                <span class="font-label-sm text-label-sm" data-i18n="catalog">Catalog</span>
             </a>
             <button type="button" onclick="openCart()" class="relative flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-all active:scale-90">
                 <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
