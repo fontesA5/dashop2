@@ -2,6 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "dashop",
   "compatibility_date": "2026-09-25",
+  "routes": [
+    {
+      "pattern": "dashop.site",
+      "custom_domain": true
+    }
+  ],
   "observability": {
     "enabled": true
   },
