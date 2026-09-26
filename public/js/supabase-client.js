@@ -7,8 +7,8 @@
 
 // Load environment variables (works in browser with proper setup)
 // For local development with Cloudflare Workers, use:
-const supabaseUrl = window.supabaseUrl || ''
-const supabaseKey = window.supabaseAnonKey || ''
+const supabaseUrl = 'https://wninmlukmkdlrfgblobz.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InduaW5tbHVrbWtkbHJmZ2Jsb2J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzNjgxOTAsImV4cCI6MjEwNTk0NDE5MH0.QahkI2kesSvnoehhwNHMLXRehqI1wCbJMztaW3_E6wg'
 
 // Alternative: Read from global env (for direct .env file usage)
 // const supabaseUrl = process.env.SUPABASE_URL || ''

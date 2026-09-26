@@ -2,5 +2,4 @@
 path = "/*"
 params = { fallback_config: 'serve-all' }
 
-# Cloudflare Pages Configuration
-# Environment variables are automatically synced from .env file
+# Enable environment variables from .env file for production
