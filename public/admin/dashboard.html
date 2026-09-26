@@ -575,12 +575,30 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-center">
-                                <div class="sm:col-span-2">
-                                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">Optional Image URL (right graphic)</label>
-                                    <input id="banner-image" type="url" placeholder="https://example.com/banner-art.png" class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary"/>
+                            <div class="flex flex-col gap-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-xs font-semibold text-on-surface-variant">Banner Image (fills entire banner background)</label>
+                                    <span class="text-[11px] text-primary font-medium">Fills 100% on Mobile & PC</span>
                                 </div>
-                                <div class="flex items-center gap-2 pt-2 sm:pt-4">
+                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                    <input id="banner-image" type="text" placeholder="Paste image URL (https://...) or upload below" class="flex-1 px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary" oninput="updateBannerImagePreview()"/>
+                                    <label class="shrink-0 px-3 py-2 rounded-lg bg-surface-container hover:bg-surface-variant text-on-surface text-xs font-bold cursor-pointer transition flex items-center justify-center gap-1.5 active:scale-95 border border-surface-container">
+                                        <span class="material-symbols-outlined text-[16px]">upload_file</span>
+                                        <span>Upload File</span>
+                                        <input id="banner-file-input" type="file" accept="image/*" class="hidden" onchange="handleBannerFileUpload(this)"/>
+                                    </label>
+                                </div>
+                                <!-- Image Preview Bar -->
+                                <div id="banner-image-preview-box" class="relative w-full h-24 rounded-xl border border-surface-container bg-surface-container-low overflow-hidden hidden">
+                                    <img id="banner-image-preview-img" src="" class="w-full h-full object-cover object-center"/>
+                                    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent flex items-center p-3">
+                                        <span class="text-xs text-white font-semibold">Image Preview (Will fill entire banner)</span>
+                                    </div>
+                                    <button type="button" onclick="clearBannerImage()" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition active:scale-90" title="Remove Image">
+                                        <span class="material-symbols-outlined text-[16px]">close</span>
+                                    </button>
+                                </div>
+                                <div class="flex items-center gap-2 pt-1">
                                     <input id="banner-active" type="checkbox" checked class="w-5 h-5 rounded text-primary focus:ring-primary cursor-pointer"/>
                                     <label for="banner-active" class="text-xs font-bold text-on-surface cursor-pointer select-none">Active / Show in Store</label>
                                 </div>

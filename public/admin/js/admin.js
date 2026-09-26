@@ -802,9 +802,15 @@ async function renderBannersList() {
         html += `
         <div class="rounded-xl border border-surface-container overflow-hidden shadow-sm bg-surface-container-low flex flex-col sm:flex-row items-stretch">
             <!-- Mini visual banner preview card -->
-            <div class="sm:w-60 p-3 ${themeStyle.bg} flex flex-col justify-between shrink-0 relative overflow-hidden">
+            <div class="sm:w-64 min-h-[120px] p-3 ${b.image_url ? 'bg-surface-container-high' : themeStyle.bg} flex flex-col justify-between shrink-0 relative overflow-hidden">
+                ${b.image_url ? `
+                <div class="absolute inset-0 z-0">
+                    <img src="${b.image_url}" class="w-full h-full object-cover object-center"/>
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/30"></div>
+                </div>
+                ` : ''}
                 <div class="relative z-10">
-                    <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${themeStyle.tagBg} text-[10px] font-bold uppercase tracking-wider mb-1 shadow-xs">
+                    <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${b.image_url ? 'bg-white/20 text-white border border-white/30 backdrop-blur-sm' : themeStyle.tagBg} text-[10px] font-bold uppercase tracking-wider mb-1 shadow-xs">
                         <span class="material-symbols-outlined text-[12px]">${b.tag_icon || 'local_fire_department'}</span>
                         <span>${b.tag || 'Promo'}</span>
                     </div>
@@ -813,7 +819,7 @@ async function renderBannersList() {
                 </div>
                 <div class="relative z-10 flex items-center justify-between mt-2 pt-2 border-t border-white/20">
                     <span class="text-[10px] font-semibold text-white/90 underline">${b.button_text || 'Shop now'}</span>
-                    ${b.promo_code ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${themeStyle.badgeBg}">${b.promo_code}</span>` : ''}
+                    ${b.promo_code ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${b.image_url ? 'bg-white/25 text-white border border-white/30' : themeStyle.badgeBg}">${b.promo_code}</span>` : ''}
                 </div>
             </div>
 
@@ -888,10 +894,75 @@ window.handleCreateBanner = async function(event) {
         document.getElementById('banner-link').value = '/catalog';
         document.getElementById('banner-btn-text').value = 'Shop now';
         document.getElementById('banner-active').checked = true;
+        window.clearBannerImage();
 
         await renderBannersList();
         showNotification(`Banner "${title}" created and saved!`);
     }
+};
+
+// Banner Image Helpers (Upload, Preview, Clear)
+window.updateBannerImagePreview = function() {
+    const input = document.getElementById('banner-image');
+    const box = document.getElementById('banner-image-preview-box');
+    const img = document.getElementById('banner-image-preview-img');
+    if (!input || !box || !img) return;
+
+    const val = input.value.trim();
+    if (val) {
+        img.src = val;
+        box.classList.remove('hidden');
+    } else {
+        box.classList.add('hidden');
+    }
+};
+
+window.clearBannerImage = function() {
+    const input = document.getElementById('banner-image');
+    const fileInput = document.getElementById('banner-file-input');
+    if (input) input.value = '';
+    if (fileInput) fileInput.value = '';
+    const box = document.getElementById('banner-image-preview-box');
+    if (box) box.classList.add('hidden');
+};
+
+window.handleBannerFileUpload = function(input) {
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (JPEG, PNG, WebP).');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            // Compress and resize to max width 1600px for sharp high-res banners with low file size
+            const maxWidth = 1600;
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            const bannerImgInput = document.getElementById('banner-image');
+            if (bannerImgInput) {
+                bannerImgInput.value = compressedDataUrl;
+                window.updateBannerImagePreview();
+            }
+            showNotification('Image loaded and optimized for banner!');
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
 };
 
 window.handleToggleBannerActive = async function(id) {
