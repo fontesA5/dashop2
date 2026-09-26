@@ -1,54 +1,37 @@
 /**
- * DaShop Theme Manager (Dark Mode)
+ * DaShop Theme Manager - Light Mode Only
+ * Dark mode has been completely disabled across the application.
  */
 
-class ThemeManager {
-    constructor() {
-        this.themeKey = 'dashop_theme';
-        this.init();
+(function() {
+    // Ensure 'dark' class is never present on document element
+    if (typeof document !== 'undefined' && document.documentElement) {
+        document.documentElement.classList.remove('dark');
     }
 
-    init() {
-        const saved = localStorage.getItem(this.themeKey);
-        if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            this.setDark(true);
-        } else {
-            this.setDark(false);
+    // Clean up any legacy saved theme preference in localStorage
+    try {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem('dashop_theme');
+            localStorage.setItem('dashop_theme', 'light');
         }
-    }
+    } catch (e) {}
 
-    isDark() {
-        return document.documentElement.classList.contains('dark');
-    }
+    // Safe stub so any legacy calls to themeManager do not error
+    window.themeManager = {
+        isDark: () => false,
+        setDark: () => {
+            if (document.documentElement) document.documentElement.classList.remove('dark');
+        },
+        toggle: () => {
+            if (document.documentElement) document.documentElement.classList.remove('dark');
+        },
+        updateIcons: () => {}
+    };
 
-    setDark(enableDark) {
-        if (enableDark) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem(this.themeKey, 'dark');
-        } else {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.documentElement) {
             document.documentElement.classList.remove('dark');
-            localStorage.setItem(this.themeKey, 'light');
         }
-        this.updateIcons();
-    }
-
-    toggle() {
-        this.setDark(!this.isDark());
-    }
-
-    updateIcons() {
-        const dark = this.isDark();
-        document.querySelectorAll('.theme-toggle-icon').forEach(icon => {
-            icon.textContent = dark ? 'light_mode' : 'dark_mode';
-        });
-        document.querySelectorAll('.theme-toggle-label').forEach(label => {
-            label.textContent = dark ? (window.i18n ? window.i18n.t('light_mode') : 'Light') : (window.i18n ? window.i18n.t('dark_mode') : 'Dark');
-        });
-    }
-}
-
-window.themeManager = new ThemeManager();
-
-document.addEventListener('DOMContentLoaded', () => {
-    window.themeManager.updateIcons();
-});
+    });
+})();
