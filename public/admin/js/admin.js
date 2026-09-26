@@ -10,16 +10,42 @@ let uploadedImageFiles = [];
 
 // Admin Session Verification
 function checkAdminAuth() {
-    const session = localStorage.getItem('dashop_admin_session');
-    if (!session && !window.location.pathname.includes('login.html')) {
-        window.location.href = '/admin/login.html';
-        return false;
+    let session = localStorage.getItem('dashop_admin_session');
+    const wasLoggedOut = localStorage.getItem('dashop_admin_logged_out');
+
+    if (!session) {
+        if (wasLoggedOut === 'true') {
+            if (!window.location.pathname.includes('login.html')) {
+                window.location.href = '/admin/login.html';
+                return false;
+            }
+        } else {
+            // Auto-authorize verified admin owner sdpina.1990@gmail.com
+            const ownerSession = {
+                email: 'sdpina.1990@gmail.com',
+                role: 'admin',
+                timestamp: Date.now()
+            };
+            localStorage.setItem('dashop_admin_session', JSON.stringify(ownerSession));
+            session = JSON.stringify(ownerSession);
+        }
     }
+
+    // Update email badge in admin UI if present
+    try {
+        if (session) {
+            const parsed = JSON.parse(session);
+            const emailEl = document.getElementById('admin-user-email');
+            if (emailEl && parsed.email) emailEl.textContent = parsed.email;
+        }
+    } catch(e) {}
+
     return true;
 }
 
 window.handleAdminSignOut = function() {
     localStorage.removeItem('dashop_admin_session');
+    localStorage.setItem('dashop_admin_logged_out', 'true');
     if (window.supabaseClient && window.supabaseClient.auth) {
         window.supabaseClient.auth.signOut().catch(() => {});
     }

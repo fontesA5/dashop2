@@ -56,6 +56,11 @@ function updateCartCount() {
         el.textContent = count;
         el.classList.remove('scale-125');
     });
+    document.querySelectorAll('#dock-cart-badge').forEach(el => {
+        el.textContent = count;
+        if (count > 0) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+    });
 }
 
 // Progressive "Add to Cart" Animation
@@ -355,7 +360,20 @@ async function handleCheckout(event) {
         if (window.supabaseClient) {
             const { data, error } = await window.supabaseClient.from('orders').insert([orderPayload]).select();
             if (error) console.error('Order save error:', error);
-            else console.log('Order created successfully:', data);
+            else {
+                console.log('Order created successfully:', data);
+                if (data && data[0]) {
+                    const custOrders = JSON.parse(localStorage.getItem('dashop_customer_orders') || '[]');
+                    custOrders.unshift({
+                        id: data[0].id,
+                        total: data[0].total,
+                        status: data[0].status || 'pending',
+                        items_count: cart.reduce((s, i) => s + (i.quantity || 1), 0),
+                        date: new Date().toISOString()
+                    });
+                    localStorage.setItem('dashop_customer_orders', JSON.stringify(custOrders));
+                }
+            }
         }
 
         // Reset cart and checkout state
@@ -430,6 +448,53 @@ function getProductSlug(product) {
     return (product.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+let currentActiveCategory = 'All';
+
+window.filterByCategory = function(category, btnElement) {
+    currentActiveCategory = category || 'All';
+    
+    // Update chip styling
+    document.querySelectorAll('.category-chip').forEach(chip => {
+        chip.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm');
+        chip.classList.add('bg-surface-container-low', 'text-on-surface');
+    });
+
+    const activeBtn = btnElement || document.querySelector(`.category-chip[data-category="${category}"]`);
+    if (activeBtn) {
+        activeBtn.classList.remove('bg-surface-container-low', 'text-on-surface');
+        activeBtn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm');
+    }
+
+    const grid = document.getElementById('product-grid') || document.getElementById('catalog-grid');
+    if (!grid) return;
+
+    const searchInput = document.getElementById('catalog-search') || document.getElementById('search-input');
+    const query = (searchInput?.value || '').toLowerCase().trim();
+
+    let filtered = allProducts;
+    if (query) {
+        filtered = filtered.filter(p => 
+            p.name.toLowerCase().includes(query) || 
+            (p.category && p.category.toLowerCase().includes(query))
+        );
+    }
+
+    if (category && category !== 'All') {
+        if (category === 'Flash Deals') {
+            filtered = filtered.filter(p => (parseFloat(p.price) <= 12) || (p.description && p.description.includes('Deal')));
+        } else {
+            filtered = filtered.filter(p => 
+                p.category && (
+                    p.category.toLowerCase().includes(category.toLowerCase()) ||
+                    category.toLowerCase().includes(p.category.toLowerCase())
+                )
+            );
+        }
+    }
+
+    renderProductGrid(filtered, grid);
+};
+
 // Load Products from Supabase
 async function loadProducts() {
     const grid = document.getElementById('product-grid') || document.getElementById('catalog-grid');
@@ -451,26 +516,143 @@ async function loadProducts() {
 
     if (!grid) return;
 
+    // Attach search input listener for live search
+    const searchInput = document.getElementById('catalog-search') || document.getElementById('search-input');
+    if (searchInput && !searchInput.dataset.hasListener) {
+        searchInput.dataset.hasListener = 'true';
+        searchInput.addEventListener('input', () => {
+            window.filterByCategory(currentActiveCategory);
+        });
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const q = urlParams.get('q');
     const cat = urlParams.get('category');
-    let productsToRender = allProducts;
+    const isFlash = urlParams.get('flash');
 
-    if (q) {
-        const query = q.toLowerCase();
-        productsToRender = productsToRender.filter(p => 
-            p.name.toLowerCase().includes(query) || 
-            (p.category && p.category.toLowerCase().includes(query))
-        );
-    }
-    if (cat && cat !== 'All') {
-        productsToRender = productsToRender.filter(p => 
-            p.category && p.category.toLowerCase() === cat.toLowerCase()
-        );
-    }
+    if (searchInput && q) searchInput.value = q;
 
-    renderProductGrid(productsToRender, grid);
+    if (isFlash) {
+        window.filterByCategory('Flash Deals');
+    } else if (cat) {
+        window.filterByCategory(cat);
+    } else {
+        window.filterByCategory('All');
+    }
 }
+
+// Customer Orders Modal Logic
+window.openCustomerOrdersModal = function() {
+    const modal = document.getElementById('customer-orders-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+
+    // Check if admin session is present to show merchant link
+    const adminSession = localStorage.getItem('dashop_admin_session');
+    const adminLinkWrapper = document.getElementById('admin-orders-link-wrapper');
+    if (adminLinkWrapper) {
+        if (adminSession) adminLinkWrapper.classList.remove('hidden');
+        else adminLinkWrapper.classList.add('hidden');
+    }
+
+    renderCustomerOrdersList();
+};
+
+window.closeCustomerOrdersModal = function() {
+    const modal = document.getElementById('customer-orders-modal');
+    if (modal) modal.classList.add('hidden');
+};
+
+function renderCustomerOrdersList() {
+    const container = document.getElementById('customer-orders-list');
+    if (!container) return;
+
+    const orders = JSON.parse(localStorage.getItem('dashop_customer_orders') || '[]');
+    if (orders.length === 0) {
+        container.innerHTML = `
+            <div class="p-4 rounded-xl bg-surface-container-low text-center text-xs text-on-surface-variant font-medium">
+                No orders placed on this device yet.
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    orders.forEach(o => {
+        const dateStr = o.date ? new Date(o.date).toLocaleDateString() : 'Recent';
+        const isCompleted = o.status === 'completed';
+        const statusBadge = isCompleted 
+            ? `<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold">Completed</span>`
+            : `<span class="px-2 py-0.5 rounded-full bg-surface-dim text-on-surface text-[11px] font-bold">Pending</span>`;
+
+        html += `
+            <div class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-1 border border-surface-container/60 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="font-bold text-xs text-on-surface font-mono">Order #${o.id}</span>
+                    ${statusBadge}
+                </div>
+                <div class="flex items-center justify-between text-xs text-on-surface-variant mt-0.5">
+                    <span>${o.items_count || 1} items • ${dateStr}</span>
+                    <span class="font-bold text-on-surface text-sm">$${parseFloat(o.total || 0).toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+window.searchCustomerOrder = async function() {
+    const input = document.getElementById('order-track-input');
+    const resultBox = document.getElementById('order-search-result');
+    if (!input || !resultBox) return;
+
+    const term = (input.value || '').trim();
+    if (!term) {
+        resultBox.innerHTML = `<span class="text-error">Please enter an Order ID or Email.</span>`;
+        return;
+    }
+
+    resultBox.innerHTML = `<span class="text-on-surface-variant">Looking up order...</span>`;
+
+    try {
+        let query = window.supabaseClient.from('orders').select('*');
+        if (/^\d+$/.test(term)) {
+            query = query.eq('id', parseInt(term));
+        } else {
+            query = query.ilike('customer_email', term);
+        }
+
+        const { data, error } = await query.order('created_at', { ascending: false }).limit(3);
+        if (error || !data || data.length === 0) {
+            resultBox.innerHTML = `<span class="text-error">No order found matching "${term}".</span>`;
+            return;
+        }
+
+        let html = '<div class="flex flex-col gap-2 mt-2">';
+        data.forEach(o => {
+            const dateStr = new Date(o.created_at).toLocaleDateString();
+            const isCompleted = o.status === 'completed';
+            const statusClass = isCompleted ? 'text-secondary font-bold' : 'text-primary font-bold';
+            html += `
+                <div class="p-2.5 rounded-lg bg-surface-container-lowest border border-surface-container flex flex-col gap-0.5">
+                    <div class="flex justify-between items-center font-bold">
+                        <span>#${o.id} - ${o.customer_name}</span>
+                        <span class="${statusClass} uppercase text-[10px]">${o.status || 'Pending'}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-on-surface-variant text-[11px]">
+                        <span>${dateStr} • ${o.address || 'Delivery'}</span>
+                        <span class="font-extrabold text-on-surface">$${parseFloat(o.total || 0).toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        resultBox.innerHTML = html;
+    } catch (err) {
+        console.error('Error tracking order:', err);
+        resultBox.innerHTML = `<span class="text-error">Lookup failed: ${err.message}</span>`;
+    }
+};
 
 function renderProductGrid(products, grid) {
     if (!grid) return;
@@ -782,3 +964,7 @@ window.applyPromoCode = applyPromoCode;
 window.removeFromCart = removeFromCart;
 window.updateQuantity = updateQuantity;
 window.showNotification = showNotification;
+window.openCustomerOrdersModal = openCustomerOrdersModal;
+window.closeCustomerOrdersModal = closeCustomerOrdersModal;
+window.filterByCategory = filterByCategory;
+window.searchCustomerOrder = searchCustomerOrder;
