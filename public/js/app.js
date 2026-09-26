@@ -195,15 +195,19 @@ async function syncOrderToSupabase(orderData) {
     
     const supabase = window.supabaseClient;
     
-    try {
-        // Insert order into Supabase orders table
-        const { data, error } = await supabase
-            .from('orders')
-            .insert([{
-                ...orderData,
-                status: 'pending'
-            }])
-            .select('*');
+        try {
+            // Insert order into Supabase orders table
+            const { data, error } = await supabase
+                .from('orders')
+                .insert([{
+                    customer_name: orderData.name,
+                    customer_email: orderData.email,
+                    address: orderData.address,
+                    total: orderData.total,
+                    items_json: JSON.stringify(orderData.items),
+                    status: 'pending'
+                }])
+                .select('*');
         
         if (error) throw error;
         
@@ -248,23 +252,41 @@ async function loadProducts() {
         }
         
         // Render product cards
-        let html = '<div class="product-grid";';
+        let html = '';
         products.forEach(product => {
-            const emoji = product.image || getPlaceholderEmoji(product.name);
+            const isEmoji = product.image && (product.image.length <= 4 || !product.image.startsWith('http'));
+            const imageHtml = isEmoji || !product.image
+                ? `<div style="font-size: 4rem; text-align: center; line-height: 7rem;">${product.image || getPlaceholderEmoji(product.name)}</div>`
+                : `<img class="h-28 w-auto object-contain" src="${product.image}" alt="${product.name}">`;
+                
+            const category = product.category || 'General';
+
             html += `
-                <div class="product-card" onclick="viewProduct(${product.id})">
-                    <div class="product-image">${emoji}</div>
-                    <div class="product-title">${product.name}</div>
-                    <div class="product-price">$${product.price.toFixed(2)}</div>
-                    <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${JSON.stringify(product)})">
-                        Add to Cart
-                    </button>
+            <div class="flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md cursor-pointer" onclick="viewProduct(${product.id})">
+                <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-space-xs overflow-hidden mb-space-xs">
+                    ${imageHtml}
                 </div>
-            `;
+                <div class="flex flex-col flex-1 justify-between">
+                    <div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">${category}</span>
+                        <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 leading-snug">
+                            ${product.name}
+                        </h4>
+                    </div>
+                    <div class="flex items-center justify-between pt-space-sm">
+                        <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${product.price.toFixed(2)}</span>
+                        <button class="w-8 h-8 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick='event.stopPropagation(); addToCart(${JSON.stringify(product).replace(/'/g, "&#39;")})' type="button">
+                            <span class="material-symbols-outlined text-[18px]">add</span>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
         });
-        html += '</div>';
         
-        productGrid.innerHTML = html;
+        const grid = document.getElementById('product-grid') || document.getElementById('catalog-grid');
+        if (grid) {
+            grid.innerHTML = html;
+        }
     } catch (error) {
         console.error('Error loading products:', error);
     }

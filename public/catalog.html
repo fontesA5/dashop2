@@ -1,0 +1,414 @@
+<!-- DaShop - Product Catalog -->
+<!DOCTYPE html><html lang="en" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_tab" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-dim": "#d2d9f4", "inverse-primary": "#80d5cb", "tertiary-fixed": "#acf847", "error-container": "#ffdad6", "on-primary-container": "#a3faef", "on-background": "#131b2e", "surface-container-high": "#e2e7ff", "on-surface": "#131b2e", "secondary-fixed-dim": "#4edea3", "surface-variant": "#dae2fd", "surface-container-lowest": "#ffffff", "inverse-on-surface": "#eef0ff", "secondary": "#006c49", "primary-fixed": "#9cf2e8", "on-primary-fixed": "#00201d", "surface-bright": "#faf8ff", "on-primary": "#ffffff", "tertiary": "#375b00", "on-secondary-fixed-variant": "#005236", "surface": "#faf8ff", "primary-container": "#0f766e", "on-primary-fixed-variant": "#00504a", "on-secondary": "#ffffff", "on-tertiary-fixed": "#102000", "surface-container": "#eaedff", "primary-fixed-dim": "#80d5cb", "inverse-surface": "#283044", "outline": "#6e7977", "secondary-fixed": "#6ffbbe", "tertiary-fixed-dim": "#91db2a", "error": "#ba1a1a", "tertiary-container": "#487500", "on-tertiary-fixed-variant": "#304f00", "on-surface-variant": "#3e4947", "background": "#faf8ff", "secondary-container": "#6cf8bb", "outline-variant": "#bdc9c6", "on-error-container": "#93000a", "surface-tint": "#006a63", "on-error": "#ffffff", "surface-container-highest": "#dae2fd", "on-tertiary-container": "#b5ff56", "on-secondary-fixed": "#002113", "primary": "#005c55", "on-secondary-container": "#00714d", "on-tertiary": "#ffffff", "surface-container-low": "#f2f3ff" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-2xl": "3rem", "gutter-desktop": "1.25rem", "margin": "1rem", "space-xl": "2rem", "space-sm": "0.5rem", "space-2xs": "0.125rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "gutter": "0.75rem", "space-md": "0.75rem", "space-base": "1rem", "margin-desktop": "2rem" }, fontFamily: { "headline-lg": ["Plus Jakarta Sans"], "headline-xl": ["Plus Jakarta Sans"], "title-md": ["Plus Jakarta Sans"], "price-hero": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "headline-xl-mobile": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "price-unit": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"] }, fontSize: { "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "price-hero": ["22px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.04em", "fontWeight": "700" }], "headline-xl-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.025em", "fontWeight": "800" }], "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }], "price-unit": ["11px", { "lineHeight": "14px", "fontWeight": "500" }], "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><img alt="DaShop Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V5-BCgIk-mBsL_m7yirbzNY-wokmayoYPdc0OX-1-3JcIvSkmOR2sGqQzAaKbCeNc2oGdRpnNJAVQsRpprBucxqrFy5onBbpBGt4JUW8LtE0kRRIZ2MxVafIoJ7jMZ11bj-Eb2oz657W8kegTi1Zx0V_QG_jXXCvskpRZ65a6NHORcaeHbs65QKttWCS6Hq4KIJfxElsoacIsR0AdJAlXNbCyZ6XJcgumYZza-pRwZJdVgXICrUAL2Iw"><div class="flex flex-col min-w-0"><span class="font-headline-md text-headline-md text-primary font-bold tracking-tight leading-none">DaShop</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate uppercase tracking-wider">Catalog</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Search" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[22px]">search</span></button><a aria-label="Shopping Cart" class="relative w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors" data-path="cart" href="#"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center justify-center">3</span></a><div class="w-11 h-11 flex items-center justify-center ml-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1P_fLD1hlWUlc8MWKXL2CQDmlAYLqbWqUhZkhtC9tJSdumksg-pPCAxISYfZStcL4JPGGONeBLasN37F7pPHe1QBJWfy1ntgKBW-xYRDrJaaJwhM_wdz4j2SjLehYosWXNFWPRYkx2sq3CnSGuvE1a_H3nb76Kb5cch-IYgSCP57SuZxh6e2W0hmc8avNXOENGS_4OgZdmAGBJ1G0lOU9ntUQBnYApwjCr_R0xbbtccZHT92Z4nI"></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface"><div class="flex flex-col w-full px-margin pb-20">
+<!-- Search Field Container -->
+<div class="pt-space-sm pb-space-xs">
+<div class="relative flex items-center w-full bg-surface-container-low rounded-full px-space-base py-space-sm shadow-sm">
+<span class="material-symbols-outlined text-outline text-[22px] mr-space-xs select-none">search</span>
+<input aria-label="Search essentials" class="w-full bg-transparent text-on-surface placeholder:text-outline font-body-md text-body-md focus:outline-none" id="catalog-search" placeholder="Search 1,200+ daily essentials..." type="search">
+<button aria-label="Clear or filter" class="text-outline hover:text-primary transition-colors flex items-center justify-center p-space-2xs" id="clear-search-btn">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+</button>
+</div>
+</div>
+<!-- Interactive Category Carousel / Chips -->
+<div class="py-space-xs -mx-margin px-margin overflow-x-auto no-scrollbar flex items-center gap-space-xs">
+<button class="category-chip shrink-0 px-space-base py-space-xs rounded-full font-label-md text-label-md flex items-center gap-1.5 transition-all bg-surface-container-low text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px] text-outline">apps</span>
+<span class="">All Products</span>
+</button>
+<button class="category-chip shrink-0 px-space-base py-space-xs rounded-full font-label-md text-label-md flex items-center gap-1.5 transition-all bg-primary-container text-on-primary shadow-sm shadow-primary/20">
+<span class="material-symbols-outlined text-[16px]">cleaning_services</span>
+<span class="">Household Essentials</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+</button>
+<button class="category-chip shrink-0 px-space-base py-space-xs rounded-full font-label-md text-label-md flex items-center gap-1.5 transition-all bg-surface-container-low text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px] text-outline">shower</span>
+<span class="">Personal Care</span>
+</button>
+<button class="category-chip shrink-0 px-space-base py-space-xs rounded-full font-label-md text-label-md flex items-center gap-1.5 transition-all bg-surface-container-low text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px] text-outline">auto_awesome</span>
+<span class="">Beauty &amp; Health</span>
+</button>
+<button class="category-chip shrink-0 px-space-base py-space-xs rounded-full font-label-md text-label-md flex items-center gap-1.5 transition-all bg-surface-container-low text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px] text-outline">kitchen</span>
+<span class="">Pantry</span>
+</button>
+</div>
+<!-- Filter & Sort Bar -->
+<div class="flex items-center justify-between pt-space-md pb-space-sm">
+<div class="flex items-center gap-space-xs">
+<button class="flex items-center gap-1 bg-surface-container-low hover:bg-surface-container px-space-sm py-1.5 rounded-lg text-on-surface font-label-md text-label-md transition-colors shadow-sm">
+<span class="text-outline font-body-sm text-body-sm">Sort:</span>
+<span class="font-semibold text-primary">Relevance</span>
+<span class="material-symbols-outlined text-[16px] text-primary">expand_more</span>
+</button>
+<span class="text-outline font-label-sm text-label-sm">48 results</span>
+</div>
+<!-- In Stock Only Switch -->
+<label class="flex items-center gap-space-xs cursor-pointer select-none">
+<span class="font-label-md text-label-md text-on-surface-variant">In Stock</span>
+<div class="relative">
+<input checked="" class="sr-only peer" id="in-stock-toggle" type="checkbox">
+<div class="w-9 h-5 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-container-lowest after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</label>
+</div>
+<!-- Product Grid: 2 Columns -->
+<div id="catalog-grid" class="grid grid-cols-2 gap-gutter pt-space-xs">
+<!-- Product 1: Tide Simply -->
+<div class="product-card flex flex-col justify-between bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm hover:shadow-md transition-all">
+<div class="relative flex flex-col">
+<!-- Image Well -->
+<div class="relative w-full aspect-square bg-surface-container-low/60 rounded-xl overflow-hidden flex items-center justify-center p-space-xs mb-space-sm">
+<span class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm uppercase tracking-wide">
+            Save $0.50
+          </span>
+<img alt="Tide Simply Liquid Detergent" class="w-full h-full object-contain mix-blend-multiply" data-alt="Commercial retail photo of a bright yellow Tide Simply liquid detergent jug with blue handle on a completely seamless studio white background, soft ambient grocery marketing lighting, crisp focus, fresh clean laundry aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCszvvdwzg0sHD2e4WaYgDqXwcU7TvdrjaqVOE7OxHNdQopvgGfsmlw6VBnQC5bfFwgfkcrJNpal0PY_bnil14WEMpEb06rCse5yjkQKGo9g1pI5kzBhS1oT12Tmbne2qCe8aA7t2FZ4MrwN8y4ANwbx6nsn5YE0v-Nu-qNp7X7S7tAnplY4RzjKuxQFb-2jdf3SLVkX2r1a0S8O_rz9u_voyIC3-es0f0Rh8jX1wVmU2yxcAgx_Ws">
+</div>
+<!-- Stock Indicator -->
+<div class="flex items-center gap-1 mb-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-secondary">In Stock</span>
+</div>
+<!-- Title & Subtitle -->
+<h3 class="font-title-md text-title-md text-on-surface line-clamp-2 leading-tight">
+          Tide Simply Liquid Laundry Detergent
+        </h3>
+<p class="font-body-sm text-body-sm text-outline mt-0.5">64 fl oz • Free &amp; Gentle</p>
+</div>
+<!-- Price & Instant Add Row -->
+<div class="flex items-end justify-between mt-space-md pt-space-2xs">
+<div class="flex flex-col">
+<div class="flex items-baseline text-on-surface">
+<span class="font-price-hero text-price-hero text-on-surface font-extrabold">$3</span>
+<span class="font-label-md text-label-md font-bold">.00</span>
+</div>
+<span class="font-price-unit text-price-unit text-outline">4.7¢/oz</span>
+</div>
+<!-- Add Button / Stepper Interactive Container -->
+<div class="action-slot" data-item-id="prod-1">
+<button aria-label="Add Tide to cart" class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-transform hover:bg-primary-container" onclick="handleAddToCart(this, 'prod-1', '$3.00')">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product 2: Axe Apollo -->
+<div class="product-card flex flex-col justify-between bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm hover:shadow-md transition-all">
+<div class="relative flex flex-col">
+<!-- Image Well -->
+<div class="relative w-full aspect-square bg-surface-container-low/60 rounded-xl overflow-hidden flex items-center justify-center p-space-xs mb-space-sm">
+<span class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wide">
+            Popular
+          </span>
+<img alt="Axe Apollo Refreshing Men's Body Wash" class="w-full h-full object-contain mix-blend-multiply" data-alt="Packshot of sleek black Axe Apollo refreshing men body wash bottle with cyan teal logo on pure clean white background, high clarity studio product lighting, modern grooming aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzd9_vUFwLGCPtygTXsN14tCnxChJQ9_USP78jB5G5QmGjuqqaTfQ21ARRz5aexwILwFVuYDRJfSViA9W8ELgCyD3ZA5S5ijOBvBOxhjlNCA1IOekqcgmxOjRTuvp7noXRuDTLkGVRtClxwb2UfJcLGQys4X6QpoikaTKe5g0Pq1qISGx3EGIf0UWwRgTYW8ulGF9aV7g261Ho4KwxjTQsaydH2YF_aa2-RoBthVifBeTKEbeABtw">
+</div>
+<!-- Stock Indicator -->
+<div class="flex items-center gap-1 mb-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-secondary">In Stock</span>
+</div>
+<!-- Title & Subtitle -->
+<h3 class="font-title-md text-title-md text-on-surface line-clamp-2 leading-tight">
+          Axe Apollo Refreshing Men's Body Wash
+        </h3>
+<p class="font-body-sm text-body-sm text-outline mt-0.5">16 fl oz • Sage &amp; Cedarwood</p>
+</div>
+<!-- Price & Instant Add Row -->
+<div class="flex items-end justify-between mt-space-md pt-space-2xs">
+<div class="flex flex-col">
+<div class="flex items-baseline text-on-surface">
+<span class="font-price-hero text-price-hero text-on-surface font-extrabold">$3</span>
+<span class="font-label-md text-label-md font-bold">.50</span>
+</div>
+<span class="font-price-unit text-price-unit text-outline">21.8¢/oz</span>
+</div>
+<div class="action-slot" data-item-id="prod-2">
+<button aria-label="Add Axe body wash to cart" class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-transform hover:bg-primary-container" onclick="handleAddToCart(this, 'prod-2', '$3.50')">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product 3: Downy In Wash Beads -->
+<div class="product-card flex flex-col justify-between bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm hover:shadow-md transition-all">
+<div class="relative flex flex-col">
+<!-- Image Well -->
+<div class="relative w-full aspect-square bg-surface-container-low/60 rounded-xl overflow-hidden flex items-center justify-center p-space-xs mb-space-sm">
+<span class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm uppercase tracking-wide">
+            Trial Size
+          </span>
+<img alt="Downy In Wash Scent Booster Beads" class="w-full h-full object-contain mix-blend-multiply" data-alt="Packshot of Downy Unstopables fresh laundry scent booster beads in ergonomic black curvy bottle with vibrant cyan cap on immaculate white studio background, retail marketing photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPtpQDxN7r97m4Bbi43b43J3vnMLc3IWgOEFG9cs45OxHIKqPYDrOCiMhtvMbJXNDN9eXwR_46HnJhSZIAEyDLUMInxSe1lLvY2b0CDswOxX2XzGBt77KYDBSFGbyrylCdj-NrboRGdRYBVyMvTW3nsmUKn9FJzEcgfkJ0SG7OjnjKMhdIVch0RBqf9NmOX5JSV5OfG74bltXBn1ILB0TDvQn_eIRX1SZFcuuiruzmatUEnlcGEKU">
+</div>
+<!-- Stock Indicator -->
+<div class="flex items-center gap-1 mb-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-secondary">In Stock</span>
+</div>
+<!-- Title & Subtitle -->
+<h3 class="font-title-md text-title-md text-on-surface line-clamp-2 leading-tight">
+          Downy In Wash Scent Booster Beads
+        </h3>
+<p class="font-body-sm text-body-sm text-outline mt-0.5">3.3 oz • Fresh Sparkle</p>
+</div>
+<!-- Price & Instant Add Row -->
+<div class="flex items-end justify-between mt-space-md pt-space-2xs">
+<div class="flex flex-col">
+<div class="flex items-baseline text-on-surface">
+<span class="font-price-hero text-price-hero text-on-surface font-extrabold">$2</span>
+<span class="font-label-md text-label-md font-bold">.50</span>
+</div>
+<span class="font-price-unit text-price-unit text-outline">75.7¢/oz</span>
+</div>
+<div class="action-slot" data-item-id="prod-3">
+<button aria-label="Add Downy to cart" class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-transform hover:bg-primary-container" onclick="handleAddToCart(this, 'prod-3', '$2.50')">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product 4: Crest Complete Plus -->
+<div class="product-card flex flex-col justify-between bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm hover:shadow-md transition-all">
+<div class="relative flex flex-col">
+<!-- Image Well -->
+<div class="relative w-full aspect-square bg-surface-container-low/60 rounded-xl overflow-hidden flex items-center justify-center p-space-xs mb-space-sm">
+<img alt="Crest Complete Plus Minty Fresh Gel" class="w-full h-full object-contain mix-blend-multiply" data-alt="Crest Complete Plus Scope minty fresh liquid gel toothpaste standup bottle with clean teal-green packaging on bright pristine white studio setting, sparkling reflections, crisp hygiene commercial look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5ydlTR3yhILVGcm81gNa-BCfEnz91jLRFAA1OIDVARximfD3nvV3SpKRZmCQv-fomOoO5h31PiijifN3ARWrlWnFw6M6P8uUJEMZQLsD097lY3rapwy-MVzQSz0aIBqoK4CJB0EoW63yugtiVPkpRkgt1fQVZhvc5dzQYuYDNXa2oERXQr1Wa-KoZ4gZKaO7FDdp5_EbDsyYvf8RhkSvdbxXSXQ7hxa-ZWMAVGHNvDIOKsQ8YCdY">
+</div>
+<!-- Stock Indicator -->
+<div class="flex items-center gap-1 mb-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-secondary">In Stock</span>
+</div>
+<!-- Title & Subtitle -->
+<h3 class="font-title-md text-title-md text-on-surface line-clamp-2 leading-tight">
+          Crest Complete Plus Minty Fresh Gel
+        </h3>
+<p class="font-body-sm text-body-sm text-outline mt-0.5">4.6 oz • Fluoride Outlast</p>
+</div>
+<!-- Price & Instant Add Row -->
+<div class="flex items-end justify-between mt-space-md pt-space-2xs">
+<div class="flex flex-col">
+<div class="flex items-baseline text-on-surface">
+<span class="font-price-hero text-price-hero text-on-surface font-extrabold">$2</span>
+<span class="font-label-md text-label-md font-bold">.00</span>
+</div>
+<span class="font-price-unit text-price-unit text-outline">43.5¢/oz</span>
+</div>
+<div class="action-slot" data-item-id="prod-4">
+<button aria-label="Add Crest to cart" class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-transform hover:bg-primary-container" onclick="handleAddToCart(this, 'prod-4', '$2.00')">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product 5: Walgreens Double Zipper Freezer Bags -->
+<div class="product-card flex flex-col justify-between bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm hover:shadow-md transition-all">
+<div class="relative flex flex-col">
+<!-- Image Well -->
+<div class="relative w-full aspect-square bg-surface-container-low/60 rounded-xl overflow-hidden flex items-center justify-center p-space-xs mb-space-sm">
+<img alt="Double Zipper Quart Freezer Bags" class="w-full h-full object-contain mix-blend-multiply" data-alt="Retail carton packaging of double zipper freezer storage food bags with vibrant red Walgreens typography and blue accents on pure white product background, sharp contrast, clear graphic packaging" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDm08nQcGb8OPALuQbf2iM6_zO0I14RpRb4QlrQBVaKYA2wl2IF8XhlGV3q2el3zD6NzjbMzVq5wVy8oPyv9YPo0J5omY8Hl99Zm1L2qFPV0MJWC7dO1kF0h3ClF0SFo-HtBqX2WWaPOZDkK_brVL3_H-AOam8P2Js6KU3s1u09ZeOkG5vqyDRte2_KAkFHAqxoC5F0RHhzHUwBhvYtdlmqtCT_uhHlzmxfKlSv29Q2GYQtkSuBs7k">
+</div>
+<!-- Stock Indicator -->
+<div class="flex items-center gap-1 mb-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-secondary">In Stock</span>
+</div>
+<!-- Title & Subtitle -->
+<h3 class="font-title-md text-title-md text-on-surface line-clamp-2 leading-tight">
+          Double Zipper Quart Freezer Bags
+        </h3>
+<p class="font-body-sm text-body-sm text-outline mt-0.5">20 ct • Thick Seal Grip</p>
+</div>
+<!-- Price & Instant Add Row -->
+<div class="flex items-end justify-between mt-space-md pt-space-2xs">
+<div class="flex flex-col">
+<div class="flex items-baseline text-on-surface">
+<span class="font-price-hero text-price-hero text-on-surface font-extrabold">$2</span>
+<span class="font-label-md text-label-md font-bold">.25</span>
+</div>
+<span class="font-price-unit text-price-unit text-outline">11.2¢/ea</span>
+</div>
+<div class="action-slot" data-item-id="prod-5">
+<button aria-label="Add Freezer Bags to cart" class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-transform hover:bg-primary-container" onclick="handleAddToCart(this, 'prod-5', '$2.25')">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product 6: Colgate Optic White -->
+<div class="product-card flex flex-col justify-between bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm hover:shadow-md transition-all">
+<div class="relative flex flex-col">
+<!-- Image Well -->
+<div class="relative w-full aspect-square bg-surface-container-low/60 rounded-xl overflow-hidden flex items-center justify-center p-space-xs mb-space-sm">
+<span class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wide">
+            Top Rated
+          </span>
+<img alt="Colgate Optic White Mouthwash" class="w-full h-full object-contain mix-blend-multiply" data-alt="Colgate Optic White sparkling white antiseptic mouthwash clear bottle with red metallic branding accents and crisp white cap, set upon high-key studio background with clean clinical lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAihQxAv6F5YavrJBS29f2IPxGgf4DftMBh-iBDSeHhQ_rhjezcFnYXCk3KXrQKLw2MELkzq8Vmc4mvWBVCSxhFPXSrPmZSsxfwYLYMSWNXSTpCk0t7SFd4OnZvtxPEHrqGUvnvyYG-zUGbUpJsiRau933J8VSfP1kySbeOTxvoq9Scswu0Ky6Fwa6-U6rFZ-Z2t2NnpPg-HaCghLAZuGOS7P0Gq1PEc4CeOzrWNj-EFtDEiq3cp_s">
+</div>
+<!-- Stock Indicator -->
+<div class="flex items-center gap-1 mb-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-secondary">In Stock</span>
+</div>
+<!-- Title & Subtitle -->
+<h3 class="font-title-md text-title-md text-on-surface line-clamp-2 leading-tight">
+          Colgate Optic White Sparkling Wash
+        </h3>
+<p class="font-body-sm text-body-sm text-outline mt-0.5">16 fl oz • Icy Fresh Mint</p>
+</div>
+<!-- Price & Instant Add Row -->
+<div class="flex items-end justify-between mt-space-md pt-space-2xs">
+<div class="flex flex-col">
+<div class="flex items-baseline text-on-surface">
+<span class="font-price-hero text-price-hero text-on-surface font-extrabold">$4</span>
+<span class="font-label-md text-label-md font-bold">.10</span>
+</div>
+<span class="font-price-unit text-price-unit text-outline">25.6¢/oz</span>
+</div>
+<div class="action-slot" data-item-id="prod-6">
+<button aria-label="Add Colgate wash to cart" class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-transform hover:bg-primary-container" onclick="handleAddToCart(this, 'prod-6', '$4.10')">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Ambient Trust & Value Micro-Banner -->
+<div class="mt-space-lg mb-space-base p-space-base rounded-2xl bg-surface-container-low flex items-center gap-space-md"><div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center shrink-0 text-on-primary-fixed"><span class="material-symbols-outlined text-[24px]">local_shipping</span></div><div class="flex flex-col min-w-0"><span class="font-label-lg text-label-lg text-on-surface">Online Orders Processed Daily</span><span class="font-body-sm text-body-sm text-outline truncate">Ships directly to your door</span></div></div>
+<!-- Floating Quick Cart Drawer Dock (Positioned above floating navigation) -->
+<div class="fixed left-0 right-0 bottom-20 px-margin z-40 transition-all duration-300 transform translate-y-0" id="quick-cart-dock">
+<div class="max-w-md mx-auto bg-inverse-surface text-inverse-on-surface rounded-full px-space-base py- space-sm shadow-xl flex items-center justify-between backdrop-blur-lg">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="relative w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+<span class="absolute -top-1 -right-1 w-4 h-4 bg-secondary-container text-on-secondary-container rounded-full font-label-sm text-label-sm flex items-center justify-center font-bold" id="quick-cart-badge">3</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-inverse-on-surface font-semibold truncate">3 items in cart</span>
+<span class="font-label-sm text-label-sm text-inverse-primary">$8.50 total</span>
+</div>
+</div>
+<a class="flex items-center gap-1 bg-primary text-on-primary px-space-base py-1.5 rounded-full font-label-md text-label-md hover:bg-primary-container active:scale-95 transition-all shadow-md shrink-0" data-path="cart" href="#">
+<span class="">View Cart</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<script>
+  let cartTotalCount = 3;
+  let cartTotalCost = 8.50;
+
+  function handleAddToCart(btnElement, itemId, unitPriceStr) {
+    const parentSlot = btnElement.closest('.action-slot');
+    const unitPrice = parseFloat(unitPriceStr.replace('$', ''));
+    
+    // Transform into micro quantity stepper
+    parentSlot.innerHTML = `
+      <div class="flex items-center bg-surface-container rounded-full px-1 py-0.5 shadow-inner">
+        <button 
+          onclick="updateQty('${itemId}', -1, ${unitPrice}, this)" 
+          class="w-7 h-7 rounded-full bg-surface-container-lowest text-on-surface flex items-center justify-center hover:bg-surface-dim transition-colors"
+          aria-label="Decrease quantity"
+        >
+          <span class="material-symbols-outlined text-[16px]">remove</span>
+        </button>
+        <span class="qty-counter font-label-md text-label-md px-2 text-on-surface font-bold min-w-[20px] text-center">1</span>
+        <button 
+          onclick="updateQty('${itemId}', 1, ${unitPrice}, this)" 
+          class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-primary-container transition-colors"
+          aria-label="Increase quantity"
+        >
+          <span class="material-symbols-outlined text-[16px]">add</span>
+        </button>
+      </div>
+    `;
+
+    // Increment overall state
+    cartTotalCount += 1;
+    cartTotalCost += unitPrice;
+    syncCartDock();
+  }
+
+  function updateQty(itemId, delta, price, btn) {
+    const container = btn.closest('.action-slot');
+    const counterEl = container.querySelector('.qty-counter');
+    let currentQty = parseInt(counterEl.textContent, 10);
+    currentQty += delta;
+
+    if (currentQty <= 0) {
+      // Revert back to solitary + icon button
+      container.innerHTML = `
+        <button 
+          onclick="handleAddToCart(this, '${itemId}', '$${price.toFixed(2)}')"
+          aria-label="Add to cart"
+          class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-transform hover:bg-primary-container"
+        >
+          <span class="material-symbols-outlined text-[20px]">add</span>
+        </button>
+      `;
+    } else {
+      counterEl.textContent = currentQty;
+    }
+
+    cartTotalCount += delta;
+    cartTotalCost += (delta * price);
+    syncCartDock();
+  }
+
+  function syncCartDock() {
+    const badge = document.getElementById('quick-cart-badge');
+    const dock = document.getElementById('quick-cart-dock');
+    if (!dock) return;
+
+    if (cartTotalCount <= 0) {
+      dock.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+    } else {
+      dock.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+      if (badge) badge.textContent = cartTotalCount;
+      const countLabel = dock.querySelector('.font-label-md');
+      const totalLabel = dock.querySelector('.font-label-sm.text-inverse-primary');
+      if (countLabel) countLabel.textContent = `${cartTotalCount} items in cart`;
+      if (totalLabel) totalLabel.textContent = `$${Math.max(0, cartTotalCost).toFixed(2)} total`;
+    }
+  }
+
+  // Chip Selection Toggle Micro-interaction
+  document.querySelectorAll('.category-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.category-chip').forEach(c => {
+        c.className = 'category-chip shrink-0 px-space-base py-space-xs rounded-full font-label-md text-label-md flex items-center gap-1.5 transition-all bg-surface-container-low text-on-surface hover:bg-surface-container';
+        const dot = c.querySelector('.rounded-full.bg-secondary-container');
+        if (dot) dot.remove();
+      });
+      chip.className = 'category-chip shrink-0 px-space-base py-space-xs rounded-full font-label-md text-label-md flex items-center gap-1.5 transition-all bg-primary-container text-on-primary shadow-sm shadow-primary/20';
+      const indicator = document.createElement('span');
+      indicator.className = 'w-1.5 h-1.5 rounded-full bg-secondary-container';
+      chip.appendChild(indicator);
+    });
+  });
+
+  // Client-side quick filter logic
+  const searchInput = document.getElementById('catalog-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      const productCards = document.querySelectorAll('.product-card');
+      productCards.forEach(card => {
+        const title = card.querySelector('h3')?.textContent.toLowerCase() || '';
+        const desc = card.querySelector('p')?.textContent.toLowerCase() || '';
+        if (title.includes(query) || desc.includes(query)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe pointer-events-none" data-active-classes="text-primary-container font-semibold"><div class="px-margin pb-space-sm pt-space-xs"><div class="pointer-events-auto h-16 rounded-full bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_4px_24px_rgba(15,23,42,0.08)] flex items-center justify-around px-space-xs"><a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="store" href="#"><span class="material-symbols-outlined text-[22px]">storefront</span><span class="font-label-sm text-label-sm">Store</span></a><a aria-current="page" class="flex-1 flex flex-col items-center justify-center h-12 rounded-full transition-colors text-primary-container font-semibold" data-path="catalog" href="#"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="font-label-sm text-label-sm">Catalog</span></a><a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="orders" href="#"><span class="material-symbols-outlined text-[22px]">receipt_long</span><span class="font-label-sm text-label-sm">Orders</span></a></div></div></nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/app.js"></script>
+</body></html>

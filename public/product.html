@@ -1,0 +1,442 @@
+<!-- DaShop - Product Detail -->
+<!DOCTYPE html><html lang="en" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_tab" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-dim": "#d2d9f4", "inverse-primary": "#80d5cb", "tertiary-fixed": "#acf847", "error-container": "#ffdad6", "on-primary-container": "#a3faef", "on-background": "#131b2e", "surface-container-high": "#e2e7ff", "on-surface": "#131b2e", "secondary-fixed-dim": "#4edea3", "surface-variant": "#dae2fd", "surface-container-lowest": "#ffffff", "inverse-on-surface": "#eef0ff", "secondary": "#006c49", "primary-fixed": "#9cf2e8", "on-primary-fixed": "#00201d", "surface-bright": "#faf8ff", "on-primary": "#ffffff", "tertiary": "#375b00", "on-secondary-fixed-variant": "#005236", "surface": "#faf8ff", "primary-container": "#0f766e", "on-primary-fixed-variant": "#00504a", "on-secondary": "#ffffff", "on-tertiary-fixed": "#102000", "surface-container": "#eaedff", "primary-fixed-dim": "#80d5cb", "inverse-surface": "#283044", "outline": "#6e7977", "secondary-fixed": "#6ffbbe", "tertiary-fixed-dim": "#91db2a", "error": "#ba1a1a", "tertiary-container": "#487500", "on-tertiary-fixed-variant": "#304f00", "on-surface-variant": "#3e4947", "background": "#faf8ff", "secondary-container": "#6cf8bb", "outline-variant": "#bdc9c6", "on-error-container": "#93000a", "surface-tint": "#006a63", "on-error": "#ffffff", "surface-container-highest": "#dae2fd", "on-tertiary-container": "#b5ff56", "on-secondary-fixed": "#002113", "primary": "#005c55", "on-secondary-container": "#00714d", "on-tertiary": "#ffffff", "surface-container-low": "#f2f3ff" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-2xl": "3rem", "gutter-desktop": "1.25rem", "margin": "1rem", "space-xl": "2rem", "space-sm": "0.5rem", "space-2xs": "0.125rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "gutter": "0.75rem", "space-md": "0.75rem", "space-base": "1rem", "margin-desktop": "2rem" }, fontFamily: { "headline-lg": ["Plus Jakarta Sans"], "headline-xl": ["Plus Jakarta Sans"], "title-md": ["Plus Jakarta Sans"], "price-hero": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "headline-xl-mobile": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "price-unit": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"] }, fontSize: { "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "price-hero": ["22px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.04em", "fontWeight": "700" }], "headline-xl-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.025em", "fontWeight": "800" }], "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }], "price-unit": ["11px", { "lineHeight": "14px", "fontWeight": "500" }], "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><img alt="DaShop Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V5-BCgIk-mBsL_m7yirbzNY-wokmayoYPdc0OX-1-3JcIvSkmOR2sGqQzAaKbCeNc2oGdRpnNJAVQsRpprBucxqrFy5onBbpBGt4JUW8LtE0kRRIZ2MxVafIoJ7jMZ11bj-Eb2oz657W8kegTi1Zx0V_QG_jXXCvskpRZ65a6NHORcaeHbs65QKttWCS6Hq4KIJfxElsoacIsR0AdJAlXNbCyZ6XJcgumYZza-pRwZJdVgXICrUAL2Iw"><div class="flex flex-col min-w-0"><span class="font-headline-md text-headline-md text-primary font-bold tracking-tight leading-none">DaShop</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate uppercase tracking-wider">Catalog</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Search" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[22px]">search</span></button><a aria-label="Shopping Cart" class="relative w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors" data-path="cart" href="#"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center justify-center">3</span></a><div class="w-11 h-11 flex items-center justify-center ml-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1P_fLD1hlWUlc8MWKXL2CQDmlAYLqbWqUhZkhtC9tJSdumksg-pPCAxISYfZStcL4JPGGONeBLasN37F7pPHe1QBJWfy1ntgKBW-xYRDrJaaJwhM_wdz4j2SjLehYosWXNFWPRYkx2sq3CnSGuvE1a_H3nb76Kb5cch-IYgSCP57SuZxh6e2W0hmc8avNXOENGS_4OgZdmAGBJ1G0lOU9ntUQBnYApwjCr_R0xbbtccZHT92Z4nI"></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface"><div class="flex flex-col w-full pb-32">
+<!-- Micro Breadcrumb & Category Tracker -->
+<div class="px-margin pt-space-sm pb-space-xs flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md">
+<span class="hover:text-primary transition-colors cursor-pointer">Household</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="hover:text-primary transition-colors cursor-pointer">Laundry Care</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface font-semibold truncate max-w-[120px]">Liquid Detergent</span>
+</div>
+
+</div>
+<!-- Hero Image Carousel Container -->
+<div class="px-margin pt-space-xs">
+<div class="relative w-full aspect-square bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex items-center justify-center p-space-md">
+<!-- Floating Badges Top-Left -->
+<div class="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+<span class="px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm tracking-wide font-bold shadow-sm">
+          SAVE $0.50
+        </span>
+<span class="px-2.5 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+          In Stock
+        </span>
+</div>
+<!-- Quick Action Buttons Top-Right -->
+<div class="absolute top-3 right-3 flex flex-col gap-2 z-10">
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest/90 backdrop-blur-md shadow-sm flex items-center justify-center text-on-surface-variant hover:text-error transition-all active:scale-90" id="favBtn" onclick="toggleFavorite()">
+<span class="material-symbols-outlined text-[20px]" id="favIcon">favorite</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest/90 backdrop-blur-md shadow-sm flex items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90" onclick="shareProduct()">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+</div>
+<!-- Main Visual Display -->
+<div class="relative w-full h-full flex items-center justify-center">
+<img alt="Tide Simply Liquid Laundry Detergent" class="w-full h-full object-contain drop-shadow-md select-none transition-transform duration-300" data-alt="Studio catalog product photography of Tide Simply Liquid Laundry Detergent Free and Gentle bottle with clean translucent packaging, crisp white and clear turquoise labels, bright soft daylight studio illumination, pristine white surface reflection, professional commercial high-end consumer packaged goods look." id="mainProductImg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCESni2rE-r8NYCyDO-hYVFt9qtYV7eyJTTm9vojwTFhOhINcB0yVulUlCeAOvWTKOiX5Cvl5LcHdoyaiRamUfUNWoiX_TmyTLtmiQnyZ1A-7TcXIU8_KOchoEoo6cBIoBGJQ7yIdb7u-2_1eFXDr09M06-QS0guwClJoDV4djhSJ1R6MmCoN4fA_P6GzY_C5M_rSxbi5STeQommUjUOpvQFBHHnpcxWz_ZWZPyQ1uv1dkurj2Rp5g">
+</div>
+<!-- Pagination Indicators & Lens Peek -->
+<div class="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-10">
+<button class="carousel-dot w-6 h-1.5 rounded-full bg-primary transition-all" onclick="switchSlide(0)"></button>
+<button class="carousel-dot w-2 h-1.5 rounded-full bg-surface-variant transition-all" onclick="switchSlide(1)"></button>
+<button class="carousel-dot w-2 h-1.5 rounded-full bg-surface-variant transition-all" onclick="switchSlide(2)"></button>
+</div>
+</div>
+</div>
+<!-- Title, Rating & Specs -->
+<div class="px-margin pt-space-md flex flex-col gap-1">
+<div class="flex items-center justify-between gap-space-xs">
+<span class="font-label-md text-label-md uppercase tracking-wider text-primary font-bold">Tide Simply Clean</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-md">SKU: #84920194</span>
+</div>
+<h1 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface font-extrabold tracking-tight">
+      Liquid Laundry Detergent
+    </h1>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium">
+      64 fl oz (1.89 L) • Free &amp; Gentle Unscented
+    </p>
+<!-- Star Ratings Pill Block -->
+
+</div>
+<!-- Price Stack Section -->
+<div class="px-margin pt-space-md">
+<div class="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<div class="flex items-baseline gap-2">
+<span class="font-price-hero text-price-hero text-primary font-extrabold">$3.00</span>
+<span class="font-body-md text-body-md text-on-surface-variant line-through">$3.50</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-error-container text-on-error-container font-bold">
+            14% OFF
+          </span>
+</div>
+<span class="font-price-unit text-price-unit text-on-surface-variant font-medium mt-0.5">
+          Unit Price: 4.7¢ / fl oz • 24 regular loads
+        </span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-secondary font-bold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">local_offer</span>
+          Club Member Price
+        </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Limit 4 per trip</span>
+</div>
+</div>
+</div>
+<!-- Size / Variant Selector -->
+<div class="px-margin pt-space-lg flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface font-bold">Select Bottle Size</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Standard Dispenser Cap</span>
+</div>
+<div class="grid grid-cols-3 gap-2" id="variantGroup">
+<!-- 32 fl oz Option -->
+<button class="variant-pill relative flex flex-col items-center justify-center py-2.5 px-2 rounded-xl bg-surface-container-lowest text-on-surface shadow-sm transition-all text-left" onclick="selectVariant(this, '32 fl oz', 1.75)">
+<span class="font-label-md text-label-md font-bold">32 fl oz</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">$1.75</span>
+<span class="text-[9px] text-on-surface-variant">5.5¢/oz</span>
+</button>
+<!-- 64 fl oz (Selected) Option -->
+<button class="variant-pill active relative flex flex-col items-center justify-center py-2.5 px-2 rounded-xl bg-primary text-on-primary shadow-md transition-all text-left ring-2 ring-primary ring-offset-2" onclick="selectVariant(this, '64 fl oz', 3.00)">
+<span class="absolute -top-2 px-1.5 py-0.2 rounded-full bg-secondary-container text-on-secondary-container text-[9px] font-extrabold uppercase tracking-tight">Best Value</span>
+<span class="font-label-md text-label-md font-bold">64 fl oz</span>
+<span class="font-label-sm text-label-sm text-on-primary-container font-medium">$3.00</span>
+<span class="text-[9px] text-on-primary-container opacity-90">4.7¢/oz</span>
+</button>
+<!-- 128 fl oz Option -->
+<button class="variant-pill relative flex flex-col items-center justify-center py-2.5 px-2 rounded-xl bg-surface-container-lowest text-on-surface shadow-sm transition-all text-left" onclick="selectVariant(this, '128 fl oz', 5.75)">
+<span class="font-label-md text-label-md font-bold">128 fl oz</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">$5.75</span>
+<span class="text-[9px] text-on-surface-variant">4.5¢/oz</span>
+</button>
+</div>
+</div>
+<!-- Store Availability & In-Store Pickup Card -->
+<div class="px-margin pt-space-md">
+<div class="rounded-2xl bg-surface-container-low p-space-md shadow-sm flex flex-col gap-3"><div class="flex items-start justify-between"><div class="flex items-start gap-space-sm"><div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0 mt-0.5"><span class="material-symbols-outlined text-[22px]">local_shipping</span></div><div class="flex flex-col"><div class="flex items-center gap-1.5"><span class="font-title-md text-title-md text-on-surface font-bold">Direct Online Order</span><span class="w-2 h-2 rounded-full bg-secondary"></span></div><span class="font-body-sm text-body-sm text-on-surface-variant">In Stock &amp; Ready to Ship</span></div></div><span class="text-primary font-label-sm text-label-sm font-bold">Express Eligible</span></div><div class="rounded-xl bg-surface-container-lowest p-2.5 flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[20px] text-secondary">bolt</span><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-semibold">Standard Home Delivery</span><span class="font-label-sm text-label-sm text-secondary font-bold">Dispatched within 24 hours • Tracked Shipping</span></div></div><span class="px-2 py-1 rounded bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">FREE</span></div><div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pt-0.5"><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">verified</span>Guaranteed Fresh &amp; Intact Delivery</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">lock</span>Secure Checkout</span></div></div>
+</div>
+<!-- Key Badges Strip -->
+<div class="px-margin pt-space-md">
+<div class="grid grid-cols-4 gap-2 text-center">
+<div class="bg-surface-container-lowest rounded-xl p-2 shadow-sm flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined text-primary text-[22px]">spa</span>
+<span class="font-label-sm text-label-sm text-on-surface font-bold leading-tight">No Dyes / Perfumes</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-2 shadow-sm flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined text-primary text-[22px]">clean_hands</span>
+<span class="font-label-sm text-label-sm text-on-surface font-bold leading-tight">Derm Tested</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-2 shadow-sm flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined text-primary text-[22px]">eco</span>
+<span class="font-label-sm text-label-sm text-on-surface font-bold leading-tight">HE Washer Safe</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-2 shadow-sm flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined text-primary text-[22px]">cycle</span>
+<span class="font-label-sm text-label-sm text-on-surface font-bold leading-tight">Recyclable Jug</span>
+</div>
+</div>
+</div>
+<!-- Details Accordion Section -->
+<div class="px-margin pt-space-lg flex flex-col gap-2.5">
+<span class="font-title-md text-title-md text-on-surface font-bold">Product Information</span>
+<!-- Accordion 1: Highlights -->
+<div class="rounded-2xl bg-surface-container-lowest shadow-sm overflow-hidden transition-all">
+<button class="w-full p-space-md flex items-center justify-between text-left" onclick="toggleAccordion('acc-highlights', 'chevron-1')">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">stars</span>
+<span class="font-title-md text-title-md text-on-surface font-bold">Highlights &amp; Benefits</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform duration-200" id="chevron-1">expand_more</span>
+</button>
+<div class="px-space-md pb-space-md flex flex-col gap-2 font-body-md text-body-md text-on-surface-variant" id="acc-highlights">
+<p class="leading-relaxed">
+          Tide Simply Free &amp; Gentle Liquid Detergent cleans thoroughly while being especially formulated for sensitive skin without any synthetic scents or dyes.
+        </p>
+<ul class="flex flex-col gap-1.5 pt-1">
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-0.5">check_small</span>
+<span class="">Gentle on sensitive skin and hypoallergenic formulation.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-0.5">check_small</span>
+<span class="">Cleans fabrics down to the fiber to lift soil and residue.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-0.5">check_small</span>
+<span class="">Compatible with both standard and High-Efficiency (HE) washing machines in cold or warm cycles.</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Accordion 2: Ingredients & Usage -->
+<div class="rounded-2xl bg-surface-container-lowest shadow-sm overflow-hidden transition-all">
+<button class="w-full p-space-md flex items-center justify-between text-left" onclick="toggleAccordion('acc-usage', 'chevron-2')">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">science</span>
+<span class="font-title-md text-title-md text-on-surface font-bold">Usage &amp; Ingredients</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform duration-200 rotate-180" id="chevron-2">expand_more</span>
+</button>
+<div class="px-space-md pb-space-md hidden flex-col gap-2 font-body-md text-body-md text-on-surface-variant" id="acc-usage">
+<p class="font-label-md text-label-md text-on-surface font-bold">How to Measure:</p>
+<p class="text-body-sm leading-relaxed">
+          Use dosing cap to measure. Fill to Bar 1 for medium loads, Bar 3 for full large loads. Pour into detergent dispenser tray or directly into wash drum before adding clothes.
+        </p>
+<p class="font-label-md text-label-md text-on-surface font-bold pt-2">Active Cleaning Agents:</p>
+<p class="text-body-sm leading-relaxed">
+          Biodegradable surfactants (anionic and nonionic), enzyme stabilizing aids, and water softeners. Contains 0% phosphate.
+        </p>
+</div>
+</div>
+<!-- Accordion 3: Reviews -->
+
+</div>
+<!-- Frequently Bought Together / Complementary Pairings -->
+<div class="px-margin pt-space-lg">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex flex-col">
+<h3 class="font-title-md text-title-md text-on-surface font-bold">Frequently Picked Together</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Complete your laundry and home essentials</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold">Popular</span>
+</div>
+<!-- Horizontal Swipe Mini Cards -->
+<div class="flex gap-space-sm overflow-x-auto pb-2 -mx-margin px-margin no-scrollbar">
+<!-- Complementary Item 1 -->
+<div class="w-44 shrink-0 rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm flex flex-col justify-between">
+<div>
+<div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-2 mb-2">
+<img alt="Downy Beads" class="w-full h-full object-contain" data-alt="Downy Light Laundry Scent Booster Beads bottle container on crisp clean neutral background, studio product angle, emerald teal cap accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9F_z7XPGtyqgxAfvyoXZX1RDxnSUXnZNLkcmTZP0FDcC2FS2a4RxSz2gXvu7ncHn4DGiOvHy35AnHqASnukkKT1tk4tGa9KOwUBrfUldFiw3gltGdks6Jnp1pgxubaJShbuli-sqHk5t-am7DoskTLR9CF6dHaJe6oNXCh9qiKKRpmbrz6T0nTfTxkTVTFjh7BrCWqoDSPdR7C20dOJtFlpMWxDwXZEbFaaIQg8SRZy6YBoCMI2U">
+<span class="absolute top-1.5 left-1.5 px-1 rounded bg-secondary-fixed text-on-secondary-fixed text-[9px] font-bold">Save $0.40</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Downy</span>
+<h4 class="font-label-md text-label-md text-on-surface font-bold line-clamp-2">Scent Booster In-Wash Beads 8.6 oz</h4>
+<span class="font-price-unit text-price-unit text-on-surface-variant block mt-0.5">Mild White Lavender</span>
+</div>
+<div class="flex items-center justify-between pt-2 mt-1">
+<div>
+<span class="font-title-md text-title-md text-on-surface font-extrabold">$2.50</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant line-through block leading-none">$2.90</span>
+</div>
+<button class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all" onclick="quickAdd(this, 'Downy Scent Beads', 2.50)">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+<!-- Complementary Item 2 -->
+<div class="w-44 shrink-0 rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm flex flex-col justify-between">
+<div>
+<div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-2 mb-2">
+<img alt="Storage Bags" class="w-full h-full object-contain" data-alt="Box of Double Zipper Heavy Duty Storage &amp; Freezer Gallon Bags studio product render on clean shelf, high quality packaging." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq1-VSfp4gllbT8-pPkYy-XfVeZosEsTN8aUxFndCwpYq9Mw2Uhffl9LejbV9mqnnTP6QiwfOm7lrQsnCh5x2JSgH7w0dW-5JU9imwhwNgFBOw7USiQRWRVbBXREGXjWGg9BNFCnXFI_c1OyeBveXE2CzKhZZGUl9hS4eQYANDjm9U00J7rZfQGVPnJ17z8WfLRRu3VxiNdzRWDrTaPCenKdmSmIv8P2rlIt3TThmhz9tfqeDdgS4">
+<span class="absolute top-1.5 left-1.5 px-1 rounded bg-surface-container-high text-on-surface-variant text-[9px] font-bold">Essential</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-semibold">CleanGuard</span>
+<h4 class="font-label-md text-label-md text-on-surface font-bold line-clamp-2">Double Zipper Gallon Bags 25 ct</h4>
+<span class="font-price-unit text-price-unit text-on-surface-variant block mt-0.5">Heavy Duty Seal</span>
+</div>
+<div class="flex items-center justify-between pt-2 mt-1">
+<div>
+<span class="font-title-md text-title-md text-on-surface font-extrabold">$2.25</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant line-through block leading-none">$2.60</span>
+</div>
+<button class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all" onclick="quickAdd(this, 'Gallon Storage Bags', 2.25)">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+<!-- Complementary Item 3 -->
+<div class="w-44 shrink-0 rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm flex flex-col justify-between">
+<div>
+<div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-2 mb-2">
+<img alt="Microfiber Cloths" class="w-full h-full object-contain" data-alt="Pack of 3 heavy duty microfiber cleaning cloths folded neatly, bright clean colors, white studio grocery product photo." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaj56B2XZinHRkjHGeBclgQGoVTHfVe0gpqC_Mc8cqDRLeADxegyjdkgN5brvgAZHfGOI1gVGk8_Tqbe9OgLl3g90e82PzrxzFTQEd3TjAGKsQCaOQbJH5t5AAh64WChH0s1V96M2Lpyx-murM7wvpgsEL0ZGYM3nq75FOUr1za_KeVCMK5WIlTHRiUZ3xSdrfA0vNB5G4JgrZnniH-Dr8TvwiqO9bQpZGEooc36RxJjdm8ZXSLaU">
+</div>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Store Basics</span>
+<h4 class="font-label-md text-label-md text-on-surface font-bold line-clamp-2">Multi-Surface Microfiber 3-Pk</h4>
+<span class="font-price-unit text-price-unit text-on-surface-variant block mt-0.5">Ultra Absorbent</span>
+</div>
+<div class="flex items-center justify-between pt-2 mt-1">
+<div>
+<span class="font-title-md text-title-md text-on-surface font-extrabold">$1.95</span>
+</div>
+<button class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all" onclick="quickAdd(this, 'Microfiber 3-Pk', 1.95)">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Client Bottom Action Bar (Fixed above Navigation Dock) -->
+<div class="fixed bottom-20 left-0 right-0 z-40 px-margin pointer-events-none">
+<div class="pointer-events-auto max-w-md mx-auto rounded-2xl bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_8px_30px_rgba(15,23,42,0.12)] p-2.5 flex items-center gap-space-sm">
+<!-- Quantity Stepper -->
+<div class="flex items-center bg-surface-container-low rounded-xl px-1.5 py-1 shrink-0">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-highest transition-colors active:scale-90" onclick="updateQty(-1)">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="font-title-md text-title-md text-on-surface font-extrabold w-7 text-center select-none" id="quantityDisplay">1</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-highest transition-colors active:scale-90" onclick="updateQty(1)">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<!-- Add to Cart Primary Button -->
+<button class="flex-1 h-12 rounded-xl bg-primary-container hover:bg-primary active:scale-[0.98] transition-all flex items-center justify-between px-space-md text-on-primary shadow-md" id="addToCartBtn" onclick="addToCartAnimation()">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+<span class="font-label-lg text-label-lg font-bold" id="btnLabel">Add to Cart</span>
+</div>
+<span class="font-price-hero text-price-hero font-extrabold" id="btnPriceTotal">$3.00</span>
+</button>
+</div>
+</div>
+<!-- Toast Notification Pill for Cart Micro-interaction -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 -translate-y-4 transition-all duration-300" id="toastNotification">
+<div class="px-4 py-2.5 rounded-full bg-inverse-surface text-inverse-on-surface shadow-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-fixed text-[18px]">check_circle</span>
+<span class="font-label-md text-label-md font-semibold" id="toastMsg">Added to online cart</span>
+</div>
+</div>
+<script>
+    // Component State
+    let currentQty = 1;
+    let unitPrice = 3.00;
+    let isFav = false;
+
+    function updateQty(change) {
+      const next = currentQty + change;
+      if (next >= 1 && next <= 12) {
+        currentQty = next;
+        document.getElementById('quantityDisplay').innerText = currentQty;
+        recalculateTotal();
+      }
+    }
+
+    function recalculateTotal() {
+      const total = (currentQty * unitPrice).toFixed(2);
+      document.getElementById('btnPriceTotal').innerText = '$' + total;
+    }
+
+    function selectVariant(element, sizeName, price) {
+      // Remove active states
+      const pills = document.querySelectorAll('.variant-pill');
+      pills.forEach(p => {
+        p.classList.remove('bg-primary', 'text-on-primary', 'shadow-md', 'ring-2', 'ring-primary', 'ring-offset-2');
+        p.classList.add('bg-surface-container-lowest', 'text-on-surface', 'shadow-sm');
+        const priceLabel = p.querySelector('span:nth-child(2)');
+        if (priceLabel) priceLabel.classList.add('text-on-surface-variant');
+      });
+
+      // Activate current
+      element.classList.remove('bg-surface-container-lowest', 'text-on-surface', 'shadow-sm');
+      element.classList.add('bg-primary', 'text-on-primary', 'shadow-md', 'ring-2', 'ring-primary', 'ring-offset-2');
+      const curPriceLabel = element.querySelector('span:nth-child(2)');
+      if (curPriceLabel) {
+        curPriceLabel.classList.remove('text-on-surface-variant');
+        curPriceLabel.classList.add('text-on-primary-container');
+      }
+
+      unitPrice = price;
+      recalculateTotal();
+      showToast(`Selected size: ${sizeName}`);
+    }
+
+    function toggleAccordion(id, chevronId) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById(chevronId);
+      if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+        icon.classList.remove('rotate-180');
+      } else {
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+        icon.classList.add('rotate-180');
+      }
+    }
+
+    function toggleFavorite() {
+      isFav = !isFav;
+      const icon = document.getElementById('favIcon');
+      const btn = document.getElementById('favBtn');
+      if (isFav) {
+        icon.style.fontVariationSettings = "'FILL' 1";
+        btn.classList.add('text-error');
+        showToast('Saved to your Favorites');
+      } else {
+        icon.style.fontVariationSettings = "'FILL' 0";
+        btn.classList.remove('text-error');
+      }
+    }
+
+    function shareProduct() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Tide Simply Liquid Laundry Detergent - DaShop',
+          text: 'Available for in-store pickup in 15 mins at DaShop!',
+          url: window.location.href,
+        }).catch(() => {});
+      } else {
+        showToast('Product link copied to clipboard');
+      }
+    }
+
+    function addToCartAnimation() {
+      const btn = document.getElementById('addToCartBtn');
+      const label = document.getElementById('btnLabel');
+      
+      label.innerText = 'Added!';
+      btn.classList.add('bg-secondary');
+      
+      showToast(`${currentQty} bottle(s) reserved for Pickup`);
+
+      setTimeout(() => {
+        label.innerText = 'Add to Cart';
+        btn.classList.remove('bg-secondary');
+      }, 1500);
+    }
+
+    function quickAdd(btnEl, name, price) {
+      btnEl.classList.add('bg-secondary');
+      btnEl.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>';
+      showToast(`Added ${name} to pickup bag`);
+      setTimeout(() => {
+        btnEl.classList.remove('bg-secondary');
+        btnEl.innerHTML = '<span class="material-symbols-outlined text-[18px]">add</span>';
+      }, 1400);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toastNotification');
+      const msg = document.getElementById('toastMsg');
+      msg.innerText = message;
+      toast.classList.remove('opacity-0', '-translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-4');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2000);
+    }
+
+    function switchSlide(index) {
+      const dots = document.querySelectorAll('.carousel-dot');
+      dots.forEach((d, i) => {
+        if (i === index) {
+          d.classList.remove('w-2', 'bg-surface-variant');
+          d.classList.add('w-6', 'bg-primary');
+        } else {
+          d.classList.remove('w-6', 'bg-primary');
+          d.classList.add('w-2', 'bg-surface-variant');
+        }
+      });
+    }
+  </script>
+</div></main><nav class="fixed bottom-0 w-full z-50 pb-safe pointer-events-none" data-active-classes="text-primary-container font-semibold"><div class="px-margin pb-space-sm pt-space-xs"><div class="pointer-events-auto h-16 rounded-full bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_4px_24px_rgba(15,23,42,0.08)] flex items-center justify-around px-space-xs"><a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="store" href="#"><span class="material-symbols-outlined text-[22px]">storefront</span><span class="font-label-sm text-label-sm">Store</span></a><a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="catalog" href="#"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="font-label-sm text-label-sm">Catalog</span></a><a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="orders" href="#"><span class="material-symbols-outlined text-[22px]">receipt_long</span><span class="font-label-sm text-label-sm">Orders</span></a></div></div></nav>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/app.js"></script>
+</body></html>
