@@ -322,7 +322,15 @@ async function loadProducts() {
         if (error) throw error;
         allProducts = data;
         
-        renderProducts(allProducts, grid);
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const q = urlParams.get('q');
+        let productsToRender = allProducts;
+        if (q && grid.id === 'catalog-grid') {
+            productsToRender = allProducts.filter(p => p.name.toLowerCase().includes(q.toLowerCase()) || (p.category && p.category.toLowerCase().includes(q.toLowerCase())));
+        }
+        renderProducts(productsToRender, grid);
+
     } catch (error) {
         console.error('Error loading products:', error);
         grid.innerHTML = '<p class="p-4 text-error">Failed to load products. Check console.</p>';
@@ -353,7 +361,7 @@ function renderProducts(products, grid) {
                 </div>
                 <div class="flex items-center justify-between pt-space-sm">
                     <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$\${product.price.toFixed(2)}</span>
-                    <button class="w-8 h-8 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick='event.stopPropagation(); addToCart(\${JSON.stringify(product).replace(/'/g, "&#39;")})' type="button">
+                    <button class="w-8 h-8 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick='event.stopPropagation(); window.addToCartById(${product.id})' type="button">
                         <span class="material-symbols-outlined text-[18px]">add</span>
                     </button>
                 </div>
@@ -367,6 +375,13 @@ function renderProducts(products, grid) {
 // Implement search logic for catalog
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('catalog-search');
+    const urlParams = new URLSearchParams(window.location.search);
+    const q = urlParams.get('q');
+    if (q && searchInput) {
+        searchInput.value = q;
+        // The actual filtering will happen after loadProducts fetches the data
+    }
+
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
@@ -455,3 +470,12 @@ function viewProduct(productId) {
 // Export for module use if needed
 window.viewProduct = viewProduct;
 window.loadProductDetail = loadProductDetail;
+
+window.addToCartById = function(id) {
+    const product = allProducts.find(p => p.id === id);
+    if (product) {
+        addToCart(product, 1);
+    } else {
+        console.error('Product not found: ' + id);
+    }
+};
