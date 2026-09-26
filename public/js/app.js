@@ -688,14 +688,14 @@ function renderProductGrid(products, grid) {
         const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
         const imgHtml = isEmoji 
             ? `<div class="text-6xl flex items-center justify-center w-full h-full">${primaryImg || '📦'}</div>`
-            : `<img class="h-32 w-auto object-contain transition-transform group-hover:scale-105" src="${primaryImg}" alt="${p.name}">`;
+            : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${p.name}">`;
 
         const slug = getProductSlug(p);
         const category = p.category || 'General';
 
         html += `
         <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="viewProduct('${slug}', ${p.id})">
-            <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-space-xs overflow-hidden mb-space-xs">
+            <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
             </div>
             <div class="flex flex-col flex-1 justify-between">
@@ -730,13 +730,13 @@ function initNewArrivals() {
         const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
         const imgHtml = isEmoji 
             ? `<div class="text-5xl flex items-center justify-center w-full h-full">${primaryImg || '📦'}</div>`
-            : `<img class="h-32 w-auto object-contain transition-transform group-hover:scale-105" src="${primaryImg}" alt="${p.name}">`;
+            : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${p.name}">`;
 
         const slug = getProductSlug(p);
 
         html += `
         <div class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1 cursor-pointer" onclick="viewProduct('${slug}', ${p.id})">
-            <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center p-space-sm overflow-hidden mb-space-xs">
+            <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
             </div>
             <div class="flex flex-col flex-1 justify-between">
