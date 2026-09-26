@@ -1137,6 +1137,80 @@ async function loadProductDetail() {
             addToCart(product, qty, addBtn);
         };
     }
+
+    // Render Discover More / Recommended products
+    await renderDiscoverMore(product);
+}
+
+// Render "Discover More" Suggestions on product.html
+async function renderDiscoverMore(currentProduct) {
+    const grid = document.getElementById('discover-more-grid');
+    if (!grid || !currentProduct) return;
+
+    if (allProducts.length === 0 && window.supabaseClient) {
+        try {
+            const { data } = await window.supabaseClient.from('products').select('*');
+            if (data) allProducts = data.filter(p => p.category !== '__dashop_config__');
+        } catch(e) {}
+    }
+
+    if (!allProducts || allProducts.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-4 text-center text-on-surface-variant text-sm">No other products available yet.</div>';
+        return;
+    }
+
+    // Exclude current product and config rows
+    const available = allProducts.filter(p => 
+        String(p.id) !== String(currentProduct.id) && 
+        p.category !== '__dashop_config__'
+    );
+
+    if (available.length === 0) {
+        document.getElementById('discover-more-section')?.classList.add('hidden');
+        return;
+    }
+
+    // Prioritize products in the same category
+    const sameCategory = available.filter(p => p.category && p.category.toLowerCase() === (currentProduct.category || '').toLowerCase());
+    const otherCategories = available.filter(p => !p.category || p.category.toLowerCase() !== (currentProduct.category || '').toLowerCase());
+
+    // Suggestions: up to 8 items
+    const suggestions = [...sameCategory, ...otherCategories].slice(0, 8);
+
+    let html = '';
+    suggestions.forEach(p => {
+        const primaryImg = getProductPrimaryImage(p);
+        const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
+        const imgHtml = isEmoji 
+            ? `<div class="text-6xl flex items-center justify-center w-full h-full">${primaryImg || '📦'}</div>`
+            : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${p.name}">`;
+
+        const slug = getProductSlug(p);
+        const category = p.category || 'General';
+
+        html += `
+        <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="viewProduct('${slug}', ${p.id})">
+            <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
+                ${imgHtml}
+            </div>
+            <div class="flex flex-col flex-1 justify-between">
+                <div>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">${category}</span>
+                    <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 leading-snug">
+                        ${p.name}
+                    </h4>
+                </div>
+                <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
+                    <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${parseFloat(p.price).toFixed(2)}</span>
+                    <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="event.stopPropagation(); window.addToCartById(${p.id}, this)" type="button">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    });
+
+    grid.innerHTML = html;
 }
 
 // Switch main photo when thumbnail is clicked
