@@ -1398,6 +1398,22 @@ async function loadProductDetail() {
     if (catEl) catEl.textContent = product.category || 'General';
     if (descEl) descEl.textContent = getProductCleanDescription(product) || 'High quality product from DaShop.';
 
+    // Stock Badge
+    const stockBadge = document.getElementById('detail-stock-badge');
+    if (stockBadge) {
+        const stockQty = parseInt(product.stock) || 0;
+        if (stockQty <= 0) {
+            stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-error-container text-error font-label-sm font-bold';
+            stockBadge.textContent = 'Out of Stock';
+        } else if (stockQty <= 3) {
+            stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-label-sm font-bold';
+            stockBadge.textContent = `Only ${stockQty} left`;
+        } else {
+            stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-secondary-container/40 text-on-secondary-container font-label-sm font-bold';
+            stockBadge.textContent = 'In Stock';
+        }
+    }
+
     const images = getProductAllImages(product);
     const mainImg = images[0] || '📦';
     const isEmoji = !mainImg || mainImg.length <= 4 || !mainImg.startsWith('http');
@@ -1425,10 +1441,71 @@ async function loadProductDetail() {
         thumbsContainer.classList.remove('hidden');
     }
 
+    // Options & Variations Handling
+    let selectedVariation = null;
+    let meta = null;
+    if (product.description && product.description.startsWith('{')) {
+        try { meta = JSON.parse(product.description); } catch(e) {}
+    }
+
+    const varsContainer = document.getElementById('detail-variations-container');
+    const varsList = document.getElementById('detail-variations-list');
+    if (varsContainer && varsList && meta?.variations && meta.variations.length > 0) {
+        varsContainer.classList.remove('hidden');
+        let varHtml = '';
+        meta.variations.forEach((v, idx) => {
+            const vPrice = parseFloat(v.price) || parseFloat(product.price);
+            varHtml += `
+                <button type="button" class="variation-pill px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all ${idx === 0 ? 'border-primary bg-primary text-on-primary shadow-sm' : 'border-surface-container bg-surface-container-low text-on-surface hover:bg-surface-container'}" data-var-idx="${idx}">
+                    <span>${v.name}</span>
+                    <span class="font-bold ml-1">$${vPrice.toFixed(2)}</span>
+                </button>
+            `;
+        });
+        varsList.innerHTML = varHtml;
+
+        selectedVariation = meta.variations[0];
+        if (selectedVariation && selectedVariation.price && priceEl) {
+            priceEl.textContent = '$' + parseFloat(selectedVariation.price).toFixed(2);
+        }
+
+        varsList.querySelectorAll('.variation-pill').forEach((pill, idx) => {
+            pill.onclick = () => {
+                varsList.querySelectorAll('.variation-pill').forEach(p => {
+                    p.classList.remove('border-primary', 'bg-primary', 'text-on-primary', 'shadow-sm');
+                    p.classList.add('border-surface-container', 'bg-surface-container-low', 'text-on-surface');
+                });
+                pill.classList.remove('border-surface-container', 'bg-surface-container-low', 'text-on-surface');
+                pill.classList.add('border-primary', 'bg-primary', 'text-on-primary', 'shadow-sm');
+
+                selectedVariation = meta.variations[idx];
+                if (selectedVariation && selectedVariation.price && priceEl) {
+                    priceEl.textContent = '$' + parseFloat(selectedVariation.price).toFixed(2);
+                }
+                if (selectedVariation && selectedVariation.imageUrl) {
+                    window.switchProductDetailImage(selectedVariation.imageUrl);
+                }
+            };
+        });
+    } else if (varsContainer) {
+        varsContainer.classList.add('hidden');
+    }
+
     if (addBtn) {
         addBtn.onclick = () => {
             const qty = window.currentQty || 1;
-            addToCart(product, qty, addBtn);
+            if (selectedVariation) {
+                const varProduct = {
+                    ...product,
+                    id: `${product.id}-${(selectedVariation.id || selectedVariation.name).replace(/\s+/g, '-')}`,
+                    name: `${product.name} (${selectedVariation.name})`,
+                    price: parseFloat(selectedVariation.price) || parseFloat(product.price),
+                    image: selectedVariation.imageUrl || getProductPrimaryImage(product)
+                };
+                addToCart(varProduct, qty, addBtn);
+            } else {
+                addToCart(product, qty, addBtn);
+            }
         };
     }
 

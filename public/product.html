@@ -136,8 +136,14 @@
                 
                 <div class="flex items-baseline gap-3">
                     <span id="detail-price" class="font-price-hero text-price-hero text-primary font-extrabold text-3xl">$0.00</span>
-                    <span class="px-2.5 py-0.5 rounded-full bg-secondary-container/40 text-on-secondary-container font-label-sm font-bold">In Stock</span>
+                    <span id="detail-stock-badge" class="px-2.5 py-0.5 rounded-full bg-secondary-container/40 text-on-secondary-container font-label-sm font-bold">In Stock</span>
                 </div>
+            </div>
+
+            <!-- Options / Variations (if available) -->
+            <div id="detail-variations-container" class="px-margin pt-space-sm hidden">
+                <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Available Options</span>
+                <div id="detail-variations-list" class="flex flex-wrap gap-2"></div>
             </div>
 
             <!-- Description -->
