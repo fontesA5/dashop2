@@ -87,7 +87,13 @@ const translations = {
         inventory: "Inventory",
         in_stock: "in stock",
         recent_activity: "Recent Activity",
-        quick_actions: "Quick Actions"
+        quick_actions: "Quick Actions",
+        track_by_phone: "Track Order by Phone",
+        track_phone_placeholder: "Enter your phone number...",
+        track: "Track",
+        enter_phone_to_track: "Please enter your phone number to track your order.",
+        no_order_phone_found: "No order found matching this phone number.",
+        looking_up_order: "Looking up order..."
     },
     es: {
         store: "Tienda",
@@ -172,7 +178,13 @@ const translations = {
         inventory: "Inventario",
         in_stock: "en inventario",
         recent_activity: "Actividad Reciente",
-        quick_actions: "Acciones Rápidas"
+        quick_actions: "Acciones Rápidas",
+        track_by_phone: "Rastrear Pedido por Teléfono",
+        track_phone_placeholder: "Ingresa tu número de teléfono...",
+        track: "Rastrear",
+        enter_phone_to_track: "Por favor, ingresa tu número de teléfono para rastrear tu pedido.",
+        no_order_phone_found: "No se encontró ningún pedido con este número de teléfono.",
+        looking_up_order: "Buscando pedido..."
     },
     pt: {
         store: "Loja",
@@ -257,7 +269,13 @@ const translations = {
         inventory: "Estoque",
         in_stock: "em estoque",
         recent_activity: "Atividade Recente",
-        quick_actions: "Ações Rápidas"
+        quick_actions: "Ações Rápidas",
+        track_by_phone: "Rastrear Pedido por Telefone",
+        track_phone_placeholder: "Digite seu número de telefone...",
+        track: "Rastrear",
+        enter_phone_to_track: "Por favor, digite seu número de telefone para rastrear seu pedido.",
+        no_order_phone_found: "Nenhum pedido encontrado com este número de telefone.",
+        looking_up_order: "Buscando pedido..."
     }
 };
 

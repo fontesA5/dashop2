@@ -360,9 +360,21 @@ async function handleCheckout(event) {
     const finalTotal = Math.max(0, subtotal - discount);
 
     const name = (formData.get('name') || '').trim() || 'Guest Customer';
-    const email = (formData.get('email') || '').trim();
     const phone = (formData.get('phone') || '').trim();
-    const address = (formData.get('address') || '').trim() || (phone ? `Contact: ${phone}` : 'Store Pickup');
+
+    if (!phone) {
+        alert('Please enter your phone number so we can process and track your order.');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            submitBtn.innerHTML = originalBtnContent;
+        }
+        return;
+    }
+
+    const cleanDigits = phone.replace(/\D/g, '') || '0000000000';
+    const email = `${cleanDigits}@dashop.site`;
+    const address = `Phone: ${phone}`;
 
     // Schema-aligned payload for Supabase 'orders' table
     const orderPayload = {
@@ -377,7 +389,6 @@ async function handleCheckout(event) {
             discount: discount,
             promo_code: appliedPromo ? appliedPromo.promo_code : null,
             phone: phone,
-            address: address,
             customer_name: name,
             customer_email: email
         })
@@ -420,6 +431,8 @@ async function handleCheckout(event) {
             status: createdOrder.status || 'pending',
             items_count: cart.reduce((s, i) => s + (i.quantity || 1), 0),
             items: [...cart],
+            phone: phone,
+            customer_name: name,
             address: address,
             date: createdOrder.created_at || new Date().toISOString()
         });
@@ -459,13 +472,14 @@ function showOrderSuccessModal(order, items, total, promo) {
 
     const orderId = '#' + String(order.id).padStart(6, '0');
     const customerName = order.customer_name || 'Valued Customer';
-    const email = order.customer_email || '';
-    const address = order.address || '';
     let phone = '';
     try {
         const parsed = typeof order.items_json === 'string' ? JSON.parse(order.items_json) : order.items_json;
         if (parsed?.phone) phone = parsed.phone;
     } catch (e) {}
+    if (!phone && order.address && order.address.startsWith('Phone: ')) {
+        phone = order.address.replace('Phone: ', '').trim();
+    }
 
     const itemsListHtml = items.map(item => `
         <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800/60 last:border-b-0 text-xs sm:text-sm">
@@ -516,16 +530,19 @@ function showOrderSuccessModal(order, items, total, promo) {
                             <span class="material-symbols-outlined text-[14px]">schedule</span> Pending Confirmation
                         </span>
                     </div>
-                    ${email ? `
-                    <div class="col-span-2 pt-2 border-t border-slate-200/80 dark:border-slate-700/60">
-                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Confirmation Sent To</span>
-                        <span class="text-xs font-medium text-slate-800 dark:text-slate-200 break-all">${email}${phone ? ` • 📞 ${phone}` : ''}</span>
-                    </div>` : ''}
-                    ${address ? `
-                    <div class="col-span-2 pt-1">
-                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block" data-i18n="address">Delivery Address</span>
-                        <span class="text-xs font-medium text-slate-800 dark:text-slate-200">${address}</span>
-                    </div>` : ''}
+                    <div class="col-span-2 pt-2 border-t border-slate-200/80 dark:border-slate-700/60 flex flex-col gap-1.5">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Customer</span>
+                            <span class="font-semibold text-slate-800 dark:text-slate-200">${customerName}</span>
+                        </div>
+                        ${phone ? `
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tracking Phone</span>
+                            <span class="font-mono font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[15px]">phone_iphone</span> ${phone}
+                            </span>
+                        </div>` : ''}
+                    </div>
                 </div>
 
                 <!-- Purchased Items -->
@@ -749,6 +766,18 @@ window.openCustomerOrdersModal = function() {
         else adminLinkWrapper.classList.add('hidden');
     }
 
+    // Attach Enter key listener to track input
+    const trackInput = document.getElementById('order-track-input');
+    if (trackInput && !trackInput.dataset.hasListener) {
+        trackInput.dataset.hasListener = 'true';
+        trackInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                window.searchCustomerOrder();
+            }
+        });
+    }
+
     renderCustomerOrdersList();
 };
 
@@ -802,46 +831,131 @@ window.searchCustomerOrder = async function() {
 
     const term = (input.value || '').trim();
     if (!term) {
-        resultBox.innerHTML = `<span class="text-error">Please enter an Order ID or Email.</span>`;
+        const msg = window.i18n ? window.i18n.t('enter_phone_to_track') : 'Please enter your phone number to track your order.';
+        resultBox.innerHTML = `<span class="text-error font-medium">${msg}</span>`;
         return;
     }
 
-    resultBox.innerHTML = `<span class="text-on-surface-variant">Looking up order...</span>`;
+    const loadingMsg = window.i18n ? window.i18n.t('looking_up_order') : 'Looking up order...';
+    resultBox.innerHTML = `
+        <div class="flex items-center gap-1.5 py-1 text-on-surface-variant font-medium">
+            <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+            <span>${loadingMsg}</span>
+        </div>
+    `;
 
     try {
-        let query = window.supabaseClient.from('orders').select('*');
-        if (/^\d+$/.test(term)) {
-            query = query.eq('id', parseInt(term));
-        } else {
-            query = query.ilike('customer_email', term);
+        let matchingOrders = [];
+        const cleanDigits = term.replace(/\D/g, '');
+
+        if (window.supabaseClient) {
+            let orClauses = [];
+
+            // 1. Order ID (if short pure digits, typically 1 to 6 digits)
+            if (/^\d{1,6}$/.test(term)) {
+                orClauses.push(`id.eq.${parseInt(term)}`);
+            }
+
+            // 2. Phone number matching (raw digits and formatted)
+            if (cleanDigits.length >= 4) {
+                orClauses.push(`customer_email.ilike.%${cleanDigits}%`);
+                orClauses.push(`address.ilike.%${cleanDigits}%`);
+                if (cleanDigits !== term) {
+                    orClauses.push(`address.ilike.%${term}%`);
+                }
+            }
+
+            // 3. Fallback for names or email query
+            if (term.length >= 3 && cleanDigits.length < term.length) {
+                orClauses.push(`customer_name.ilike.%${term}%`);
+                orClauses.push(`customer_email.ilike.%${term}%`);
+                orClauses.push(`address.ilike.%${term}%`);
+            }
+
+            if (orClauses.length > 0) {
+                const { data, error } = await window.supabaseClient
+                    .from('orders')
+                    .select('*')
+                    .or(orClauses.join(','))
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (!error && Array.isArray(data)) {
+                    matchingOrders = data;
+                }
+            }
+
+            // Secondary fallback: if direct query returns empty, check recent orders' items_json
+            if (matchingOrders.length === 0 && cleanDigits.length >= 4) {
+                try {
+                    const { data: recentOrders } = await window.supabaseClient
+                        .from('orders')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .limit(30);
+
+                    if (Array.isArray(recentOrders)) {
+                        matchingOrders = recentOrders.filter(o => {
+                            let phoneVal = '';
+                            try {
+                                const parsed = typeof o.items_json === 'string' ? JSON.parse(o.items_json) : o.items_json;
+                                if (parsed?.phone) phoneVal = String(parsed.phone);
+                            } catch(e) {}
+                            const orderDigits = (phoneVal + (o.address || '') + (o.customer_email || '')).replace(/\D/g, '');
+                            return orderDigits.includes(cleanDigits);
+                        });
+                    }
+                } catch(e) {}
+            }
         }
 
-        const { data, error } = await query.order('created_at', { ascending: false }).limit(3);
-        if (error || !data || data.length === 0) {
-            resultBox.innerHTML = `<span class="text-error">No order found matching "${term}".</span>`;
+        // Local storage device orders fallback / merge
+        const localOrders = JSON.parse(localStorage.getItem('dashop_customer_orders') || '[]');
+        if (matchingOrders.length === 0 && localOrders.length > 0) {
+            matchingOrders = localOrders.filter(o => {
+                const oClean = (o.phone || '').replace(/\D/g, '');
+                const oAddrClean = (o.address || '').replace(/\D/g, '');
+                return (cleanDigits && (oClean.includes(cleanDigits) || oAddrClean.includes(cleanDigits))) ||
+                       (term && String(o.id) === term) ||
+                       (o.customer_name && o.customer_name.toLowerCase().includes(term.toLowerCase()));
+            });
+        }
+
+        if (matchingOrders.length === 0) {
+            const notFoundMsg = window.i18n ? window.i18n.t('no_order_phone_found') : 'No order found matching this phone number.';
+            resultBox.innerHTML = `<span class="text-error font-medium">${notFoundMsg}</span>`;
             return;
         }
 
         let html = '<div class="flex flex-col gap-2 mt-2">';
-        data.forEach(o => {
-            const dateStr = new Date(o.created_at).toLocaleDateString();
+        matchingOrders.forEach(o => {
+            const dateStr = o.created_at || o.date ? new Date(o.created_at || o.date).toLocaleDateString() : 'Recent';
             const isCompleted = o.status === 'completed';
-            const statusClass = isCompleted ? 'text-secondary font-bold' : 'text-primary font-bold';
-            let infoSubtitle = o.address || 'Standard Delivery';
+            const statusBadge = isCompleted 
+                ? `<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-wider">Completed</span>`
+                : `<span class="px-2 py-0.5 rounded-full bg-surface-dim text-on-surface text-[10px] font-bold uppercase tracking-wider">Pending</span>`;
+
+            let phoneDisplay = o.phone || '';
             try {
                 const parsed = typeof o.items_json === 'string' ? JSON.parse(o.items_json) : o.items_json;
-                if (parsed?.phone) infoSubtitle = `📞 ${parsed.phone}`;
+                if (parsed?.phone) phoneDisplay = parsed.phone;
             } catch (e) {}
+            if (!phoneDisplay && o.address && o.address.startsWith('Phone: ')) {
+                phoneDisplay = o.address.replace('Phone: ', '').trim();
+            }
 
             html += `
-                <div class="p-2.5 rounded-lg bg-surface-container-lowest border border-surface-container flex flex-col gap-0.5">
-                    <div class="flex justify-between items-center font-bold">
-                        <span>#${o.id} - ${o.customer_name}</span>
-                        <span class="${statusClass} uppercase text-[10px]">${o.status || 'Pending'}</span>
+                <div class="p-3 rounded-2xl bg-surface-container-lowest border border-surface-container flex flex-col gap-1 shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-xs font-mono text-on-surface">Order #${o.id} • ${o.customer_name || 'Customer'}</span>
+                        ${statusBadge}
                     </div>
-                    <div class="flex justify-between items-center text-on-surface-variant text-[11px]">
-                        <span>${dateStr} · ${infoSubtitle}</span>
-                        <span class="font-extrabold text-on-surface">$${parseFloat(o.total || 0).toFixed(2)}</span>
+                    <div class="flex justify-between items-center text-on-surface-variant text-xs mt-0.5">
+                        <span class="flex items-center gap-1 font-mono">
+                            <span class="material-symbols-outlined text-[14px] text-primary">phone_iphone</span>
+                            ${phoneDisplay || dateStr}
+                        </span>
+                        <span class="font-black text-on-surface text-sm">$${parseFloat(o.total || 0).toFixed(2)}</span>
                     </div>
                 </div>
             `;
@@ -850,7 +964,7 @@ window.searchCustomerOrder = async function() {
         resultBox.innerHTML = html;
     } catch (err) {
         console.error('Error tracking order:', err);
-        resultBox.innerHTML = `<span class="text-error">Lookup failed: ${err.message}</span>`;
+        resultBox.innerHTML = `<span class="text-error font-medium">Lookup error: ${err.message}</span>`;
     }
 };
 

@@ -279,6 +279,9 @@ function renderOrdersPage() {
                 if (parsed.address && !orderAddress) orderAddress = parsed.address;
             }
         } catch (e) {}
+        if (!customerPhone && o.address && o.address.startsWith('Phone: ')) {
+            customerPhone = o.address.replace('Phone: ', '').trim();
+        }
 
         const itemsSummary = items.map(i => `${i.name} (x${i.quantity || 1})`).join(', ') || 'Custom Items';
 
@@ -296,6 +299,7 @@ function renderOrdersPage() {
                                 <span class="px-1.5 py-0.5 rounded bg-surface-container">${shortId}</span>
                                 <span>•</span>
                                 <span>${date}</span>
+                                ${customerPhone ? `<span>•</span><span class="text-primary font-bold">📞 ${customerPhone}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -318,11 +322,11 @@ function renderOrdersPage() {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
                         <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block">Customer Contact</span>
-                        <p class="font-body-md text-on-surface font-medium">${o.customer_email || 'No email'}</p>
-                        ${customerPhone ? `<p class="font-body-sm text-outline mt-0.5">📞 ${customerPhone}</p>` : ''}
+                        ${customerPhone ? `<p class="font-title-md text-primary font-bold mt-0.5 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">call</span> ${customerPhone}</p>` : ''}
+                        <p class="font-body-sm text-outline mt-0.5 font-mono">${o.customer_email || 'No email'}</p>
                     </div>
                     <div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
-                        <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block">Delivery Address</span>
+                        <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block">Delivery Address / Note</span>
                         <p class="font-body-md text-on-surface font-medium">${orderAddress || 'Store Pickup'}</p>
                     </div>
                 </div>

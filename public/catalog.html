@@ -228,16 +228,8 @@
                         <input type="text" id="name" name="name" required placeholder="John Doe" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container">
                     </div>
                     <div class="flex flex-col gap-1">
-                        <label class="font-label-md text-on-surface font-semibold" data-i18n="email">Email *</label>
-                        <input type="email" id="email" name="email" required placeholder="john@example.com" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container">
-                    </div>
-                    <div class="flex flex-col gap-1">
                         <label class="font-label-md text-on-surface font-semibold" data-i18n="phone">Phone Number *</label>
                         <input type="tel" id="phone" name="phone" required placeholder="+1 (555) 000-0000" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container">
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="font-label-md text-on-surface font-semibold" data-i18n="address">Delivery Address *</label>
-                        <input type="text" id="address" name="address" required placeholder="Street address, apartment, city, zip" class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container">
                     </div>
 
                     <!-- Discount Code Section -->
@@ -276,12 +268,15 @@
                     </button>
                 </div>
                 <div class="p-4 overflow-y-auto flex flex-col gap-4">
-                    <!-- Track by ID/Email -->
+                    <!-- Track by Phone / Order ID -->
                     <div class="p-3 rounded-2xl bg-surface-container-low flex flex-col gap-2">
-                        <span class="text-xs font-bold text-on-surface uppercase tracking-wider">Track Any Order</span>
+                        <span class="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px] text-primary">phone_iphone</span>
+                            <span data-i18n="track_by_phone">Track Order by Phone</span>
+                        </span>
                         <div class="flex gap-2">
-                            <input type="text" id="order-track-input" placeholder="Enter Order ID or Email..." class="flex-1 px-3 py-2 rounded-xl bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container font-medium"/>
-                            <button onclick="searchCustomerOrder()" class="px-4 py-2 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-container transition-all active:scale-95">Track</button>
+                            <input type="tel" id="order-track-input" data-i18n-placeholder="track_phone_placeholder" placeholder="Enter your phone number..." class="flex-1 px-3 py-2 rounded-xl bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container font-medium"/>
+                            <button onclick="searchCustomerOrder()" class="px-4 py-2 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-container transition-all active:scale-95" data-i18n="track">Track</button>
                         </div>
                         <div id="order-search-result" class="text-xs mt-1"></div>
                     </div>
