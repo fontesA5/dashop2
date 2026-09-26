@@ -191,7 +191,7 @@
         let currentFilterStatus = 'all';
 
         function setOrderStatusFilter(status, btn) {
-            currentFilterStatus = status;
+            currentFilterStatus = (status || 'all').toLowerCase();
             document.querySelectorAll('.order-filter-tab').forEach(b => {
                 b.classList.remove('bg-primary', 'text-on-primary');
                 b.classList.add('bg-surface-container-lowest', 'text-on-surface-variant');
@@ -202,24 +202,49 @@
             }
             filterOrdersLocally();
         }
+        window.setOrderStatusFilter = setOrderStatusFilter;
 
         function filterOrdersLocally() {
-            const searchVal = (document.getElementById('order-search')?.value || '').toLowerCase();
+            const searchVal = (document.getElementById('order-search')?.value || '').toLowerCase().trim();
             const cards = document.querySelectorAll('.order-card');
+            let visibleCount = 0;
             
             cards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                const matchesSearch = !searchVal || text.includes(searchVal);
+                const cardStatus = (card.getAttribute('data-status') || 'pending').toLowerCase();
+                const cardText = card.textContent.toLowerCase();
+                const matchesSearch = !searchVal || cardText.includes(searchVal);
                 let matchesStatus = true;
-                if (currentFilterStatus === 'pending') {
-                    matchesStatus = text.includes('pending');
-                } else if (currentFilterStatus === 'completed') {
-                    matchesStatus = text.includes('completed');
+                if (currentFilterStatus !== 'all') {
+                    matchesStatus = (cardStatus === currentFilterStatus);
                 }
                 
-                card.style.display = (matchesSearch && matchesStatus) ? 'block' : 'none';
+                const isVisible = matchesSearch && matchesStatus;
+                card.style.display = isVisible ? 'block' : 'none';
+                if (isVisible) visibleCount++;
             });
+
+            // Empty state feedback if no orders match the filter
+            let emptyNotice = document.getElementById('orders-empty-filter-notice');
+            const container = document.getElementById('orders-container-dynamic');
+            if (cards.length > 0 && visibleCount === 0 && container) {
+                if (!emptyNotice) {
+                    emptyNotice = document.createElement('div');
+                    emptyNotice.id = 'orders-empty-filter-notice';
+                    emptyNotice.className = 'p-8 text-center text-on-surface-variant bg-surface-container-lowest rounded-2xl';
+                    emptyNotice.innerHTML = `
+                        <span class="material-symbols-outlined text-[36px] text-outline mb-1">filter_alt_off</span>
+                        <p class="font-title-md font-semibold text-on-surface">No ${currentFilterStatus !== 'all' ? currentFilterStatus : ''} orders found</p>
+                        <p class="font-body-sm text-outline mt-0.5">Try clearing your search or switching filter tabs.</p>
+                    `;
+                    container.appendChild(emptyNotice);
+                } else {
+                    emptyNotice.classList.remove('hidden');
+                }
+            } else if (emptyNotice) {
+                emptyNotice.classList.add('hidden');
+            }
         }
+        window.filterOrdersLocally = filterOrdersLocally;
 
         document.getElementById('order-search')?.addEventListener('input', filterOrdersLocally);
     </script>

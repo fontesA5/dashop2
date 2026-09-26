@@ -286,7 +286,7 @@ function renderOrdersPage() {
         const itemsSummary = items.map(i => `${i.name} (x${i.quantity || 1})`).join(', ') || 'Custom Items';
 
         html += `
-        <article class="order-card bg-surface-container-lowest rounded-xl shadow-sm transition-all duration-200 overflow-hidden" data-order-id="${shortId}">
+        <article class="order-card bg-surface-container-lowest rounded-xl shadow-sm transition-all duration-200 overflow-hidden" data-order-id="${shortId}" data-status="${(o.status || 'pending').toLowerCase()}">
             <div class="p-space-base flex flex-col gap-space-xs cursor-pointer select-none" onclick="toggleOrderDetails('order-${index}')">
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-space-sm min-w-0">
@@ -352,6 +352,9 @@ function renderOrdersPage() {
     });
 
     container.innerHTML = html;
+    if (typeof window.filterOrdersLocally === 'function') {
+        window.filterOrdersLocally();
+    }
 }
 
 // Toggle Order details collapse
