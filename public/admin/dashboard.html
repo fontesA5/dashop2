@@ -79,7 +79,7 @@
     <!-- Header -->
     <header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
         <div class="h-16 px-margin flex items-center justify-between gap-space-sm max-w-7xl mx-auto w-full">
-            <a href="/index.html" class="flex items-center gap-space-sm min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
+            <a href="/" class="flex items-center gap-space-sm min-w-0 cursor-pointer hover:opacity-80 active:scale-95 transition-all">
                 <img alt="DaShop Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V5-BCgIk-mBsL_m7yirbzNY-wokmayoYPdc0OX-1-3JcIvSkmOR2sGqQzAaKbCeNc2oGdRpnNJAVQsRpprBucxqrFy5onBbpBGt4JUW8LtE0kRRIZ2MxVafIoJ7jMZ11bj-Eb2oz657W8kegTi1Zx0V_QG_jXXCvskpRZ65a6NHORcaeHbs65QKttWCS6Hq4KIJfxElsoacIsR0AdJAlXNbCyZ6XJcgumYZza-pRwZJdVgXICrUAL2Iw"/>
                 <div class="flex flex-col min-w-0">
                     <span class="font-headline-md text-headline-md text-primary font-bold tracking-tight leading-none">DaShop</span>
@@ -88,27 +88,29 @@
             </a>
             
             <div class="flex items-center gap-2">
-                <!-- Language Switcher -->
-                <div class="relative group">
-                    <button class="px-2.5 py-1.5 rounded-full bg-surface-container-low text-xs font-bold flex items-center gap-1 text-on-surface hover:bg-surface-container transition-colors">
+                <!-- Interactive Language Switcher -->
+                <div class="relative">
+                    <button type="button" onclick="toggleLangMenu(event)" class="px-2.5 py-1.5 rounded-full bg-surface-container-low text-xs font-bold flex items-center gap-1 text-on-surface hover:bg-surface-container active:scale-95 transition-all">
                         <span class="material-symbols-outlined text-[16px]">translate</span>
                         <span id="current-lang-text">EN</span>
                     </button>
-                    <div class="absolute right-0 top-full mt-1 w-28 bg-surface-container-lowest rounded-xl shadow-xl border border-surface-container py-1 hidden group-hover:block z-50">
-                        <button onclick="window.i18n.setLanguage('en')" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-surface-container-low">English</button>
-                        <button onclick="window.i18n.setLanguage('es')" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-surface-container-low">Español</button>
-                        <button onclick="window.i18n.setLanguage('pt')" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-surface-container-low">Português</button>
+                    <div id="lang-dropdown" class="absolute right-0 top-full mt-1 w-32 bg-surface-container-lowest rounded-xl shadow-xl border border-surface-container py-1 hidden z-50">
+                        <button onclick="selectLanguage('en')" class="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-surface-container-low flex items-center gap-2"><span>🇺🇸</span> English</button>
+                        <button onclick="selectLanguage('es')" class="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-surface-container-low flex items-center gap-2"><span>🇪🇸</span> Español</button>
+                        <button onclick="selectLanguage('pt')" class="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-surface-container-low flex items-center gap-2"><span>🇧🇷</span> Português</button>
                     </div>
                 </div>
 
-                <!-- Dark Mode Toggle -->
-                <button onclick="window.themeManager.toggle()" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors" title="Toggle theme">
+                <!-- Dark Mode Toggle Button -->
+                <button type="button" onclick="window.themeManager.toggle()" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low active:scale-90 transition-all" title="Toggle theme">
                     <span class="material-symbols-outlined text-[20px] theme-toggle-icon">dark_mode</span>
                 </button>
 
-                <a aria-label="Search" href="/catalog.html" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors">
-                    <span class="material-symbols-outlined text-[20px]">search</span>
-                </a>
+                <!-- Sign Out Button -->
+                <button type="button" onclick="handleAdminSignOut()" class="px-3 py-1.5 rounded-full bg-error-container/40 text-error hover:bg-error-container text-xs font-bold flex items-center gap-1 transition-all active:scale-95" title="Sign Out">
+                    <span class="material-symbols-outlined text-[16px]">logout</span>
+                    <span>Exit</span>
+                </button>
             </div>
         </div>
     </header>
@@ -282,22 +284,22 @@
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 w-full z-50 pb-safe pointer-events-none">
+    <nav class="fixed bottom-0 w-full z-50 pb-safe pointer-events-auto">
         <div class="px-margin pb-space-sm pt-space-xs">
-            <div class="pointer-events-auto h-16 max-w-md mx-auto w-full rounded-full bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_4px_24px_rgba(15,23,42,0.08)] flex items-center justify-around px-space-xs border border-surface-container/50">
-                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/index.html">
+            <div class="h-16 max-w-md mx-auto w-full rounded-full bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_4px_24px_rgba(15,23,42,0.08)] flex items-center justify-around px-space-xs border border-surface-container/50">
+                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface active:scale-90 transition-all" href="/">
                     <span class="material-symbols-outlined text-[22px]">storefront</span>
                     <span class="font-label-sm text-label-sm" data-i18n="store">Store</span>
                 </a>
-                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/catalog.html">
+                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface active:scale-90 transition-all" href="/catalog.html">
                     <span class="material-symbols-outlined text-[22px]">grid_view</span>
                     <span class="font-label-sm text-label-sm" data-i18n="catalog">Catalog</span>
                 </a>
-                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/admin/orders.html">
+                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface active:scale-90 transition-all" href="/admin/orders.html">
                     <span class="material-symbols-outlined text-[22px]">receipt_long</span>
                     <span class="font-label-sm text-label-sm" data-i18n="orders">Orders</span>
                 </a>
-                <a aria-current="page" class="flex-1 flex flex-col items-center justify-center h-12 rounded-full transition-colors text-primary font-semibold" href="/admin/dashboard.html">
+                <a aria-current="page" class="flex-1 flex flex-col items-center justify-center h-12 rounded-full transition-all active:scale-90 text-primary font-semibold" href="/admin/dashboard.html">
                     <span class="material-symbols-outlined text-[22px]">dashboard</span>
                     <span class="font-label-sm text-label-sm" data-i18n="admin_hub">Admin Hub</span>
                 </a>

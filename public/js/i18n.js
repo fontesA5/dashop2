@@ -289,6 +289,25 @@ class I18nManager {
 
 window.i18n = new I18nManager();
 
+// Global language dropdown handlers
+window.toggleLangMenu = function(e) {
+    if (e) e.stopPropagation();
+    const dd = document.getElementById('lang-dropdown');
+    if (dd) dd.classList.toggle('hidden');
+};
+
+window.selectLanguage = function(lang) {
+    if (window.i18n) window.i18n.setLanguage(lang);
+    const dd = document.getElementById('lang-dropdown');
+    if (dd) dd.classList.add('hidden');
+};
+
+document.addEventListener('click', () => {
+    const dd = document.getElementById('lang-dropdown');
+    if (dd) dd.classList.add('hidden');
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     window.i18n.applyTranslations();
 });
+

@@ -8,7 +8,26 @@ let adminOrders = [];
 let editingProductId = null;
 let uploadedImageFiles = [];
 
+// Admin Session Verification
+function checkAdminAuth() {
+    const session = localStorage.getItem('dashop_admin_session');
+    if (!session && !window.location.pathname.includes('login.html')) {
+        window.location.href = '/admin/login.html';
+        return false;
+    }
+    return true;
+}
+
+window.handleAdminSignOut = function() {
+    localStorage.removeItem('dashop_admin_session');
+    if (window.supabaseClient && window.supabaseClient.auth) {
+        window.supabaseClient.auth.signOut().catch(() => {});
+    }
+    window.location.href = '/admin/login.html';
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
+    if (!checkAdminAuth()) return;
     await loadAdminData();
     initAdminModals();
 });

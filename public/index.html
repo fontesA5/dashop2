@@ -80,7 +80,8 @@
     <!-- Header -->
     <header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
         <div class="h-16 px-margin flex items-center justify-between gap-space-sm max-w-7xl mx-auto w-full">
-            <a href="/index.html" class="flex items-center gap-space-sm min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
+            <!-- Home Logo Button -->
+            <a href="/" class="flex items-center gap-space-sm min-w-0 cursor-pointer hover:opacity-80 active:scale-95 transition-all">
                 <img alt="DaShop Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V5-BCgIk-mBsL_m7yirbzNY-wokmayoYPdc0OX-1-3JcIvSkmOR2sGqQzAaKbCeNc2oGdRpnNJAVQsRpprBucxqrFy5onBbpBGt4JUW8LtE0kRRIZ2MxVafIoJ7jMZ11bj-Eb2oz657W8kegTi1Zx0V_QG_jXXCvskpRZ65a6NHORcaeHbs65QKttWCS6Hq4KIJfxElsoacIsR0AdJAlXNbCyZ6XJcgumYZza-pRwZJdVgXICrUAL2Iw"/>
                 <div class="flex flex-col min-w-0">
                     <span class="font-headline-md text-headline-md text-primary font-bold tracking-tight leading-none">DaShop</span>
@@ -89,31 +90,31 @@
             </a>
             
             <div class="flex items-center gap-2">
-                <!-- Language Switcher -->
-                <div class="relative group">
-                    <button class="px-2.5 py-1.5 rounded-full bg-surface-container-low text-xs font-bold flex items-center gap-1 text-on-surface hover:bg-surface-container transition-colors">
+                <!-- Interactive Language Switcher -->
+                <div class="relative">
+                    <button type="button" onclick="toggleLangMenu(event)" class="px-2.5 py-1.5 rounded-full bg-surface-container-low text-xs font-bold flex items-center gap-1 text-on-surface hover:bg-surface-container active:scale-95 transition-all">
                         <span class="material-symbols-outlined text-[16px]">translate</span>
                         <span id="current-lang-text">EN</span>
                     </button>
-                    <div class="absolute right-0 top-full mt-1 w-28 bg-surface-container-lowest rounded-xl shadow-xl border border-surface-container py-1 hidden group-hover:block z-50">
-                        <button onclick="window.i18n.setLanguage('en')" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-surface-container-low">English</button>
-                        <button onclick="window.i18n.setLanguage('es')" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-surface-container-low">Español</button>
-                        <button onclick="window.i18n.setLanguage('pt')" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-surface-container-low">Português</button>
+                    <div id="lang-dropdown" class="absolute right-0 top-full mt-1 w-32 bg-surface-container-lowest rounded-xl shadow-xl border border-surface-container py-1 hidden z-50">
+                        <button onclick="selectLanguage('en')" class="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-surface-container-low flex items-center gap-2"><span>🇺🇸</span> English</button>
+                        <button onclick="selectLanguage('es')" class="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-surface-container-low flex items-center gap-2"><span>🇪🇸</span> Español</button>
+                        <button onclick="selectLanguage('pt')" class="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-surface-container-low flex items-center gap-2"><span>🇧🇷</span> Português</button>
                     </div>
                 </div>
 
-                <!-- Dark Mode Toggle -->
-                <button onclick="window.themeManager.toggle()" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors" title="Toggle theme">
+                <!-- Dark Mode Toggle Button -->
+                <button type="button" onclick="window.themeManager.toggle()" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low active:scale-90 transition-all" title="Toggle theme">
                     <span class="material-symbols-outlined text-[20px] theme-toggle-icon">dark_mode</span>
                 </button>
 
-                <!-- Search Link -->
-                <a aria-label="Search" href="/catalog.html" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors">
+                <!-- Search Link Button -->
+                <a aria-label="Search" href="/catalog.html" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-[20px]">search</span>
                 </a>
 
                 <!-- Cart Button -->
-                <button aria-label="Shopping Cart" class="relative w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors" onclick="openCart()">
+                <button aria-label="Shopping Cart" class="relative w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low active:scale-90 transition-all" onclick="openCart()">
                     <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
                     <span id="cart-count" class="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-on-primary font-label-sm text-label-sm flex items-center justify-center font-bold">0</span>
                 </button>
@@ -121,32 +122,10 @@
         </div>
     </header>
 
-    <main class="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface max-w-7xl mx-auto">
+    <main class="flex-1 flex flex-col relative w-full pt-20 pb-28 bg-surface max-w-7xl mx-auto">
         <div class="flex flex-col w-full">
-            <!-- Delivery & Address Quick Selector Bar -->
-            <section class="px-margin pt-space-sm pb-space-xs flex items-center justify-between">
-                <div class="flex items-center justify-between w-full">
-                    <div class="flex items-center gap-space-xs">
-                        <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
-                            <span class="material-symbols-outlined text-[18px]">local_shipping</span>
-                        </div>
-                        <div class="flex flex-col min-w-0">
-                            <span class="font-label-lg text-label-lg text-on-surface font-bold" data-i18n="official_store">Official Online Store</span>
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim inline-block animate-pulse"></span>
-                                <span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider" data-i18n="direct_to_you">Direct to You • Orders 24/7</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-full text-on-surface-variant font-label-sm text-label-sm">
-                        <span class="material-symbols-outlined text-[16px] text-tertiary">bolt</span>
-                        <span class="font-semibold text-on-surface" data-i18n="fast_dispatch">Fast Dispatch</span>
-                    </div>
-                </div>
-            </section>
-
             <!-- Search Bar with Dynamic Autocomplete Suggestions -->
-            <section class="px-margin py-space-xs">
+            <section class="px-margin pt-space-xs pb-space-sm">
                 <div class="relative flex items-center w-full h-12 bg-surface-container-low rounded-xl px-space-md shadow-sm border border-surface-container/50">
                     <span class="material-symbols-outlined text-outline text-[22px] mr-space-sm">search</span>
                     <input id="index-search-input" class="w-full bg-transparent border-0 outline-none text-on-surface placeholder:text-outline font-body-md" placeholder="Search groceries, essentials..." data-i18n-placeholder="search_placeholder" type="search" onkeypress="if(event.key === 'Enter') window.location.href='/catalog.html?q='+encodeURIComponent(this.value)"/>
@@ -162,16 +141,16 @@
             <section class="px-margin pt-space-xs pb-space-sm">
                 <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-container to-secondary text-on-primary p-space-lg shadow-md">
                     <div class="absolute -right-8 -bottom-10 w-44 h-44 rounded-full bg-tertiary-fixed opacity-20 blur-2xl pointer-events-none"></div>
-                    <div class="relative z-10 flex flex-col items-start max-w-[80%]">
+                    <div class="relative z-10 flex flex-col items-start max-w-[85%]">
                         <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm uppercase tracking-wider mb-space-xs shadow-sm font-bold">
                             <span class="material-symbols-outlined text-[14px]">local_fire_department</span>
                             <span data-i18n="limited_time">Limited Time</span>
                         </div>
                         <h2 id="hero-promo-title" class="font-headline-xl-mobile text-on-primary font-extrabold leading-tight mb-space-2xs">
-                            Save Big on Your Weekly Groceries
+                            Save Big on Your Essentials
                         </h2>
                         <p id="hero-promo-sub" class="font-body-md text-on-primary-container font-medium mb-space-md">
-                            Use code <span id="hero-promo-code" class="font-mono font-bold px-1.5 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded">SAVE10</span> for discounts on checkout!
+                            Use code <span id="hero-promo-code" class="font-mono font-bold px-1.5 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded">SAVE10</span> for instant discounts!
                         </p>
                         <a href="/catalog.html" class="h-10 px-space-lg rounded-full bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed font-title-md font-bold shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-space-xs">
                             <span data-i18n="shop_now">Shop now</span>
@@ -181,47 +160,52 @@
                 </div>
             </section>
 
-            <!-- Categories Section -->
-            <section class="py-space-xs">
-                <div class="px-margin flex items-center justify-between mb-space-xs">
+            <!-- Responsive Categories Grid (Clean layout on mobile, tablet, and desktop) -->
+            <section class="px-margin py-space-sm">
+                <div class="flex items-center justify-between mb-space-sm">
                     <h3 class="font-headline-md text-headline-md text-on-surface font-bold" data-i18n="explore_categories">Explore Categories</h3>
                     <a href="/catalog.html" class="font-label-md text-primary font-semibold hover:underline" data-i18n="view_all">View All</a>
                 </div>
-                <div class="flex gap-space-sm overflow-x-auto px-margin no-scrollbar py-space-2xs">
-                    <a href="/catalog.html?category=Electronics" class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none">
-                        <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200">
-                            <span class="material-symbols-outlined text-[28px]">headphones</span>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                    <a href="/catalog.html?category=Electronics" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
+                        <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
+                            <span class="material-symbols-outlined text-[26px]">headphones</span>
                         </div>
-                        <span class="font-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Electronics</span>
+                        <span class="font-title-md text-sm font-semibold text-on-surface">Electronics</span>
+                        <span class="text-xs text-on-surface-variant font-normal">Audio & Tech</span>
                     </a>
-                    <a href="/catalog.html?category=Household" class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none">
-                        <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200">
-                            <span class="material-symbols-outlined text-[28px]">cleaning_services</span>
+                    <a href="/catalog.html?category=Household" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
+                        <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
+                            <span class="material-symbols-outlined text-[26px]">cleaning_services</span>
                         </div>
-                        <span class="font-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Household</span>
+                        <span class="font-title-md text-sm font-semibold text-on-surface">Household</span>
+                        <span class="text-xs text-on-surface-variant font-normal">Essentials & Home</span>
                     </a>
-                    <a href="/catalog.html?category=Peripherals" class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none">
-                        <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200">
-                            <span class="material-symbols-outlined text-[28px]">keyboard</span>
+                    <a href="/catalog.html?category=Peripherals" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
+                        <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
+                            <span class="material-symbols-outlined text-[26px]">keyboard</span>
                         </div>
-                        <span class="font-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Peripherals</span>
+                        <span class="font-title-md text-sm font-semibold text-on-surface">Peripherals</span>
+                        <span class="text-xs text-on-surface-variant font-normal">Keyboards & Mice</span>
                     </a>
-                    <a href="/catalog.html?category=Accessories" class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none">
-                        <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed group-hover:text-on-primary-fixed text-primary shadow-sm transition-all duration-200">
-                            <span class="material-symbols-outlined text-[28px]">devices</span>
+                    <a href="/catalog.html?category=Accessories" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group active:scale-95">
+                        <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
+                            <span class="material-symbols-outlined text-[26px]">devices</span>
                         </div>
-                        <span class="font-label-md text-on-surface font-semibold max-w-[70px] text-center leading-tight">Accessories</span>
+                        <span class="font-title-md text-sm font-semibold text-on-surface">Accessories</span>
+                        <span class="text-xs text-on-surface-variant font-normal">Stands & Cables</span>
                     </a>
-                    <a href="/catalog.html" class="flex flex-col items-center gap-space-2xs shrink-0 group focus:outline-none">
-                        <div class="w-16 h-16 rounded-2xl bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:text-primary shadow-sm transition-all duration-200">
-                            <span class="material-symbols-outlined text-[28px]">apps</span>
+                    <a href="/catalog.html" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-md border border-surface-container/60 transition-all text-center group col-span-2 sm:col-span-1 md:col-span-1 active:scale-95">
+                        <div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary flex items-center justify-center text-primary transition-all mb-1.5">
+                            <span class="material-symbols-outlined text-[26px]">apps</span>
                         </div>
-                        <span class="font-label-md text-on-surface-variant font-medium max-w-[70px] text-center leading-tight" data-i18n="all_products">All Products</span>
+                        <span class="font-title-md text-sm font-semibold text-on-surface" data-i18n="all_products">All Products</span>
+                        <span class="text-xs text-on-surface-variant font-normal">Browse Full Catalog</span>
                     </a>
                 </div>
             </section>
 
-            <!-- Dynamic New Arrivals Section (Purged static placeholder items) -->
+            <!-- Dynamic New Arrivals Section -->
             <section class="pt-space-sm pb-space-xs">
                 <div class="px-margin flex items-center justify-between mb-space-xs">
                     <div class="flex items-center gap-space-xs">
@@ -233,7 +217,6 @@
                         <span class="material-symbols-outlined text-[16px]">chevron_right</span>
                     </a>
                 </div>
-                <!-- Dynamic New Arrivals Container -->
                 <div id="new-arrivals-container" class="flex gap-space-md overflow-x-auto px-margin py-space-xs no-scrollbar">
                     <div class="p-8 text-on-surface-variant text-sm">Loading live products...</div>
                 </div>
@@ -246,33 +229,31 @@
                     <a href="/catalog.html" class="font-label-md text-primary font-semibold hover:underline" data-i18n="view_all">View All</a>
                 </div>
                 <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-space-sm">
-                    <div class="col-span-full p-8 text-center text-on-surface-variant">Loading live catalog...</div>
+                    <div class="col-span-full p-8 text-center text-on-surface-variant font-medium">Loading live catalog...</div>
                 </div>
             </section>
         </div>
     </main>
 
-    <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 w-full z-50 pb-safe pointer-events-none">
-        <div class="px-margin pb-space-sm pt-space-xs">
-            <div class="pointer-events-auto h-16 max-w-md mx-auto w-full rounded-full bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_4px_24px_rgba(15,23,42,0.08)] flex items-center justify-around px-space-xs border border-surface-container/50">
-                <a aria-current="page" class="flex-1 flex flex-col items-center justify-center h-12 rounded-full transition-colors text-primary font-semibold" href="/index.html">
-                    <span class="material-symbols-outlined text-[22px]">storefront</span>
-                    <span class="font-label-sm text-label-sm" data-i18n="store">Store</span>
-                </a>
-                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/catalog.html">
-                    <span class="material-symbols-outlined text-[22px]">grid_view</span>
-                    <span class="font-label-sm text-label-sm" data-i18n="catalog">Catalog</span>
-                </a>
-                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/admin/orders.html">
-                    <span class="material-symbols-outlined text-[22px]">receipt_long</span>
-                    <span class="font-label-sm text-label-sm" data-i18n="orders">Orders</span>
-                </a>
-                <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/admin/dashboard.html">
-                    <span class="material-symbols-outlined text-[22px]">dashboard</span>
-                    <span class="font-label-sm text-label-sm" data-i18n="admin_hub">Admin Hub</span>
-                </a>
-            </div>
+    <!-- Reliable Bottom Navigation Dock -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 pb-safe px-margin pb-3 pointer-events-auto">
+        <div class="h-16 max-w-md mx-auto w-full rounded-full bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_4px_24px_rgba(15,23,42,0.15)] flex items-center justify-around px-space-xs border border-surface-container/60">
+            <a aria-current="page" class="flex-1 flex flex-col items-center justify-center h-12 rounded-full transition-all text-primary font-bold active:scale-90" href="/">
+                <span class="material-symbols-outlined text-[22px]">storefront</span>
+                <span class="font-label-sm text-label-sm" data-i18n="store">Store</span>
+            </a>
+            <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-all active:scale-90" href="/catalog.html">
+                <span class="material-symbols-outlined text-[22px]">grid_view</span>
+                <span class="font-label-sm text-label-sm" data-i18n="catalog">Catalog</span>
+            </a>
+            <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-all active:scale-90" href="/admin/orders.html">
+                <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+                <span class="font-label-sm text-label-sm" data-i18n="orders">Orders</span>
+            </a>
+            <a class="flex-1 flex flex-col items-center justify-center h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-all active:scale-90" href="/admin/dashboard.html">
+                <span class="material-symbols-outlined text-[22px]">dashboard</span>
+                <span class="font-label-sm text-label-sm" data-i18n="admin_hub">Admin Hub</span>
+            </a>
         </div>
     </nav>
 
@@ -356,5 +337,21 @@
     <script src="/js/theme.js"></script>
     <script src="/js/promos.js"></script>
     <script src="/js/app.js"></script>
+    <script>
+        function toggleLangMenu(e) {
+            e.stopPropagation();
+            const dd = document.getElementById('lang-dropdown');
+            if (dd) dd.classList.toggle('hidden');
+        }
+
+        function selectLanguage(lang) {
+            if (window.i18n) window.i18n.setLanguage(lang);
+            document.getElementById('lang-dropdown')?.classList.add('hidden');
+        }
+
+        document.addEventListener('click', () => {
+            document.getElementById('lang-dropdown')?.classList.add('hidden');
+        });
+    </script>
 </body>
 </html>
