@@ -10,23 +10,39 @@ let uploadedImageFiles = [];
 
 // Admin Session Verification — always requires login
 function checkAdminAuth() {
-    const session = localStorage.getItem('dashop_admin_session');
+    const raw = localStorage.getItem('dashop_admin_session');
 
-    if (!session) {
-        // No session → redirect to login (unless already on login page)
+    if (!raw) {
         if (!window.location.pathname.includes('login.html')) {
-            window.location.href = '/admin/login.html';
+            window.location.replace('/admin/login.html');
             return false;
         }
         return false;
     }
 
-    // Update email badge in admin UI if present
+    // Validate session JSON
+    let session = null;
     try {
-        const parsed = JSON.parse(session);
-        const emailEl = document.getElementById('admin-user-email');
-        if (emailEl && parsed.email) emailEl.textContent = parsed.email;
-    } catch(e) {}
+        session = JSON.parse(raw);
+    } catch(e) {
+        localStorage.removeItem('dashop_admin_session');
+        if (!window.location.pathname.includes('login.html')) {
+            window.location.replace('/admin/login.html');
+        }
+        return false;
+    }
+
+    if (!session || !session.email) {
+        localStorage.removeItem('dashop_admin_session');
+        if (!window.location.pathname.includes('login.html')) {
+            window.location.replace('/admin/login.html');
+        }
+        return false;
+    }
+
+    // Update email badge in admin UI if present
+    const emailEl = document.getElementById('admin-user-email');
+    if (emailEl) emailEl.textContent = session.email;
 
     return true;
 }
@@ -36,7 +52,7 @@ window.handleAdminSignOut = function() {
     if (window.supabaseClient && window.supabaseClient.auth) {
         window.supabaseClient.auth.signOut().catch(() => {});
     }
-    window.location.href = '/admin/login.html';
+    window.location.replace('/admin/login.html');
 };
 
 document.addEventListener('DOMContentLoaded', async () => {

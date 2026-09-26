@@ -142,8 +142,8 @@
                 }));
                 showAlert('Welcome back! Redirecting to Dashboard...', false);
                 setTimeout(() => {
-                    window.location.href = '/admin/dashboard.html';
-                }, 300);
+                    window.location.replace('/admin/dashboard.html');
+                }, 500);
                 return;
             }
 
@@ -197,8 +197,8 @@
                         timestamp: Date.now()
                     }));
                     setTimeout(() => {
-                        window.location.href = '/admin/dashboard.html';
-                    }, 400);
+                        window.location.replace('/admin/dashboard.html');
+                    }, 500);
                 } else {
                     showAlert('Invalid credentials or unauthorized email. Please verify your admin email.');
                     btn.disabled = false;
