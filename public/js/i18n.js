@@ -96,7 +96,14 @@ const translations = {
         looking_up_order: "Looking up order...",
         out_of_stock: "Out of Stock",
         product_out_of_stock: "Sorry, this product is out of stock!",
-        stock_limit_reached: "Stock limit reached for this product."
+        stock_limit_reached: "Stock limit reached for this product.",
+        install_app_title: "Install DASHOP App",
+        install_app_desc: "Add to your home screen for lightning-fast access, offline support, and full-screen shopping.",
+        install_btn: "Install App",
+        not_now: "Not Now",
+        ios_install_guide: "To install on your iPhone / iPad:",
+        ios_install_step1: "Tap the Share button at the bottom of Safari",
+        ios_install_step2: "Scroll down and select 'Add to Home Screen'"
     },
     es: {
         store: "Tienda",
@@ -190,7 +197,14 @@ const translations = {
         looking_up_order: "Buscando pedido...",
         out_of_stock: "Agotado",
         product_out_of_stock: "¡Este producto está agotado!",
-        stock_limit_reached: "Límite de existencias alcanzado para este producto."
+        stock_limit_reached: "Límite de existencias alcanzado para este producto.",
+        install_app_title: "Instalar App DASHOP",
+        install_app_desc: "Agrega a tu pantalla de inicio para un acceso ultrarrápido y una mejor experiencia de compra.",
+        install_btn: "Instalar App",
+        not_now: "Ahora no",
+        ios_install_guide: "Para instalar en tu iPhone / iPad:",
+        ios_install_step1: "Toca el botón Compartir en la barra de Safari",
+        ios_install_step2: "Baja y selecciona 'Agregar a inicio'"
     },
     pt: {
         store: "Loja",
@@ -284,7 +298,14 @@ const translations = {
         looking_up_order: "Buscando pedido...",
         out_of_stock: "Esgotado",
         product_out_of_stock: "Este produto está esgotado!",
-        stock_limit_reached: "Limite de estoque atingido para este produto."
+        stock_limit_reached: "Limite de estoque atingido para este produto.",
+        install_app_title: "Instalar App DASHOP",
+        install_app_desc: "Adicione à tela inicial para acesso ultrarrápido, suporte offline e a melhor experiência de compra.",
+        install_btn: "Instalar App",
+        not_now: "Agora não",
+        ios_install_guide: "Para instalar no seu iPhone / iPad:",
+        ios_install_step1: "Toque no botão Compartilhar na barra do Safari",
+        ios_install_step2: "Role para baixo e selecione 'Adicionar à Tela de Início'"
     }
 };
 

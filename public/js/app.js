@@ -9,6 +9,17 @@ const STORAGE_KEY = 'dashop_cart';
 let appliedPromo = null;
 let allProducts = [];
 
+// PWA Install Prompt Listener (Capture early)
+window.deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.deferredInstallPrompt = e;
+    console.log('[PWA] beforeinstallprompt event captured');
+    if (typeof window.showPWAInstallPrompt === 'function') {
+        window.showPWAInstallPrompt(false);
+    }
+});
+
 // Service Worker Registration with auto-update
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -24,6 +35,7 @@ if ('serviceWorker' in navigator) {
 // Initialize app when DOM is ready
 async function startApp() {
     initCart();
+    initPWAInstallPrompt();
     await loadProducts();
     await loadProductDetail();
     initSearchAutocomplete();
@@ -1781,6 +1793,170 @@ window.openBarcodeSearchScanner = function() {
     }, "Scan Product Barcode to Search");
 };
 
+// PWA Install Prompt Management
+function initPWAInstallPrompt() {
+    // Skip if on admin pages
+    if (window.location.pathname.startsWith('/admin')) return;
+
+    // Detect if already running as standalone PWA
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         window.navigator.standalone === true || 
+                         document.referrer.includes('android-app://');
+    if (isStandalone) {
+        console.log('[PWA] App is already running in standalone mode');
+        return;
+    }
+
+    // Check dismissal cooldown (24 hours)
+    const DISMISSED_KEY = 'dashop_pwa_dismissed_at';
+    const lastDismissed = localStorage.getItem(DISMISSED_KEY);
+    if (lastDismissed) {
+        const hoursPassed = (Date.now() - parseInt(lastDismissed, 10)) / (1000 * 60 * 60);
+        if (hoursPassed < 24) {
+            console.log('[PWA] Install prompt was recently dismissed. Waiting cooldown.');
+            return;
+        }
+    }
+
+    const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !window.MSStream;
+
+    window.addEventListener('appinstalled', () => {
+        dismissPWAInstallModal();
+        window.deferredInstallPrompt = null;
+        localStorage.setItem(DISMISSED_KEY, (Date.now() + 30 * 24 * 60 * 60 * 1000).toString());
+    });
+
+    window.showPWAInstallPrompt = function(forceIOS = false) {
+        if (isStandalone) return;
+        const dismissed = localStorage.getItem(DISMISSED_KEY);
+        if (dismissed && ((Date.now() - parseInt(dismissed, 10)) / (1000 * 60 * 60)) < 24) return;
+        
+        setTimeout(() => {
+            renderPWAInstallModal(forceIOS || isIOS);
+        }, 1200);
+    };
+
+    if (window.deferredInstallPrompt) {
+        window.showPWAInstallPrompt(false);
+    } else if (isIOS) {
+        window.showPWAInstallPrompt(true);
+    } else {
+        // Fallback timer for browsers that don't immediately fire beforeinstallprompt
+        setTimeout(() => {
+            if (!document.getElementById('pwa-install-modal')) {
+                window.showPWAInstallPrompt(false);
+            }
+        }, 3000);
+    }
+}
+
+function renderPWAInstallModal(isIOS = false) {
+    if (document.getElementById('pwa-install-modal')) return;
+
+    const t = (key) => window.i18n ? window.i18n.t(key) : key;
+
+    const container = document.createElement('div');
+    container.id = 'pwa-install-modal';
+    container.className = 'fixed bottom-20 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-[9990] max-w-sm sm:max-w-md w-auto bg-surface-container-lowest text-on-surface rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.25)] border border-surface-container-high transition-all duration-300 transform translate-y-8 opacity-0';
+
+    container.innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3.5">
+                <img src="/icons/icon-192x192.png" alt="DASHOP" class="w-13 h-13 rounded-2xl shadow-md border border-surface-container-high object-cover flex-shrink-0" onerror="this.src='/icons/icon-512x512.png'">
+                <div>
+                    <span class="inline-block text-[10px] font-bold tracking-wider uppercase text-primary bg-primary/10 px-2 py-0.5 rounded-full mb-1">DASHOP Web App</span>
+                    <h3 class="font-extrabold text-on-surface text-base leading-tight" data-i18n="install_app_title">${t('install_app_title')}</h3>
+                </div>
+            </div>
+            <button onclick="dismissPWAInstallModal()" class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors -mr-1 -mt-1 flex-shrink-0" title="Close" aria-label="Close">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+        </div>
+
+        <p class="text-xs text-on-surface-variant font-medium mt-3 leading-relaxed" data-i18n="install_app_desc">
+            ${t('install_app_desc')}
+        </p>
+
+        ${isIOS ? `
+            <div class="mt-3.5 p-3 rounded-2xl bg-surface-container-low border border-surface-container space-y-2 text-xs text-on-surface">
+                <div class="font-bold text-primary flex items-center gap-1.5" data-i18n="ios_install_guide">
+                    <span class="material-symbols-outlined text-[18px]">apple</span>
+                    <span>${t('ios_install_guide')}</span>
+                </div>
+                <div class="flex items-center gap-2 text-on-surface-variant">
+                    <span class="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold text-[11px] flex items-center justify-center flex-shrink-0">1</span>
+                    <span data-i18n="ios_install_step1">${t('ios_install_step1')}</span>
+                    <span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0">ios_share</span>
+                </div>
+                <div class="flex items-center gap-2 text-on-surface-variant">
+                    <span class="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold text-[11px] flex items-center justify-center flex-shrink-0">2</span>
+                    <span data-i18n="ios_install_step2">${t('ios_install_step2')}</span>
+                    <span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0">add_box</span>
+                </div>
+            </div>
+            <button onclick="dismissPWAInstallModal()" class="w-full mt-3.5 py-2.5 px-4 bg-primary text-white font-bold text-xs rounded-xl shadow hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]">check</span>
+                <span data-i18n="not_now">${t('not_now')}</span>
+            </button>
+        ` : `
+            <div class="mt-4 flex flex-col gap-2">
+                <button id="pwa-install-action-btn" onclick="triggerPWAInstall()" class="w-full py-2.5 px-4 bg-primary text-white font-bold text-sm rounded-xl shadow-md hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">download</span>
+                    <span data-i18n="install_btn">${t('install_btn')}</span>
+                </button>
+                <button onclick="dismissPWAInstallModal()" class="w-full py-1 text-xs font-semibold text-outline hover:text-on-surface transition-colors" data-i18n="not_now">
+                    ${t('not_now')}
+                </button>
+            </div>
+        `}
+    `;
+
+    document.body.appendChild(container);
+
+    // Smooth entrance animation
+    requestAnimationFrame(() => {
+        container.classList.remove('translate-y-8', 'opacity-0');
+        container.classList.add('translate-y-0', 'opacity-100');
+    });
+
+    if (window.i18n) {
+        window.i18n.applyTranslations();
+    }
+}
+
+function dismissPWAInstallModal() {
+    const modal = document.getElementById('pwa-install-modal');
+    if (modal) {
+        modal.classList.add('translate-y-8', 'opacity-0');
+        modal.classList.remove('translate-y-0', 'opacity-100');
+        setTimeout(() => {
+            if (modal && modal.parentElement) modal.remove();
+        }, 350);
+    }
+    // Record dismissal timestamp to avoid annoying users
+    localStorage.setItem('dashop_pwa_dismissed_at', Date.now().toString());
+}
+
+async function triggerPWAInstall() {
+    if (window.deferredInstallPrompt) {
+        try {
+            window.deferredInstallPrompt.prompt();
+            const choice = await window.deferredInstallPrompt.userChoice;
+            if (choice && choice.outcome === 'accepted') {
+                console.log('User accepted PWA installation');
+                dismissPWAInstallModal();
+            }
+        } catch (err) {
+            console.error('Error triggering PWA install prompt:', err);
+        }
+        window.deferredInstallPrompt = null;
+    } else {
+        // Fallback for browsers without direct programmatic prompt
+        alert('To install DASHOP on this device, open your browser menu and choose "Add to Home screen" or "Install App".');
+        dismissPWAInstallModal();
+    }
+}
+
 // Export for global window access
 window.viewProduct = viewProduct;
 window.openCart = openCart;
@@ -1796,3 +1972,7 @@ window.openCustomerOrdersModal = openCustomerOrdersModal;
 window.closeCustomerOrdersModal = closeCustomerOrdersModal;
 window.filterByCategory = filterByCategory;
 window.searchCustomerOrder = searchCustomerOrder;
+window.initPWAInstallPrompt = initPWAInstallPrompt;
+window.renderPWAInstallModal = renderPWAInstallModal;
+window.dismissPWAInstallModal = dismissPWAInstallModal;
+window.triggerPWAInstall = triggerPWAInstall;
