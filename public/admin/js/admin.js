@@ -8,6 +8,10 @@ let adminOrders = [];
 let editingProductId = null;
 let uploadedImageFiles = [];
 let wasManageProductsOpen = false;
+let knownAdminOrderIds = new Set();
+let isInitialAdminOrderLoad = true;
+let titleFlashInterval = null;
+let originalDocumentTitle = document.title || 'DASHOP Admin';
 
 // Notification Toast for Admin
 function showNotification(message, duration = 3000) {
@@ -101,6 +105,10 @@ async function initAdmin() {
     if (!checkAdminAuth()) return;
     await loadAdminData();
     initAdminModals();
+    initAdminOrderAlerts();
+    setupAdminRealtimeOrderListener();
+    startAdminOrdersPolling();
+    checkHighlightedOrder();
 }
 
 if (document.readyState === 'loading') {
@@ -125,7 +133,14 @@ async function loadAdminData() {
                 .from('orders')
                 .select('*')
                 .order('created_at', { ascending: false });
-            if (!oErr && oData) adminOrders = oData;
+            if (!oErr && oData) {
+                adminOrders = oData;
+                if (isInitialAdminOrderLoad) {
+                    knownAdminOrderIds.clear();
+                    oData.forEach(o => knownAdminOrderIds.add(String(o.id)));
+                    isInitialAdminOrderLoad = false;
+                }
+            }
         }
     } catch (e) {
         console.error('Error fetching admin data:', e);
@@ -286,7 +301,7 @@ function renderOrdersPage() {
         const itemsSummary = items.map(i => `${i.name} (x${i.quantity || 1})`).join(', ') || 'Custom Items';
 
         html += `
-        <article class="order-card bg-surface-container-lowest rounded-xl shadow-sm transition-all duration-200 overflow-hidden" data-order-id="${shortId}" data-status="${(o.status || 'pending').toLowerCase()}">
+        <article id="order-card-${o.id}" class="order-card bg-surface-container-lowest rounded-xl shadow-sm transition-all duration-200 overflow-hidden" data-order-id="${shortId}" data-status="${(o.status || 'pending').toLowerCase()}">
             <div class="p-space-base flex flex-col gap-space-xs cursor-pointer select-none" onclick="toggleOrderDetails('order-${index}')">
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-space-sm min-w-0">
@@ -1251,3 +1266,417 @@ function handleImageFiles(files) {
         reader.readAsDataURL(file);
     });
 }
+
+// =========================================================================
+// Real-Time New Order Alerts (Audio Chime, System Notifications & Banner)
+// =========================================================================
+
+// Synthesize pleasant, crisp multi-tone chime (Web Audio API)
+function playOrderAlertChime() {
+    const soundEnabled = localStorage.getItem('dashop_admin_sound_enabled') !== 'false';
+    if (!soundEnabled) return;
+
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+
+        // Clean POS / cash register chime chord: C5, E5, G5, C6
+        const notes = [
+            { freq: 523.25, time: 0.00, dur: 0.14 },
+            { freq: 659.25, time: 0.11, dur: 0.14 },
+            { freq: 783.99, time: 0.22, dur: 0.16 },
+            { freq: 1046.50, time: 0.36, dur: 0.50 }
+        ];
+
+        notes.forEach(n => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(n.freq, ctx.currentTime + n.time);
+
+            gain.gain.setValueAtTime(0, ctx.currentTime + n.time);
+            gain.gain.linearRampToValueAtTime(0.28, ctx.currentTime + n.time + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n.time + n.dur);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(ctx.currentTime + n.time);
+            osc.stop(ctx.currentTime + n.time + n.dur);
+        });
+    } catch (e) {
+        console.warn('[Admin Alerts] Sound playback error:', e);
+    }
+}
+
+// OS / Browser Native System Notification
+function sendSystemOrderNotification(order) {
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    const customer = order.customer_name || order.customer_phone || 'Customer';
+    const total = order.total ? `$${parseFloat(order.total).toFixed(2)}` : '$0.00';
+    const body = `${customer} placed a new order for ${total}. Tap to view details!`;
+
+    try {
+        const notif = new Notification(`🔔 New Order #${order.id}`, {
+            body: body,
+            icon: '/icons/icon-192x192.png',
+            badge: '/icons/icon-192x192.png',
+            tag: `order-${order.id}`,
+            requireInteraction: true
+        });
+
+        notif.onclick = () => {
+            window.focus();
+            if (window.location.pathname.includes('orders')) {
+                const card = document.getElementById(`order-card-${order.id}`);
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    card.classList.add('ring-4', 'ring-primary');
+                    setTimeout(() => card.classList.remove('ring-4', 'ring-primary'), 3500);
+                }
+            } else {
+                window.location.href = `/admin/orders.html#order-card-${order.id}`;
+            }
+            notif.close();
+        };
+    } catch (e) {
+        console.warn('[Admin Alerts] System notification failed:', e);
+    }
+}
+
+// In-App Floating Top Toast / Banner
+function showInAppNewOrderBanner(order) {
+    const existing = document.getElementById('new-order-banner-alert');
+    if (existing) existing.remove();
+
+    const customer = order.customer_name || order.customer_phone || 'Customer';
+    const total = order.total ? `$${parseFloat(order.total).toFixed(2)}` : '$0.00';
+
+    const banner = document.createElement('div');
+    banner.id = 'new-order-banner-alert';
+    banner.className = 'fixed top-20 right-4 left-4 sm:left-auto sm:right-6 sm:w-96 z-[99999] bg-primary text-white rounded-2xl p-4 shadow-2xl border border-primary-container flex items-center justify-between gap-3 transition-all duration-300 transform translate-y-[-20px] opacity-0';
+
+    banner.innerHTML = `
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-secondary-container text-[24px]">notifications_active</span>
+            </div>
+            <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">New Order</span>
+                    <span class="font-mono text-xs font-bold text-secondary-container">#${order.id}</span>
+                </div>
+                <h4 class="font-extrabold text-sm truncate text-white mt-0.5">${customer}</h4>
+                <p class="text-xs text-white/80 font-semibold">${total}</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="/admin/orders.html#order-card-${order.id}" onclick="document.getElementById('new-order-banner-alert')?.remove()" class="px-3 py-1.5 bg-white text-primary rounded-xl font-bold text-xs shadow hover:bg-white/90 active:scale-95 transition-all">
+                View
+            </a>
+            <button onclick="document.getElementById('new-order-banner-alert')?.remove()" class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-white/80 hover:text-white transition-colors" title="Close">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(banner);
+
+    requestAnimationFrame(() => {
+        banner.classList.remove('translate-y-[-20px]', 'opacity-0');
+        banner.classList.add('translate-y-0', 'opacity-100');
+    });
+
+    // Auto dismiss after 12 seconds
+    setTimeout(() => {
+        if (banner && banner.parentElement) {
+            banner.classList.add('opacity-0', 'translate-y-[-20px]');
+            setTimeout(() => banner.remove(), 350);
+        }
+    }, 12000);
+}
+
+// Flash document title when tab is not active
+function flashAdminDocumentTitle(alertText) {
+    if (!originalDocumentTitle) originalDocumentTitle = document.title || 'DASHOP Admin';
+    if (titleFlashInterval) clearInterval(titleFlashInterval);
+
+    let state = false;
+    titleFlashInterval = setInterval(() => {
+        document.title = state ? alertText : originalDocumentTitle;
+        state = !state;
+    }, 1000);
+
+    const onFocus = () => {
+        if (titleFlashInterval) {
+            clearInterval(titleFlashInterval);
+            titleFlashInterval = null;
+        }
+        document.title = originalDocumentTitle;
+        window.removeEventListener('focus', onFocus);
+    };
+    window.addEventListener('focus', onFocus);
+}
+
+// Master handler for new orders
+function handleIncomingNewOrder(order) {
+    if (!order || !order.id) return;
+    const orderIdStr = String(order.id);
+    if (knownAdminOrderIds.has(orderIdStr)) return;
+    knownAdminOrderIds.add(orderIdStr);
+
+    console.log('[Admin Alerts] 🔔 New order received:', order);
+
+    // 1. Play audio chime
+    playOrderAlertChime();
+
+    // 2. Dispatch native OS system notification
+    sendSystemOrderNotification(order);
+
+    // 3. Show in-app banner
+    showInAppNewOrderBanner(order);
+
+    // 4. Update data array
+    adminOrders = [order, ...adminOrders.filter(o => String(o.id) !== orderIdStr)];
+
+    // 5. Re-render UI components
+    renderDashboardKPIs();
+    renderRecentOrdersFeed();
+    renderOrdersPage();
+
+    // 6. Flash document title
+    flashAdminDocumentTitle(`🔔 (1) New Order #${order.id}!`);
+}
+
+// Supabase Real-time Channel Listener
+function setupAdminRealtimeOrderListener() {
+    if (!window.supabaseClient) return;
+
+    try {
+        window.supabaseClient
+            .channel('admin-orders-realtime')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+                if (payload && payload.new) {
+                    handleIncomingNewOrder(payload.new);
+                }
+            })
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (payload) => {
+                if (payload && payload.new) {
+                    const idx = adminOrders.findIndex(o => String(o.id) === String(payload.new.id));
+                    if (idx !== -1) {
+                        adminOrders[idx] = payload.new;
+                        renderDashboardKPIs();
+                        renderRecentOrdersFeed();
+                        renderOrdersPage();
+                    }
+                }
+            })
+            .subscribe((status) => {
+                console.log('[Admin Realtime] Orders channel status:', status);
+            });
+    } catch (e) {
+        console.warn('[Admin Realtime] Subscription initialization error:', e);
+    }
+}
+
+// Background Polling Safety Net (every 12 seconds)
+function startAdminOrdersPolling() {
+    setInterval(async () => {
+        if (!window.supabaseClient) return;
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (!error && data && data.length > 0) {
+                if (isInitialAdminOrderLoad) return;
+
+                const newOrders = data.filter(o => !knownAdminOrderIds.has(String(o.id)));
+                if (newOrders.length > 0) {
+                    // Process from oldest to newest of the fresh batch
+                    newOrders.reverse().forEach(order => {
+                        handleIncomingNewOrder(order);
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('[Admin Polling] Error checking orders:', err);
+        }
+    }, 12000);
+}
+
+// Initialize Admin Order Alerts Controls & UI
+function initAdminOrderAlerts() {
+    updateAdminNotifUI();
+
+    // Unlock AudioContext on first user interaction so sounds can play freely
+    const unlockAudio = () => {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                const ctx = new AudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+            }
+        } catch(e) {}
+        document.removeEventListener('click', unlockAudio);
+        document.removeEventListener('keydown', unlockAudio);
+    };
+    document.addEventListener('click', unlockAudio, { once: true });
+    document.addEventListener('keydown', unlockAudio, { once: true });
+
+    // Close notification dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        const dd = document.getElementById('admin-notif-dropdown');
+        const btn = document.getElementById('admin-notif-btn');
+        if (dd && !dd.classList.contains('hidden')) {
+            if (!dd.contains(e.target) && (!btn || !btn.contains(e.target))) {
+                dd.classList.add('hidden');
+            }
+        }
+    });
+
+    // Check if browser notifications are already granted or request permission gently
+    if ('Notification' in window && Notification.permission === 'default') {
+        const promptAsked = sessionStorage.getItem('dashop_admin_notif_prompted');
+        if (!promptAsked) {
+            sessionStorage.setItem('dashop_admin_notif_prompted', 'true');
+            setTimeout(() => {
+                const dd = document.getElementById('admin-notif-dropdown');
+                if (dd) dd.classList.remove('hidden');
+            }, 2500);
+        }
+    }
+}
+
+// Highlight order if deep-linked via hash
+function checkHighlightedOrder() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#order-card-')) {
+        setTimeout(() => {
+            const card = document.querySelector(hash);
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                card.classList.add('ring-4', 'ring-primary');
+                setTimeout(() => card.classList.remove('ring-4', 'ring-primary'), 3500);
+            }
+        }, 600);
+    }
+}
+
+// UI Dropdown & Settings Controls
+window.toggleAdminNotifSettings = function(e) {
+    if (e) e.stopPropagation();
+    const dd = document.getElementById('admin-notif-dropdown');
+    if (dd) dd.classList.toggle('hidden');
+    updateAdminNotifUI();
+};
+
+window.toggleSoundAlert = function() {
+    const current = localStorage.getItem('dashop_admin_sound_enabled') !== 'false';
+    const next = !current;
+    localStorage.setItem('dashop_admin_sound_enabled', next ? 'true' : 'false');
+    updateAdminNotifUI();
+    if (next) {
+        playOrderAlertChime();
+        showNotification('Sound alerts enabled 🔊');
+    } else {
+        showNotification('Sound alerts muted 🔇');
+    }
+};
+
+window.requestSystemNotifPermission = async function() {
+    if (!('Notification' in window)) {
+        alert('Your browser does not support desktop notifications.');
+        return;
+    }
+    try {
+        const perm = await Notification.requestPermission();
+        updateAdminNotifUI();
+        if (perm === 'granted') {
+            showNotification('System notifications enabled! 🔔');
+            new Notification('DASHOP Admin Alerts Active', {
+                body: 'You will receive notifications here whenever a new customer order is placed.',
+                icon: '/icons/icon-192x192.png'
+            });
+        } else if (perm === 'denied') {
+            alert('Notifications were blocked. Please enable notifications in your browser address bar / site settings.');
+        }
+    } catch (err) {
+        console.error('Permission request failed:', err);
+    }
+};
+
+window.testOrderNotification = function() {
+    playOrderAlertChime();
+    const testId = Math.floor(1000 + Math.random() * 9000);
+    const sampleOrder = {
+        id: testId,
+        customer_name: 'Test Customer',
+        customer_phone: '+1 555-0199',
+        total: '49.99',
+        created_at: new Date().toISOString()
+    };
+    showInAppNewOrderBanner(sampleOrder);
+    sendSystemOrderNotification(sampleOrder);
+    showNotification('Test alert & sound triggered! 🔔');
+};
+
+function updateAdminNotifUI() {
+    const soundEnabled = localStorage.getItem('dashop_admin_sound_enabled') !== 'false';
+    const soundBtn = document.getElementById('sound-toggle-btn');
+    const soundLabel = document.getElementById('sound-toggle-label');
+    if (soundBtn && soundLabel) {
+        soundLabel.textContent = soundEnabled ? 'On' : 'Off';
+        if (soundEnabled) {
+            soundBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition-all flex items-center gap-1';
+        } else {
+            soundBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-all flex items-center gap-1';
+        }
+    }
+
+    const pushBtn = document.getElementById('push-perm-btn');
+    const permPill = document.getElementById('notif-perm-pill');
+    if (pushBtn && permPill) {
+        if (!('Notification' in window)) {
+            pushBtn.textContent = 'Unsupported';
+            pushBtn.disabled = true;
+            permPill.textContent = 'Unsupported';
+            permPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant';
+        } else if (Notification.permission === 'granted') {
+            pushBtn.textContent = 'Allowed';
+            pushBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-secondary-container text-on-secondary-container';
+            permPill.textContent = 'Active';
+            permPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container';
+        } else if (Notification.permission === 'denied') {
+            pushBtn.textContent = 'Blocked';
+            pushBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-error-container text-error';
+            permPill.textContent = 'Blocked';
+            permPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-error-container text-error';
+        } else {
+            pushBtn.textContent = 'Enable';
+            pushBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition-all';
+            permPill.textContent = 'Off';
+            permPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant';
+        }
+    }
+}
+
+// Window exports
+window.playOrderAlertChime = playOrderAlertChime;
+window.sendSystemOrderNotification = sendSystemOrderNotification;
+window.showInAppNewOrderBanner = showInAppNewOrderBanner;
+window.handleIncomingNewOrder = handleIncomingNewOrder;
+window.setupAdminRealtimeOrderListener = setupAdminRealtimeOrderListener;
+window.startAdminOrdersPolling = startAdminOrdersPolling;
+window.initAdminOrderAlerts = initAdminOrderAlerts;
+window.checkHighlightedOrder = checkHighlightedOrder;

@@ -83,6 +83,46 @@
                     <span id="admin-user-email">sdpina.1990@gmail.com</span>
                 </div>
 
+                <!-- Order Alerts Bell Toggle -->
+                <div class="relative">
+                    <button id="admin-notif-btn" type="button" onclick="toggleAdminNotifSettings(event)" class="px-2.5 py-1.5 rounded-full bg-surface-container-low hover:bg-surface-container text-xs font-bold flex items-center gap-1.5 text-on-surface active:scale-95 transition-all" title="Order Notifications">
+                        <span class="material-symbols-outlined text-[18px] text-primary" id="admin-notif-bell-icon">notifications_active</span>
+                        <span class="hidden md:inline" id="admin-notif-status-text">Alerts</span>
+                        <span id="admin-notif-badge" class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                    </button>
+                    <div id="admin-notif-dropdown" class="absolute right-0 top-full mt-2 w-72 bg-surface-container-lowest rounded-2xl shadow-2xl border border-surface-container p-4 hidden z-50">
+                        <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+                            <h4 class="font-bold text-sm text-on-surface flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-primary text-[18px]">notifications</span>
+                                <span>Order Alerts</span>
+                            </h4>
+                            <span id="notif-perm-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">Active</span>
+                        </div>
+                        <div class="py-3 space-y-2.5 text-xs text-on-surface-variant">
+                            <p class="leading-relaxed">Instant sound and push notifications when a customer places an order.</p>
+                            <div class="flex items-center justify-between pt-1">
+                                <span class="font-semibold text-on-surface">Sound Alert:</span>
+                                <button type="button" onclick="toggleSoundAlert()" id="sound-toggle-btn" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition-all flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">volume_up</span>
+                                    <span id="sound-toggle-label">On</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between pt-1">
+                                <span class="font-semibold text-on-surface">System Push:</span>
+                                <button type="button" onclick="requestSystemNotifPermission()" id="push-perm-btn" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition-all">
+                                    Enable
+                                </button>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-surface-container flex gap-2">
+                            <button type="button" onclick="testOrderNotification()" class="w-full py-2 bg-surface-container hover:bg-surface-container-high rounded-xl text-xs font-bold text-on-surface transition-all flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">play_circle</span>
+                                <span>Test Sound & Alert</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Interactive Language Switcher -->
                 <div class="relative">
                     <button type="button" onclick="toggleLangMenu(event)" class="px-2.5 py-1.5 rounded-full bg-surface-container-low text-xs font-bold flex items-center gap-1 text-on-surface hover:bg-surface-container active:scale-95 transition-all">
