@@ -206,50 +206,50 @@
                 <div class="flex flex-col gap-space-xs">
                     <div class="flex items-center justify-between">
                         <h2 class="font-headline-md text-on-surface font-bold" data-i18n="quick_actions">Quick Actions</h2>
-                        <span class="font-label-sm text-on-surface-variant">Operations</span>
+                        <span class="font-label-sm text-on-surface-variant font-semibold">Store Operations</span>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                         <!-- Add Product -->
-                        <button onclick="openAddProductModal()" class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-sm text-left active:scale-[0.98]">
-                            <div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">add_box</span>
+                        <button onclick="openAddProductModal()" class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 sm:p-5 rounded-2xl bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-sm hover:shadow-md text-left active:scale-[0.98] border border-surface-container/70 group">
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                                <span class="material-symbols-outlined text-[28px] sm:text-[32px]">add_box</span>
                             </div>
                             <div class="min-w-0">
-                                <span class="font-label-md text-on-surface block truncate font-bold" data-i18n="add_new_product">Add Product</span>
-                                <span class="font-label-sm text-on-surface-variant truncate block">New listing</span>
+                                <span class="text-sm sm:text-base font-extrabold text-on-surface block truncate" data-i18n="add_new_product">Add Product</span>
+                                <span class="text-xs sm:text-sm text-on-surface-variant truncate block font-medium mt-0.5">New listing</span>
                             </div>
                         </button>
 
                         <!-- Manage Products -->
-                        <button onclick="openManageProductsModal()" class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-sm text-left active:scale-[0.98]">
-                            <div class="w-10 h-10 rounded-xl bg-secondary text-on-secondary flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                        <button onclick="openManageProductsModal()" class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 sm:p-5 rounded-2xl bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-sm hover:shadow-md text-left active:scale-[0.98] border border-surface-container/70 group">
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-secondary text-on-secondary flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                                <span class="material-symbols-outlined text-[28px] sm:text-[32px]">inventory_2</span>
                             </div>
                             <div class="min-w-0">
-                                <span class="font-label-md text-on-surface block truncate font-bold" data-i18n="manage_products">Products</span>
-                                <span class="font-label-sm text-on-surface-variant truncate block">Edit & Delete</span>
+                                <span class="text-sm sm:text-base font-extrabold text-on-surface block truncate" data-i18n="manage_products">Products</span>
+                                <span class="text-xs sm:text-sm text-on-surface-variant truncate block font-medium mt-0.5">Edit & stock</span>
                             </div>
                         </button>
 
                         <!-- View Orders -->
-                        <a href="/admin/orders" class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-sm text-left active:scale-[0.98]">
-                            <div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+                        <a href="/admin/orders" class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 sm:p-5 rounded-2xl bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-sm hover:shadow-md text-left active:scale-[0.98] border border-surface-container/70 group">
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary-container text-on-primary flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                                <span class="material-symbols-outlined text-[28px] sm:text-[32px]">receipt_long</span>
                             </div>
                             <div class="min-w-0">
-                                <span class="font-label-md text-on-surface block truncate font-bold" data-i18n="orders">Orders</span>
-                                <span class="font-label-sm text-on-surface-variant truncate block">Status & Delete</span>
+                                <span class="text-sm sm:text-base font-extrabold text-on-surface block truncate" data-i18n="orders">Orders</span>
+                                <span class="text-xs sm:text-sm text-on-surface-variant truncate block font-medium mt-0.5">Live status</span>
                             </div>
                         </a>
 
                         <!-- Manage Promos & Carousel Banners -->
-                        <button onclick="openManagePromosModal()" class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-sm text-left active:scale-[0.98]">
-                            <div class="w-10 h-10 rounded-xl bg-tertiary text-on-primary flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">campaign</span>
+                        <button onclick="openManagePromosModal()" class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 sm:p-5 rounded-2xl bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-sm hover:shadow-md text-left active:scale-[0.98] border border-surface-container/70 group">
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-tertiary text-on-primary flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                                <span class="material-symbols-outlined text-[28px] sm:text-[32px]">campaign</span>
                             </div>
                             <div class="min-w-0">
-                                <span class="font-label-md text-on-surface block truncate font-bold">Promos & Banners</span>
-                                <span class="font-label-sm text-on-surface-variant truncate block">Seasonal & Ads</span>
+                                <span class="text-sm sm:text-base font-extrabold text-on-surface block truncate">Promos & Ads</span>
+                                <span class="text-xs sm:text-sm text-on-surface-variant truncate block font-medium mt-0.5">Banners & codes</span>
                             </div>
                         </button>
                     </div>
@@ -382,6 +382,25 @@
                         <div id="product-images-preview" class="flex gap-2 overflow-x-auto py-1"></div>
                     </div>
 
+                    <!-- Product Variations / Options (Scent, Size, Color, Flavor, etc.) -->
+                    <div class="flex flex-col gap-2 p-3.5 rounded-2xl bg-surface-container-low/60 border border-surface-container">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-primary text-[20px]">style</span>
+                                <span class="font-label-md font-bold text-on-surface">Product Variations & Options</span>
+                            </div>
+                            <button type="button" onclick="adminAddVariationRow()" class="px-3 py-1 rounded-full bg-primary text-on-primary text-xs font-bold flex items-center gap-1 active:scale-95 transition shadow-sm hover:bg-primary-container">
+                                <span class="material-symbols-outlined text-[14px]">add</span>
+                                <span>Add Variation</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-on-surface-variant">Add flavors, scents, or sizes with their own price, stock, photo, and barcode.</p>
+                        
+                        <div id="admin-variations-container" class="flex flex-col gap-2 mt-1">
+                            <!-- Dynamic Variation Rows -->
+                        </div>
+                    </div>
+
                     <div class="flex flex-col gap-1">
                         <label class="font-label-md font-semibold text-on-surface" data-i18n="description">Description</label>
                         <textarea id="prod-desc" rows="3" placeholder="Provide product features, specs, and details..." class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface outline-none focus:ring-2 focus:ring-primary border border-surface-container"></textarea>
@@ -420,7 +439,7 @@
                         <table class="w-full text-left text-sm">
                             <thead>
                                 <tr class="border-b border-surface-container text-on-surface-variant text-xs uppercase">
-                                    <th class="p-3">Photo</th>
+                                    <th class="p-3 w-24 min-w-[90px]">Photo</th>
                                     <th class="p-3">Name</th>
                                     <th class="p-3">Category</th>
                                     <th class="p-3">Price</th>

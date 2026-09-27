@@ -319,20 +319,45 @@ function renderOrdersPage() {
                 </div>
             </div>
             <div class="hidden bg-surface-container-low px-space-base pb-space-base pt-space-xs flex flex-col gap-space-sm border-t border-surface-container" id="details-order-${index}">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
-                        <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block">Customer Contact</span>
-                        ${customerPhone ? `<p class="font-title-md text-primary font-bold mt-0.5 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">call</span> ${customerPhone}</p>` : ''}
-                        <p class="font-body-sm text-outline mt-0.5 font-mono">${o.customer_email || 'No email'}</p>
-                    </div>
-                    <div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
-                        <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block">Delivery Address / Note</span>
-                        <p class="font-body-md text-on-surface font-medium">${orderAddress || 'Store Pickup'}</p>
+                <!-- Customer Contact Card -->
+                <div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm border border-surface-container/60">
+                    <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block font-bold">Customer Contact</span>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                        ${customerPhone ? `<p class="font-title-md text-primary font-bold flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">call</span> ${customerPhone}</p>` : ''}
+                        <p class="font-body-sm text-on-surface-variant font-mono flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-outline">mail</span> ${o.customer_email || 'No email'}</p>
                     </div>
                 </div>
-                <div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
-                    <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block mb-1">Items Purchased</span>
-                    <p class="font-body-sm text-on-surface">${itemsSummary}</p>
+
+                <!-- Items Purchased with Photos -->
+                <div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm border border-surface-container/60">
+                    <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block font-bold mb-2">Items Purchased (${items.length})</span>
+                    <div class="flex flex-col gap-2">
+                        ${items.map(item => {
+                            let img = item.image;
+                            if (!img && adminProducts.length > 0) {
+                                const prod = adminProducts.find(p => String(p.id) === String(item.id) || p.name === item.name);
+                                if (prod) img = prod.image;
+                            }
+                            const isEmoji = !img || img.length <= 4 || !img.startsWith('http');
+                            const imgEl = isEmoji 
+                                ? `<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-xl shrink-0">${img || '📦'}</div>`
+                                : `<img src="${img}" class="w-12 h-12 rounded-xl object-contain bg-surface-container p-1 shrink-0 shadow-sm border border-surface-container/60">`;
+                            return `
+                                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low/70 border border-surface-container/40">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        ${imgEl}
+                                        <div class="min-w-0">
+                                            <p class="font-title-md text-xs sm:text-sm font-bold text-on-surface truncate">${item.name}</p>
+                                            <p class="font-body-sm text-xs text-on-surface-variant">Qty: <span class="font-bold text-primary">${item.quantity || 1}</span> • Unit: $${parseFloat(item.price || 0).toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                    <div class="font-extrabold text-xs sm:text-sm text-on-surface shrink-0 ml-2">
+                                        $${((parseFloat(item.price) || 0) * (item.quantity || 1)).toFixed(2)}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                     ${discountCode ? `<div class="mt-2 text-xs font-semibold text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-xs">local_offer</span> Promo Applied: ${discountCode}</div>` : ''}
                 </div>
                 <div class="flex items-center justify-between pt-2">
@@ -449,12 +474,12 @@ function renderProductsList() {
         }
         const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
         const imgEl = isEmoji 
-            ? `<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-xl">${primaryImg}</div>`
-            : `<img src="${primaryImg}" class="w-10 h-10 rounded-lg object-contain bg-surface-container p-0.5">`;
+            ? `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-surface-container flex items-center justify-center text-3xl shadow-sm">${primaryImg}</div>`
+            : `<img src="${primaryImg}" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-contain bg-surface-container p-1 shadow-sm border border-surface-container/70">`;
 
         html += `
         <tr class="border-b border-surface-container/60 hover:bg-surface-container-low/50 transition-colors">
-            <td class="p-3">${imgEl}</td>
+            <td class="p-3 w-24 sm:w-28">${imgEl}</td>
             <td class="p-3 font-semibold text-on-surface">
                 <div>${p.name} ${imgCount > 1 ? `<span class="ml-1 text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded-full font-mono font-bold">${imgCount} photos</span>` : ''}</div>
                 ${barcode ? `<div class="flex items-center gap-1 font-mono text-[11px] text-outline mt-0.5"><span class="material-symbols-outlined text-[13px]">barcode</span><span>${barcode}</span></div>` : ''}
@@ -492,6 +517,9 @@ window.openAddProductModal = function() {
     const barcodeInput = document.getElementById('prod-barcode');
     if (barcodeInput) barcodeInput.value = '';
 
+    const varsContainer = document.getElementById('admin-variations-container');
+    if (varsContainer) varsContainer.innerHTML = '';
+
     const manageModal = document.getElementById('manage-products-modal');
     if (manageModal && !manageModal.classList.contains('hidden')) {
         wasManageProductsOpen = true;
@@ -506,6 +534,60 @@ window.openAddProductModal = function() {
 
     const modal = document.getElementById('product-modal');
     if (modal) modal.classList.remove('hidden');
+};
+
+// Add a Variation row in Admin Product Editor
+window.adminAddVariationRow = function(data = {}) {
+    const container = document.getElementById('admin-variations-container');
+    if (!container) return;
+
+    const rowId = 'var_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+    const name = data.name || '';
+    const price = data.price !== undefined ? data.price : '';
+    const stock = data.stock !== undefined ? data.stock : '';
+    const barcode = data.barcode || '';
+    const imageUrl = data.imageUrl || '';
+
+    const row = document.createElement('div');
+    row.id = rowId;
+    row.className = 'admin-var-row p-3 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col gap-2 transition-all';
+    row.innerHTML = `
+        <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px] text-primary">label</span>
+                <span>Variation</span>
+            </span>
+            <button type="button" onclick="document.getElementById('${rowId}').remove()" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-error-container/40 text-error transition-colors" title="Remove variation">
+                <span class="material-symbols-outlined text-[16px]">close</span>
+            </button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+                <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Name / Scent / Size *</label>
+                <input type="text" class="var-name w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container focus:ring-1 focus:ring-primary" placeholder="e.g. Lavender, 32 oz" value="${name.replace(/"/g, '&quot;')}" required />
+            </div>
+            <div>
+                <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Price ($) *</label>
+                <input type="number" step="0.01" class="var-price w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container focus:ring-1 focus:ring-primary" placeholder="e.g. 4.99" value="${price}" required />
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div>
+                <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Stock Quantity *</label>
+                <input type="number" class="var-stock w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container focus:ring-1 focus:ring-primary" placeholder="e.g. 10" value="${stock}" required />
+            </div>
+            <div>
+                <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Barcode / SKU</label>
+                <input type="text" class="var-barcode w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container font-mono" placeholder="Optional barcode" value="${barcode.replace(/"/g, '&quot;')}" />
+            </div>
+            <div>
+                <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Image URL</label>
+                <input type="url" class="var-image w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container" placeholder="https://..." value="${imageUrl.replace(/"/g, '&quot;')}" />
+            </div>
+        </div>
+    `;
+
+    container.appendChild(row);
 };
 
 // Open Edit Product Modal
@@ -536,6 +618,7 @@ window.editProduct = function(id) {
     let slug = '';
     let existingImages = [];
     let barcode = product.barcode || '';
+    let variations = [];
 
     if (product.description && product.description.startsWith('{')) {
         try {
@@ -544,6 +627,7 @@ window.editProduct = function(id) {
             slug = meta.slug || '';
             existingImages = meta.images || [];
             if (meta.barcode) barcode = meta.barcode;
+            if (Array.isArray(meta.variations)) variations = meta.variations;
         } catch (e) {}
     }
 
@@ -552,6 +636,13 @@ window.editProduct = function(id) {
     document.getElementById('prod-batch-images').value = existingImages.join('\n');
     const barcodeInput = document.getElementById('prod-barcode');
     if (barcodeInput) barcodeInput.value = barcode;
+
+    // Populate variations
+    const varsContainer = document.getElementById('admin-variations-container');
+    if (varsContainer) {
+        varsContainer.innerHTML = '';
+        variations.forEach(v => window.adminAddVariationRow(v));
+    }
 
     renderImagePreviews(existingImages);
 
@@ -622,18 +713,44 @@ window.handleProductSubmit = async function(event) {
     const primaryImage = allImages[0] ? (allImages[0].length < 50 ? allImages[0] : '📦') : '📦';
     const barcode = (document.getElementById('prod-barcode')?.value || '').trim();
 
-    // Store metadata in description JSON to support unlimited batch images, slugs & barcodes
+    // Collect variations
+    const varRows = document.querySelectorAll('#admin-variations-container .admin-var-row');
+    const variations = [];
+    let totalVarStock = 0;
+    varRows.forEach(row => {
+        const vName = row.querySelector('.var-name')?.value.trim();
+        const vPrice = parseFloat(row.querySelector('.var-price')?.value) || price;
+        const vStock = parseInt(row.querySelector('.var-stock')?.value) || 0;
+        const vBarcode = row.querySelector('.var-barcode')?.value.trim() || '';
+        const vImage = row.querySelector('.var-image')?.value.trim() || '';
+        if (vName) {
+            variations.push({
+                id: 'var_' + Math.random().toString(36).substr(2, 9),
+                name: vName,
+                price: vPrice,
+                stock: vStock,
+                barcode: vBarcode,
+                imageUrl: vImage
+            });
+            totalVarStock += vStock;
+        }
+    });
+
+    const finalStock = variations.length > 0 ? (stock > 0 ? stock : totalVarStock) : stock;
+
+    // Store metadata in description JSON to support unlimited batch images, slugs, barcodes & variations
     const metadataDesc = JSON.stringify({
         desc: descText,
         slug: slug,
         images: allImages,
-        barcode: barcode
+        barcode: barcode,
+        variations: variations
     });
 
     const payload = {
         name,
         price,
-        stock,
+        stock: finalStock,
         category,
         image: primaryImage,
         description: metadataDesc,

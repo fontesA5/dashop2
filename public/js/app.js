@@ -714,7 +714,8 @@ window.filterByCategory = function(category, btnElement) {
     const searchInput = document.getElementById('catalog-search') || document.getElementById('search-input');
     const query = (searchInput?.value || '').toLowerCase().trim();
 
-    let filtered = allProducts;
+    // Only show in-stock products on catalog
+    let filtered = allProducts.filter(p => (parseInt(p.stock) || 0) > 0);
     if (query) {
         filtered = filtered.filter(p => {
             const b = getProductBarcode(p).toLowerCase();
@@ -1004,14 +1005,18 @@ window.searchCustomerOrder = async function() {
 
 function renderProductGrid(products, grid) {
     if (!grid) return;
-    if (products.length === 0) {
+    
+    // Only display in-stock products on user product list / catalog
+    const inStockProducts = (products || []).filter(p => (parseInt(p.stock) || 0) > 0);
+
+    if (inStockProducts.length === 0) {
         const emptyMsg = window.i18n ? window.i18n.t('no_products') : 'No products found.';
         grid.innerHTML = `<div class="col-span-full p-8 text-center text-on-surface-variant font-medium">${emptyMsg}</div>`;
         return;
     }
 
     let html = '';
-    products.forEach(p => {
+    inStockProducts.forEach(p => {
         const primaryImg = getProductPrimaryImage(p);
         const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
         const imgHtml = isEmoji 
@@ -1020,37 +1025,24 @@ function renderProductGrid(products, grid) {
 
         const slug = getProductSlug(p);
         const category = p.category || 'General';
-        const stockQty = typeof p.stock !== 'undefined' ? parseInt(p.stock) : 999;
-        const isOutOfStock = stockQty <= 0;
-        const outOfStockLabel = window.i18n ? window.i18n.t('out_of_stock') : 'Out of Stock';
 
         html += `
-        <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer ${isOutOfStock ? 'opacity-75' : ''}" onclick="viewProduct('${slug}', ${p.id})">
+        <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="viewProduct('${slug}', ${p.id})">
             <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
-                ${isOutOfStock ? `
-                <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-2">
-                    <span class="px-2.5 py-1 rounded-full bg-error text-white font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider shadow-md text-center">
-                        ${outOfStockLabel}
-                    </span>
-                </div>` : ''}
             </div>
             <div class="flex flex-col flex-1 justify-between">
                 <div>
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">${category}</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">${category}</span>
                     <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 leading-snug">
                         ${p.name}
                     </h4>
                 </div>
                 <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
                     <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${parseFloat(p.price).toFixed(2)}</span>
-                    ${isOutOfStock ? `
-                    <button class="cart-btn w-9 h-9 rounded-full bg-surface-container-highest text-outline flex items-center justify-center shadow-none cursor-not-allowed opacity-60" onclick="event.stopPropagation(); window.showNotification('${outOfStockLabel}')" type="button" title="${outOfStockLabel}">
-                        <span class="material-symbols-outlined text-[18px]">remove_shopping_cart</span>
-                    </button>` : `
                     <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="event.stopPropagation(); window.addToCartById(${p.id}, this)" type="button">
                         <span class="material-symbols-outlined text-[18px]">add</span>
-                    </button>`}
+                    </button>
                 </div>
             </div>
         </div>`;
@@ -1065,7 +1057,10 @@ function initNewArrivals() {
     if (!container || allProducts.length === 0) return;
 
     let html = '';
-    const newItems = allProducts.slice(0, 8);
+    const inStockItems = allProducts.filter(p => (parseInt(p.stock) || 0) > 0);
+    const newItems = inStockItems.slice(0, 8);
+    if (newItems.length === 0) return;
+
     newItems.forEach(p => {
         const primaryImg = getProductPrimaryImage(p);
         const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
@@ -1074,20 +1069,11 @@ function initNewArrivals() {
             : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${p.name}">`;
 
         const slug = getProductSlug(p);
-        const stockQty = typeof p.stock !== 'undefined' ? parseInt(p.stock) : 999;
-        const isOutOfStock = stockQty <= 0;
-        const outOfStockLabel = window.i18n ? window.i18n.t('out_of_stock') : 'Out of Stock';
 
         html += `
-        <div class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1 cursor-pointer ${isOutOfStock ? 'opacity-75' : ''}" onclick="viewProduct('${slug}', ${p.id})">
+        <div class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1 cursor-pointer" onclick="viewProduct('${slug}', ${p.id})">
             <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
-                ${isOutOfStock ? `
-                <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-2">
-                    <span class="px-2 py-0.5 rounded-full bg-error text-white font-extrabold text-[10px] uppercase tracking-wider shadow-md text-center">
-                        ${outOfStockLabel}
-                    </span>
-                </div>` : ''}
             </div>
             <div class="flex flex-col flex-1 justify-between">
                 <div>
@@ -1096,13 +1082,9 @@ function initNewArrivals() {
                 </div>
                 <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
                     <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${parseFloat(p.price).toFixed(2)}</span>
-                    ${isOutOfStock ? `
-                    <button class="cart-btn w-9 h-9 rounded-full bg-surface-container-highest text-outline flex items-center justify-center shadow-none cursor-not-allowed opacity-60" onclick="event.stopPropagation(); window.showNotification('${outOfStockLabel}')" type="button" title="${outOfStockLabel}">
-                        <span class="material-symbols-outlined text-[18px]">remove_shopping_cart</span>
-                    </button>` : `
                     <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="event.stopPropagation(); window.addToCartById(${p.id}, this)" type="button">
                         <span class="material-symbols-outlined text-[20px]">add</span>
-                    </button>`}
+                    </button>
                 </div>
             </div>
         </div>`;
@@ -1370,8 +1352,8 @@ function initSearchAutocomplete() {
             }
 
             const matches = allProducts.filter(p => 
-                p.name.toLowerCase().includes(val) || 
-                (p.category && p.category.toLowerCase().includes(val))
+                (parseInt(p.stock) || 0) > 0 &&
+                (p.name.toLowerCase().includes(val) || (p.category && p.category.toLowerCase().includes(val)))
             ).slice(0, 5);
 
             if (matches.length === 0) {
@@ -1646,7 +1628,8 @@ async function renderDiscoverMore(currentProduct) {
     // Exclude current product and config rows
     const available = allProducts.filter(p => 
         String(p.id) !== String(currentProduct.id) && 
-        p.category !== '__dashop_config__'
+        p.category !== '__dashop_config__' &&
+        (parseInt(p.stock) || 0) > 0
     );
 
     if (available.length === 0) {
