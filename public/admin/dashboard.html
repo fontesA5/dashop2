@@ -114,10 +114,14 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="pt-2 border-t border-surface-container flex gap-2">
+                        <div class="pt-2 border-t border-surface-container flex flex-col gap-2">
+                            <button type="button" onclick="openTelegramConfigModal()" class="w-full py-2 bg-[#0088cc]/10 hover:bg-[#0088cc]/20 text-[#0088cc] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95">
+                                <span class="material-symbols-outlined text-[16px]">send</span>
+                                <span>Telegram Phone Alerts</span>
+                            </button>
                             <button type="button" onclick="testOrderNotification()" class="w-full py-2 bg-surface-container hover:bg-surface-container-high rounded-xl text-xs font-bold text-on-surface transition-all flex items-center justify-center gap-1">
                                 <span class="material-symbols-outlined text-[16px]">play_circle</span>
-                                <span>Test Sound & Alert</span>
+                                <span>Test Sound & Browser Alert</span>
                             </button>
                         </div>
                     </div>
@@ -691,6 +695,83 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+        </div>
+    <!-- Telegram Phone Alerts Setup Modal -->
+    <div id="telegram-config-modal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+        <div class="bg-surface-container-lowest text-on-surface rounded-3xl shadow-2xl max-w-lg w-full p-5 sm:p-6 border border-surface-container overflow-hidden max-h-[92vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-surface-container">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-[#0088cc]/10 text-[#0088cc] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[24px]">send</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-on-surface">Telegram Phone Alerts</h3>
+                        <p class="text-xs text-on-surface-variant font-medium">Instant lock-screen notifications for new orders</p>
+                    </div>
+                </div>
+                <button onclick="closeTelegramConfigModal()" class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <div class="py-4 space-y-4 overflow-y-auto flex-1 text-xs">
+                <!-- Toggle Active -->
+                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container-low border border-surface-container">
+                    <div>
+                        <span class="font-bold text-sm block text-on-surface">Enable Telegram Order Alerts</span>
+                        <span class="text-xs text-on-surface-variant">Buzz your phone instantly whenever an order is placed</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="tg-alerts-enabled" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    </label>
+                </div>
+
+                <!-- Bot Token -->
+                <div>
+                    <label class="block font-bold text-on-surface mb-1">Telegram Bot Token</label>
+                    <input type="password" id="tg-bot-token" placeholder="e.g. 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz" class="w-full px-3.5 py-2.5 rounded-xl border border-surface-container bg-surface-container-lowest font-mono text-xs focus:outline-none focus:border-primary">
+                    <span class="text-[11px] text-outline mt-1 block">Created via @BotFather in Telegram.</span>
+                </div>
+
+                <!-- Chat ID -->
+                <div>
+                    <label class="block font-bold text-on-surface mb-1">Your Telegram Chat ID</label>
+                    <input type="text" id="tg-chat-id" placeholder="e.g. 123456789" class="w-full px-3.5 py-2.5 rounded-xl border border-surface-container bg-surface-container-lowest font-mono text-xs focus:outline-none focus:border-primary">
+                    <span class="text-[11px] text-outline mt-1 block">Your personal ID (found by messaging @userinfobot).</span>
+                </div>
+
+                <!-- Step-by-Step Instructions -->
+                <div class="p-3.5 rounded-2xl bg-surface-container-low border border-surface-container space-y-2 text-on-surface-variant leading-relaxed">
+                    <div class="font-bold text-primary flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">help</span>
+                        <span>1-Minute Setup Instructions:</span>
+                    </div>
+                    <ol class="list-decimal pl-4 space-y-1.5 text-[11px]">
+                        <li>Open Telegram on your phone and search for <a href="https://t.me/BotFather" target="_blank" class="text-primary font-bold underline">@BotFather</a>.</li>
+                        <li>Send <code>/newbot</code>, give it a name (e.g. <i>My Store Bot</i>), and copy the <b>HTTP API Token</b> into the field above.</li>
+                        <li>Search for <a href="https://t.me/userinfobot" target="_blank" class="text-primary font-bold underline">@userinfobot</a> and send <code>/start</code> to copy your numeric <b>Id</b> into the Chat ID field.</li>
+                        <li>Open your newly created bot in Telegram and tap <b>Start</b>.</li>
+                        <li>Tap <b>"Send Test Alert to Phone"</b> below to verify your phone rings!</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-surface-container flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
+                <button type="button" onclick="testTelegramAlert()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[16px] text-[#0088cc]">send</span>
+                    <span>Send Test Alert to Phone</span>
+                </button>
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <button type="button" onclick="closeTelegramConfigModal()" class="px-4 py-2.5 rounded-xl text-outline hover:text-on-surface font-semibold text-xs transition-colors">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="saveTelegramConfig()" class="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-xs shadow-md hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">save</span>
+                        <span>Save Settings</span>
+                    </button>
                 </div>
             </div>
         </div>

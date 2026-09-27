@@ -484,6 +484,11 @@ async function handleCheckout(event) {
         });
         localStorage.setItem('dashop_customer_orders', JSON.stringify(custOrders));
 
+        // Background Telegram Order Notification to Admin Phone
+        sendTelegramOrderNotification(createdOrder, cart, phone, name).catch(e => {
+            console.warn('[Telegram Alert] Error in background dispatch:', e);
+        });
+
         // Preserve cart items and promo snapshot for the confirmation modal
         const snapshotItems = [...cart];
         const snapshotTotal = finalTotal;
@@ -1957,6 +1962,75 @@ async function triggerPWAInstall() {
     }
 }
 
+// Dispatch Instant Telegram Order Notification to Admin Phone
+async function sendTelegramOrderNotification(order, cartItems, customerPhone, customerName) {
+    try {
+        let config = null;
+        if (window.supabaseClient) {
+            const { data } = await window.supabaseClient
+                .from('products')
+                .select('description')
+                .eq('category', '__dashop_config__')
+                .eq('name', '__dashop_telegram_config__')
+                .maybeSingle();
+            if (data && data.description) {
+                try { config = JSON.parse(data.description); } catch(e) {}
+            }
+        }
+        if (!config) {
+            const local = localStorage.getItem('dashop_telegram_config');
+            if (local) {
+                try { config = JSON.parse(local); } catch(e) {}
+            }
+        }
+
+        if (!config || config.enabled === false || !config.botToken || !config.chatId) {
+            console.log('[Telegram Alert] Telegram alert not enabled or not configured yet.');
+            return;
+        }
+
+        const itemsList = (cartItems || []).map(i => {
+            const qty = i.quantity || 1;
+            const price = parseFloat(i.price || 0).toFixed(2);
+            return `• <b>${i.name}</b> (x${qty}) — $${price}`;
+        }).join('\n') || 'Custom items';
+
+        const customer = customerName || order.customer_name || 'Customer';
+        const phone = customerPhone || order.customer_phone || (order.items_json ? JSON.parse(order.items_json).phone : '') || 'Not provided';
+        const total = parseFloat(order.total || 0).toFixed(2);
+        const orderId = order.id || 'N/A';
+
+        const text = `🛍️ <b>NEW DASHOP ORDER RECEIVED!</b>\n\n` +
+                     `📦 <b>Order ID:</b> #${orderId}\n` +
+                     `👤 <b>Customer:</b> ${customer}\n` +
+                     `📞 <b>Phone:</b> <code>${phone}</code>\n` +
+                     `💰 <b>Total Paid:</b> <b>$${total}</b>\n\n` +
+                     `🛒 <b>Items Purchased:</b>\n${itemsList}\n\n` +
+                     `🌐 <b>Store:</b> dashop.site\n` +
+                     `🔗 <a href="https://dashop.site/admin/orders.html#order-card-${orderId}">View Order in Admin Hub</a>`;
+
+        const url = `https://api.telegram.org/bot${config.botToken.trim()}/sendMessage`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: config.chatId.trim(),
+                text: text,
+                parse_mode: 'HTML',
+                disable_web_page_preview: true
+            })
+        });
+        const resData = await res.json();
+        if (resData.ok) {
+            console.log('[Telegram Alert] Successfully dispatched order alert to Telegram');
+        } else {
+            console.warn('[Telegram Alert] Telegram API response not OK:', resData);
+        }
+    } catch (err) {
+        console.warn('[Telegram Alert] Failed to dispatch order alert:', err);
+    }
+}
+
 // Export for global window access
 window.viewProduct = viewProduct;
 window.openCart = openCart;
@@ -1976,3 +2050,4 @@ window.initPWAInstallPrompt = initPWAInstallPrompt;
 window.renderPWAInstallModal = renderPWAInstallModal;
 window.dismissPWAInstallModal = dismissPWAInstallModal;
 window.triggerPWAInstall = triggerPWAInstall;
+window.sendTelegramOrderNotification = sendTelegramOrderNotification;

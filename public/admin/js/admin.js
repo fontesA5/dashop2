@@ -1671,6 +1671,159 @@ function updateAdminNotifUI() {
     }
 }
 
+// =========================================================================
+// Telegram Store Bot Configuration & Testing
+// =========================================================================
+
+window.openTelegramConfigModal = async function() {
+    const modal = document.getElementById('telegram-config-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    // Close alerts dropdown
+    const dd = document.getElementById('admin-notif-dropdown');
+    if (dd) dd.classList.add('hidden');
+
+    await loadTelegramConfigToForm();
+};
+
+window.closeTelegramConfigModal = function() {
+    const modal = document.getElementById('telegram-config-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+async function loadTelegramConfigToForm() {
+    let config = null;
+    try {
+        if (window.supabaseClient) {
+            const { data } = await window.supabaseClient
+                .from('products')
+                .select('description')
+                .eq('category', '__dashop_config__')
+                .eq('name', '__dashop_telegram_config__')
+                .maybeSingle();
+            if (data && data.description) {
+                config = JSON.parse(data.description);
+            }
+        }
+    } catch (e) {
+        console.warn('Could not load Telegram config from Supabase:', e);
+    }
+
+    if (!config) {
+        const local = localStorage.getItem('dashop_telegram_config');
+        if (local) {
+            try { config = JSON.parse(local); } catch(e) {}
+        }
+    }
+
+    if (config) {
+        const enabledEl = document.getElementById('tg-alerts-enabled');
+        const tokenEl = document.getElementById('tg-bot-token');
+        const chatEl = document.getElementById('tg-chat-id');
+        if (enabledEl) enabledEl.checked = config.enabled !== false;
+        if (tokenEl) tokenEl.value = config.botToken || '';
+        if (chatEl) chatEl.value = config.chatId || '';
+    }
+}
+
+window.saveTelegramConfig = async function() {
+    const enabled = document.getElementById('tg-alerts-enabled')?.checked ?? true;
+    const botToken = document.getElementById('tg-bot-token')?.value?.trim() || '';
+    const chatId = document.getElementById('tg-chat-id')?.value?.trim() || '';
+
+    const config = {
+        enabled: enabled,
+        botToken: botToken,
+        chatId: chatId
+    };
+
+    // Save locally first
+    localStorage.setItem('dashop_telegram_config', JSON.stringify(config));
+
+    // Save to Supabase for persistence across all store sessions
+    if (window.supabaseClient) {
+        try {
+            const { data: existing } = await window.supabaseClient
+                .from('products')
+                .select('id')
+                .eq('category', '__dashop_config__')
+                .eq('name', '__dashop_telegram_config__')
+                .maybeSingle();
+
+            const payload = {
+                name: '__dashop_telegram_config__',
+                description: JSON.stringify(config),
+                price: 0,
+                stock: 0,
+                category: '__dashop_config__'
+            };
+
+            if (existing && existing.id) {
+                await window.supabaseClient
+                    .from('products')
+                    .update(payload)
+                    .eq('id', existing.id);
+            } else {
+                await window.supabaseClient
+                    .from('products')
+                    .insert([payload]);
+            }
+            console.log('[Telegram Config] Saved to Supabase successfully');
+        } catch (err) {
+            console.error('[Telegram Config] Failed to save to Supabase:', err);
+        }
+    }
+
+    showNotification('Telegram settings saved successfully! 📱');
+    window.closeTelegramConfigModal();
+};
+
+window.testTelegramAlert = async function() {
+    const botToken = document.getElementById('tg-bot-token')?.value?.trim();
+    const chatId = document.getElementById('tg-chat-id')?.value?.trim();
+
+    if (!botToken || !chatId) {
+        alert('Please enter both your Telegram Bot Token and Chat ID first.');
+        return;
+    }
+
+    const testTime = new Date().toLocaleTimeString();
+    const text = `🔔 <b>TEST ALERT - DASHOP STORE</b>\n\n` +
+                 `🎉 <b>Success!</b> Your phone is successfully linked to DASHOP.\n\n` +
+                 `Whenever a customer places an order, your phone will buzz immediately with the order details and customer contact.\n\n` +
+                 `⏱ <i>Time tested: ${testTime}</i>\n` +
+                 `🌐 <b>Store:</b> dashop.site`;
+
+    try {
+        const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: text,
+                parse_mode: 'HTML'
+            })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+            showNotification('✅ Test message sent! Check your Telegram on your phone.');
+            if (typeof playOrderAlertChime === 'function') playOrderAlertChime();
+        } else {
+            alert('Telegram Error: ' + (data.description || 'Check your bot token and chat ID.'));
+        }
+    } catch (err) {
+        console.error('Test Telegram alert failed:', err);
+        alert('Failed to connect to Telegram API: ' + err.message);
+    }
+};
+
 // Window exports
 window.playOrderAlertChime = playOrderAlertChime;
 window.sendSystemOrderNotification = sendSystemOrderNotification;
@@ -1680,3 +1833,7 @@ window.setupAdminRealtimeOrderListener = setupAdminRealtimeOrderListener;
 window.startAdminOrdersPolling = startAdminOrdersPolling;
 window.initAdminOrderAlerts = initAdminOrderAlerts;
 window.checkHighlightedOrder = checkHighlightedOrder;
+window.openTelegramConfigModal = openTelegramConfigModal;
+window.closeTelegramConfigModal = closeTelegramConfigModal;
+window.saveTelegramConfig = saveTelegramConfig;
+window.testTelegramAlert = testTelegramAlert;
