@@ -322,16 +322,15 @@ function renderOrdersPage() {
                 <!-- Customer Contact Card -->
                 <div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm border border-surface-container/60">
                     <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block font-bold">Customer Contact</span>
-                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
-                        ${customerPhone ? `<p class="font-title-md text-primary font-bold flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">call</span> ${customerPhone}</p>` : ''}
-                        <p class="font-body-sm text-on-surface-variant font-mono flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-outline">mail</span> ${o.customer_email || 'No email'}</p>
+                    <div class="flex items-center gap-x-4 gap-y-1 mt-1">
+                        ${customerPhone ? `<p class="font-title-md text-primary font-bold flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">call</span> ${customerPhone}</p>` : '<p class="font-body-sm text-on-surface-variant">No phone number</p>'}
                     </div>
                 </div>
 
                 <!-- Items Purchased with Photos -->
                 <div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm border border-surface-container/60">
                     <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block font-bold mb-2">Items Purchased (${items.length})</span>
-                    <div class="flex flex-col gap-2">
+                    <div class="flex flex-col gap-2.5">
                         ${items.map(item => {
                             let img = item.image;
                             if (!img && adminProducts.length > 0) {
@@ -340,18 +339,18 @@ function renderOrdersPage() {
                             }
                             const isEmoji = !img || img.length <= 4 || !img.startsWith('http');
                             const imgEl = isEmoji 
-                                ? `<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-xl shrink-0">${img || '📦'}</div>`
-                                : `<img src="${img}" class="w-12 h-12 rounded-xl object-contain bg-surface-container p-1 shrink-0 shadow-sm border border-surface-container/60">`;
+                                ? `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-surface-container flex items-center justify-center text-3xl sm:text-4xl shrink-0 shadow-sm">${img || '📦'}</div>`
+                                : `<img src="${img}" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-contain bg-surface-container p-1.5 shrink-0 shadow-sm border border-surface-container/70">`;
                             return `
-                                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low/70 border border-surface-container/40">
-                                    <div class="flex items-center gap-3 min-w-0">
+                                <div class="flex items-center justify-between p-3 rounded-2xl bg-surface-container-low/70 border border-surface-container/40 gap-3">
+                                    <div class="flex items-center gap-3.5 min-w-0">
                                         ${imgEl}
                                         <div class="min-w-0">
-                                            <p class="font-title-md text-xs sm:text-sm font-bold text-on-surface truncate">${item.name}</p>
-                                            <p class="font-body-sm text-xs text-on-surface-variant">Qty: <span class="font-bold text-primary">${item.quantity || 1}</span> • Unit: $${parseFloat(item.price || 0).toFixed(2)}</p>
+                                            <p class="font-title-md text-sm sm:text-base font-bold text-on-surface leading-snug truncate">${item.name}</p>
+                                            <p class="font-body-sm text-xs sm:text-sm text-on-surface-variant mt-1">Qty: <span class="font-bold text-primary">${item.quantity || 1}</span> • Unit: $${parseFloat(item.price || 0).toFixed(2)}</p>
                                         </div>
                                     </div>
-                                    <div class="font-extrabold text-xs sm:text-sm text-on-surface shrink-0 ml-2">
+                                    <div class="font-extrabold text-sm sm:text-base text-on-surface shrink-0 text-right">
                                         $${((parseFloat(item.price) || 0) * (item.quantity || 1)).toFixed(2)}
                                     </div>
                                 </div>
