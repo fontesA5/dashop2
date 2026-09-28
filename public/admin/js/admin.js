@@ -152,6 +152,34 @@ async function loadAdminData() {
     renderProductsList();
 }
 
+// Helper: Robust image extraction across direct URL and JSON metadata
+function getAdminProductPrimaryImage(p) {
+    if (!p) return '📦';
+    // 1. Direct http/data URL
+    if (p.image && (p.image.startsWith('http') || p.image.startsWith('data:image') || p.image.startsWith('/'))) {
+        return p.image;
+    }
+    // 2. Metadata inside description JSON
+    if (p.description && p.description.startsWith('{')) {
+        try {
+            const meta = JSON.parse(p.description);
+            if (Array.isArray(meta.images) && meta.images.length > 0) {
+                const u = typeof meta.images[0] === 'string' ? meta.images[0] : (meta.images[0] && meta.images[0].url);
+                if (u && (u.startsWith('http') || u.startsWith('data:image') || u.startsWith('/'))) {
+                    return u;
+                }
+            }
+            if (meta.imageUrl && (meta.imageUrl.startsWith('http') || meta.imageUrl.startsWith('data:image') || meta.imageUrl.startsWith('/'))) {
+                return meta.imageUrl;
+            }
+            if (meta.image && (meta.image.startsWith('http') || meta.image.startsWith('data:image') || meta.image.startsWith('/'))) {
+                return meta.image;
+            }
+        } catch (e) {}
+    }
+    return p.image || '📦';
+}
+
 // 1. Calculate & Render Real KPIs on Dashboard
 function renderDashboardKPIs() {
     const revEl = document.getElementById('kpi-revenue');
@@ -196,23 +224,31 @@ function renderDashboardKPIs() {
 
             if (outOfStockListEl) {
                 outOfStockListEl.innerHTML = outOfStock.map(p => {
-                    const imgUrl = (p.image && p.image.startsWith('http')) ? p.image : '/icons/icon-192x192.png';
+                    const primaryImg = getAdminProductPrimaryImage(p);
+                    const isEmoji = !primaryImg || primaryImg.length <= 4 || (!primaryImg.startsWith('http') && !primaryImg.startsWith('data:image') && !primaryImg.startsWith('/'));
                     const priceFormatted = '$' + parseFloat(p.price || 0).toFixed(2);
+
+                    const imgEl = isEmoji 
+                        ? `<div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-surface-container flex items-center justify-center text-3xl shrink-0 shadow-xs">${primaryImg}</div>`
+                        : `<img src="${primaryImg}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-contain bg-surface-container-low p-1 border border-surface-container/80 shrink-0 shadow-xs" alt="${p.name || 'Product'}">`;
+
                     return `
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-xs hover:border-error/40 transition-all">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <img src="${imgUrl}" onerror="this.src='/icons/icon-192x192.png'" class="w-12 h-12 rounded-lg object-contain bg-surface-container-low border border-surface-container shrink-0" alt="${p.name || 'Product'}">
+                    <div class="flex items-center justify-between p-3 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs hover:border-error/40 hover:shadow-md transition-all">
+                        <div class="flex items-center gap-3 min-w-0">
+                            ${imgEl}
                             <div class="min-w-0">
-                                <h4 class="font-bold text-xs text-on-surface truncate" title="${p.name || ''}">${p.name || 'Unnamed Product'}</h4>
-                                <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-on-surface-variant">
-                                    <span class="px-1.5 py-0.5 rounded bg-error/10 text-error font-extrabold text-[10px]">0 in stock</span>
+                                <h4 class="font-bold text-xs sm:text-sm text-on-surface truncate leading-tight" title="${p.name || ''}">${p.name || 'Unnamed Product'}</h4>
+                                <div class="flex items-center gap-1.5 mt-1 text-[11px] text-on-surface-variant font-medium">
+                                    <span class="px-2 py-0.5 rounded-full bg-error-container text-error font-extrabold text-[10px]">0 in stock</span>
                                     <span>•</span>
-                                    <span class="font-semibold text-on-surface">${priceFormatted}</span>
+                                    <span class="font-bold text-on-surface">${priceFormatted}</span>
+                                    <span>•</span>
+                                    <span class="truncate text-outline">${p.category || 'General'}</span>
                                 </div>
                             </div>
                         </div>
-                        <button onclick="editProduct(${p.id})" class="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-primary hover:text-white text-primary text-xs font-bold transition-all shrink-0 ml-2 active:scale-95 flex items-center gap-1" title="Restock product">
-                            <span class="material-symbols-outlined text-[14px]">edit_note</span>
+                        <button onclick="editProduct(${p.id})" class="px-3 py-2 rounded-xl bg-surface-container hover:bg-primary hover:text-white text-primary text-xs font-bold transition-all shrink-0 ml-2 active:scale-95 flex items-center gap-1 border border-surface-container" title="Restock product">
+                            <span class="material-symbols-outlined text-[16px]">edit_note</span>
                             <span>Restock</span>
                         </button>
                     </div>
@@ -379,14 +415,14 @@ function renderOrdersPage() {
                     <div class="flex flex-col gap-2.5">
                         ${items.map(item => {
                             let img = item.image;
-                            if (!img && adminProducts.length > 0) {
+                            if ((!img || !img.startsWith('http')) && adminProducts.length > 0) {
                                 const prod = adminProducts.find(p => String(p.id) === String(item.id) || p.name === item.name);
-                                if (prod) img = prod.image;
+                                if (prod) img = getAdminProductPrimaryImage(prod);
                             }
-                            const isEmoji = !img || img.length <= 4 || !img.startsWith('http');
+                            const isEmoji = !img || img.length <= 4 || (!img.startsWith('http') && !img.startsWith('data:image') && !img.startsWith('/'));
                             const imgEl = isEmoji 
                                 ? `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-surface-container flex items-center justify-center text-3xl sm:text-4xl shrink-0 shadow-sm">${img || '📦'}</div>`
-                                : `<img src="${img}" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-contain bg-surface-container p-1.5 shrink-0 shadow-sm border border-surface-container/70">`;
+                                : `<img src="${img}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-contain bg-surface-container p-1.5 shrink-0 shadow-sm border border-surface-container/70">`;
                             return `
                                 <div class="flex items-center justify-between p-3 rounded-2xl bg-surface-container-low/70 border border-surface-container/40 gap-3">
                                     <div class="flex items-center gap-3.5 min-w-0">
@@ -504,23 +540,22 @@ function renderProductsList() {
 
     let html = '';
     adminProducts.forEach(p => {
-        let primaryImg = p.image || '📦';
+        let primaryImg = getAdminProductPrimaryImage(p);
         let imgCount = 1;
         let barcode = p.barcode || '';
         if (p.description && p.description.startsWith('{')) {
             try {
                 const meta = JSON.parse(p.description);
                 if (meta.images && meta.images.length > 0) {
-                    primaryImg = meta.images[0];
                     imgCount = meta.images.length;
                 }
                 if (meta.barcode) barcode = meta.barcode;
             } catch (e) {}
         }
-        const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
+        const isEmoji = !primaryImg || primaryImg.length <= 4 || (!primaryImg.startsWith('http') && !primaryImg.startsWith('data:image') && !primaryImg.startsWith('/'));
         const imgEl = isEmoji 
             ? `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-surface-container flex items-center justify-center text-3xl shadow-sm">${primaryImg}</div>`
-            : `<img src="${primaryImg}" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-contain bg-surface-container p-1 shadow-sm border border-surface-container/70">`;
+            : `<img src="${primaryImg}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-contain bg-surface-container p-1 shadow-sm border border-surface-container/70">`;
 
         html += `
         <tr class="border-b border-surface-container/60 hover:bg-surface-container-low/50 transition-colors">
