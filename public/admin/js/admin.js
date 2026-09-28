@@ -178,15 +178,46 @@ function renderDashboardKPIs() {
     // Products Count
     if (prodsEl) prodsEl.textContent = adminProducts.length;
 
-    // Low stock items (< 5 in stock)
-    const lowStock = adminProducts.filter(p => (parseInt(p.stock) || 0) < 5);
-    if (lowStockCountEl) lowStockCountEl.textContent = `${lowStock.length} low`;
+    // Out of stock items (stock <= 0)
+    const outOfStock = adminProducts.filter(p => (parseInt(p.stock) || 0) <= 0);
+    const outOfStockListEl = document.getElementById('out-of-stock-products-list');
+    const outOfStockBadgeEl = document.getElementById('out-of-stock-badge');
+
+    if (lowStockCountEl) lowStockCountEl.textContent = `${outOfStock.length} out of stock`;
+    if (outOfStockBadgeEl) outOfStockBadgeEl.textContent = `${outOfStock.length} item${outOfStock.length === 1 ? '' : 's'}`;
+
     if (lowStockAlertEl) {
-        if (lowStock.length > 0) {
+        if (outOfStock.length > 0) {
             lowStockAlertEl.classList.remove('hidden');
             const alertText = lowStockAlertEl.querySelector('#low-stock-text');
             if (alertText) {
-                alertText.textContent = `${lowStock.length} items require restock: ${lowStock.map(p => p.name).slice(0, 3).join(', ')}`;
+                alertText.textContent = `${outOfStock.length} product${outOfStock.length === 1 ? '' : 's'} with 0 stock (hidden from customer catalog until restocked).`;
+            }
+
+            if (outOfStockListEl) {
+                outOfStockListEl.innerHTML = outOfStock.map(p => {
+                    const imgUrl = (p.image && p.image.startsWith('http')) ? p.image : '/icons/icon-192x192.png';
+                    const priceFormatted = '$' + parseFloat(p.price || 0).toFixed(2);
+                    return `
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-xs hover:border-error/40 transition-all">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <img src="${imgUrl}" onerror="this.src='/icons/icon-192x192.png'" class="w-12 h-12 rounded-lg object-contain bg-surface-container-low border border-surface-container shrink-0" alt="${p.name || 'Product'}">
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-xs text-on-surface truncate" title="${p.name || ''}">${p.name || 'Unnamed Product'}</h4>
+                                <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-on-surface-variant">
+                                    <span class="px-1.5 py-0.5 rounded bg-error/10 text-error font-extrabold text-[10px]">0 in stock</span>
+                                    <span>•</span>
+                                    <span class="font-semibold text-on-surface">${priceFormatted}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="editProduct(${p.id})" class="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-primary hover:text-white text-primary text-xs font-bold transition-all shrink-0 ml-2 active:scale-95 flex items-center gap-1" title="Restock product">
+                            <span class="material-symbols-outlined text-[14px]">edit_note</span>
+                            <span>Restock</span>
+                        </button>
+                    </div>
+                    `;
+                }).join('');
             }
         } else {
             lowStockAlertEl.classList.add('hidden');

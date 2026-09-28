@@ -223,26 +223,35 @@
                         </div>
                         <div>
                             <span id="kpi-products" class="font-price-hero text-on-surface font-extrabold tracking-tight block text-2xl">0</span>
-                            <span id="kpi-low-stock-count" class="font-label-sm text-error font-semibold">0 low stock</span>
+                            <span id="kpi-low-stock-count" class="font-label-sm text-error font-semibold">0 out of stock</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. Store Performance Alert Banner (Low stock) -->
-                <div id="low-stock-alert-box" class="p-space-base rounded-2xl bg-surface-container-low flex items-start gap-space-md shadow-sm hidden">
-                    <div class="w-10 h-10 rounded-xl bg-error-container flex items-center justify-center text-error shrink-0">
-                        <span class="material-symbols-outlined text-[22px]">notification_important</span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="font-label-lg font-bold text-on-surface">Low Stock Notice</span>
-                            <span class="font-label-sm text-error font-semibold">Action Required</span>
+                <!-- 3. Store Performance Alert Banner (Out of Stock Notice with Product List) -->
+                <div id="low-stock-alert-box" class="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-error/20 flex flex-col gap-3 shadow-sm hidden">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start sm:items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-error-container flex items-center justify-center text-error shrink-0">
+                                <span class="material-symbols-outlined text-[24px]">production_quantity_limits</span>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-label-lg font-bold text-on-surface text-base">Out of Stock Notice</span>
+                                    <span id="out-of-stock-badge" class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-error-container text-error">0 items</span>
+                                </div>
+                                <p id="low-stock-text" class="font-body-sm text-on-surface-variant text-xs mt-0.5">These products have 0 stock and are hidden from customer catalog until restocked.</p>
+                            </div>
                         </div>
-                        <p id="low-stock-text" class="font-body-sm text-on-surface-variant mt-0.5">Some items require replenishment.</p>
-                        <button onclick="openManageProductsModal()" class="mt-2 px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-label-sm font-bold shadow-sm hover:bg-surface-bright transition-all inline-flex items-center gap-1">
+                        <button onclick="openManageProductsModal()" class="px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-primary font-label-sm font-bold shadow-sm hover:bg-surface-bright transition-all inline-flex items-center gap-1 text-xs shrink-0 border border-surface-container">
                             <span>Manage Products</span>
                             <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                         </button>
+                    </div>
+
+                    <!-- Scrollable Container with Out of Stock Product Cards -->
+                    <div id="out-of-stock-products-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1 max-h-80 overflow-y-auto pr-1">
+                        <!-- Populated dynamically by renderDashboardKPIs() in admin.js -->
                     </div>
                 </div>
 
