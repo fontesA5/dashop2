@@ -71,3 +71,32 @@ INSERT INTO products (name, description, price, stock, image, category) VALUES
 -- Note: Use bcrypt or Argon2 in production for password hashing
 INSERT INTO admin_users (email, password_hash, role) VALUES
 ('admin@dashop.com', '$2b$10$N9qo8uLOickgx2ZMRZoMyeIJjZMiagBZkpQ46dVn5G3YhZzXcWfIq', 'admin');
+
+-- ==============================================================================
+-- Row-Level Security (RLS) Configuration
+-- ==============================================================================
+
+-- Enable RLS on all tables
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
+
+-- Products Policies
+CREATE POLICY "Allow public read access to products" ON products FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Allow public insert to products" ON products FOR INSERT TO anon, authenticated WITH CHECK (true);
+CREATE POLICY "Allow public update to products" ON products FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public delete to products" ON products FOR DELETE TO anon, authenticated USING (true);
+
+-- Orders Policies
+CREATE POLICY "Allow public read access to orders" ON orders FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Allow public insert to orders" ON orders FOR INSERT TO anon, authenticated WITH CHECK (true);
+CREATE POLICY "Allow public update to orders" ON orders FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public delete to orders" ON orders FOR DELETE TO anon, authenticated USING (true);
+
+-- Sessions Policies
+CREATE POLICY "Allow public all access to sessions" ON sessions FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+-- Admin Users Policies
+CREATE POLICY "Allow public read access to active admin users" ON admin_users FOR SELECT TO anon, authenticated USING (is_active = true);
+
