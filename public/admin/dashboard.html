@@ -786,6 +786,49 @@
         </div>
     </div>
 
+    <!-- Product Detail Modal (Purchased Items Inspection) -->
+    <div id="product-detail-modal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4" onclick="if(event.target === this) closeProductDetailModal()">
+        <div class="bg-surface-container-lowest text-on-surface rounded-3xl shadow-2xl max-w-lg w-full p-5 sm:p-6 border border-surface-container overflow-hidden max-h-[92vh] flex flex-col transition-all">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-3.5 border-b border-surface-container">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="font-bold text-base text-on-surface truncate">Product Details</h3>
+                        <p class="text-xs text-on-surface-variant font-medium">Purchased item inspection</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeProductDetailModal()" aria-label="Close product modal" class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <!-- Modal Content (Dynamically Populated) -->
+            <div id="product-detail-modal-body" class="py-4 space-y-4 overflow-y-auto flex-1">
+                <!-- Injected via openProductDetailModal() in admin.js -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="pt-3.5 border-t border-surface-container flex items-center justify-between gap-3">
+                <a id="product-modal-store-link" href="#" target="_blank" class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-[16px] text-primary">open_in_new</span>
+                    <span>View on Storefront</span>
+                </a>
+                <div class="flex items-center gap-2">
+                    <button id="product-modal-restock-btn" type="button" class="hidden px-4 py-2.5 rounded-xl bg-secondary text-on-secondary font-bold text-xs shadow-md hover:bg-secondary/90 active:scale-95 transition-all items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                        <span>Restock</span>
+                    </button>
+                    <button type="button" onclick="closeProductDetailModal()" class="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-xs shadow-md hover:bg-primary/90 active:scale-95 transition-all">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="/js/scanner.js"></script>

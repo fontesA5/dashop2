@@ -230,14 +230,25 @@ function renderDashboardKPIs() {
 
                     const imgEl = isEmoji 
                         ? `<div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-surface-container flex items-center justify-center text-3xl shrink-0 shadow-xs">${primaryImg}</div>`
-                        : `<img src="${primaryImg}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-contain bg-surface-container-low p-1 border border-surface-container/80 shrink-0 shadow-xs" alt="${p.name || 'Product'}">`;
+                        : `<img src="${primaryImg}" loading="lazy" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-contain bg-surface-container-low p-1 border border-surface-container/80 shrink-0 shadow-xs" alt="${p.name || 'Product'}">`;
+
+                    const pDataEncoded = encodeURIComponent(JSON.stringify({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        stock: p.stock,
+                        image: primaryImg,
+                        category: p.category || '',
+                        description: p.description || '',
+                        fromOutOfStockList: true
+                    }));
 
                     return `
-                    <div class="flex items-center justify-between p-3 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs hover:border-error/40 hover:shadow-md transition-all">
+                    <div onclick="openProductDetailModal('${pDataEncoded}')" class="group flex items-center justify-between p-3 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs hover:border-primary/50 hover:shadow-md transition-all cursor-pointer" title="Click to view product details">
                         <div class="flex items-center gap-3 min-w-0">
                             ${imgEl}
                             <div class="min-w-0">
-                                <h4 class="font-bold text-xs sm:text-sm text-on-surface truncate leading-tight" title="${p.name || ''}">${p.name || 'Unnamed Product'}</h4>
+                                <h4 class="font-bold text-xs sm:text-sm text-on-surface truncate leading-tight group-hover:text-primary transition-colors" title="${p.name || ''}">${p.name || 'Unnamed Product'}</h4>
                                 <div class="flex items-center gap-1.5 mt-1 text-[11px] text-on-surface-variant font-medium">
                                     <span class="px-2 py-0.5 rounded-full bg-error-container text-error font-extrabold text-[10px]">0 in stock</span>
                                     <span>•</span>
@@ -247,7 +258,7 @@ function renderDashboardKPIs() {
                                 </div>
                             </div>
                         </div>
-                        <button onclick="editProduct(${p.id})" class="px-3 py-2 rounded-xl bg-surface-container hover:bg-primary hover:text-white text-primary text-xs font-bold transition-all shrink-0 ml-2 active:scale-95 flex items-center gap-1 border border-surface-container" title="Restock product">
+                        <button onclick="event.stopPropagation(); editProduct(${p.id})" class="px-3 py-2 rounded-xl bg-surface-container hover:bg-primary hover:text-white text-primary text-xs font-bold transition-all shrink-0 ml-2 active:scale-95 flex items-center gap-1 border border-surface-container" title="Restock product">
                             <span class="material-symbols-outlined text-[16px]">edit_note</span>
                             <span>Restock</span>
                         </button>
@@ -409,37 +420,87 @@ function renderOrdersPage() {
                     </div>
                 </div>
 
-                <!-- Items Purchased with Photos -->
-                <div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm border border-surface-container/60">
-                    <span class="font-label-sm text-on-surface-variant uppercase tracking-wider block font-bold mb-2">Items Purchased (${items.length})</span>
-                    <div class="flex flex-col gap-2.5">
+                <!-- Items Purchased with Photos (Organized in Cards) -->
+                <div class="bg-surface-container-lowest p-space-sm rounded-2xl shadow-sm border border-surface-container/60">
+                    <div class="flex items-center justify-between mb-3 px-0.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[18px] text-primary">shopping_bag</span>
+                            <span class="font-label-sm text-on-surface font-bold uppercase tracking-wider">Items Purchased (${items.length})</span>
+                        </div>
+                        <span class="text-[11px] text-on-surface-variant font-medium hidden sm:inline">Tap card to inspect</span>
+                    </div>
+
+                    <!-- Responsive Product Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         ${items.map(item => {
                             let img = item.image;
-                            if ((!img || !img.startsWith('http')) && adminProducts.length > 0) {
-                                const prod = adminProducts.find(p => String(p.id) === String(item.id) || p.name === item.name);
-                                if (prod) img = getAdminProductPrimaryImage(prod);
+                            let matchedProd = null;
+                            if (adminProducts.length > 0) {
+                                matchedProd = adminProducts.find(p => String(p.id) === String(item.id) || p.name === item.name);
+                                if ((!img || !img.startsWith('http')) && matchedProd) {
+                                    img = getAdminProductPrimaryImage(matchedProd);
+                                }
                             }
                             const isEmoji = !img || img.length <= 4 || (!img.startsWith('http') && !img.startsWith('data:image') && !img.startsWith('/'));
+                            const unitPrice = parseFloat(item.price || (matchedProd ? matchedProd.price : 0) || 0).toFixed(2);
+                            const qty = parseInt(item.quantity || 1, 10);
+                            const subtotal = (parseFloat(unitPrice) * qty).toFixed(2);
+                            const prodId = matchedProd ? matchedProd.id : item.id;
+                            const stock = matchedProd ? matchedProd.stock : null;
+                            const itemDataEncoded = encodeURIComponent(JSON.stringify({
+                                id: prodId,
+                                name: item.name,
+                                price: unitPrice,
+                                quantity: qty,
+                                image: img,
+                                category: matchedProd?.category || '',
+                                description: matchedProd?.description || ''
+                            }));
+
                             const imgEl = isEmoji 
-                                ? `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-surface-container flex items-center justify-center text-3xl sm:text-4xl shrink-0 shadow-sm">${img || '📦'}</div>`
-                                : `<img src="${img}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-contain bg-surface-container p-1.5 shrink-0 shadow-sm border border-surface-container/70">`;
+                                ? `<div class="w-full h-44 sm:h-48 rounded-xl bg-surface-container flex items-center justify-center text-5xl shrink-0 shadow-inner">${img || '📦'}</div>`
+                                : `<img src="${img}" loading="lazy" alt="${item.name}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-full h-44 sm:h-48 rounded-xl object-contain bg-surface-container p-2 shrink-0 shadow-inner border border-surface-container/60 transition-transform duration-200 group-hover:scale-[1.03]">`;
+
                             return `
-                                <div class="flex items-center justify-between p-3 rounded-2xl bg-surface-container-low/70 border border-surface-container/40 gap-3">
-                                    <div class="flex items-center gap-3.5 min-w-0">
+                                <div onclick="openProductDetailModal('${itemDataEncoded}')" class="group bg-surface-container-low/70 hover:bg-surface-container-low border border-surface-container/60 hover:border-primary/50 rounded-2xl p-3 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between relative active:scale-[0.99]">
+                                    <!-- Photo Section with Quantity Badge -->
+                                    <div class="relative w-full overflow-hidden rounded-xl bg-surface-container flex items-center justify-center">
                                         ${imgEl}
-                                        <div class="min-w-0">
-                                            <p class="font-title-md text-sm sm:text-base font-bold text-on-surface leading-snug truncate">${item.name}</p>
-                                            <p class="font-body-sm text-xs sm:text-sm text-on-surface-variant mt-1">Qty: <span class="font-bold text-primary">${item.quantity || 1}</span> • Unit: $${parseFloat(item.price || 0).toFixed(2)}</p>
-                                        </div>
+                                        <span class="absolute top-2 right-2 px-2.5 py-0.5 rounded-full bg-primary text-white text-xs font-black shadow-md flex items-center gap-1 z-10">
+                                            <span>Qty:</span>
+                                            <span>${qty}</span>
+                                        </span>
+                                        ${stock !== null ? (stock <= 0 ? `<span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-error-container text-error text-[10px] font-bold shadow-sm z-10">Out of Stock</span>` : '') : ''}
                                     </div>
-                                    <div class="font-extrabold text-sm sm:text-base text-on-surface shrink-0 text-right">
-                                        $${((parseFloat(item.price) || 0) * (item.quantity || 1)).toFixed(2)}
+
+                                    <!-- Product Info Section (Full Name, No Truncation) -->
+                                    <div class="mt-2.5 flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <h3 class="font-title-md text-sm sm:text-base font-bold text-on-surface leading-snug break-words">
+                                                ${item.name}
+                                            </h3>
+                                            <p class="font-body-sm text-xs text-on-surface-variant mt-1">
+                                                Unit Price: <span class="font-semibold text-on-surface font-mono">$${unitPrice}</span>
+                                            </p>
+                                        </div>
+
+                                        <!-- Bottom Price & Action Row -->
+                                        <div class="mt-3 pt-2.5 border-t border-surface-container/60 flex items-center justify-between">
+                                            <div class="flex flex-col">
+                                                <span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Subtotal</span>
+                                                <span class="font-extrabold text-base text-primary font-mono">$${subtotal}</span>
+                                            </div>
+                                            <div class="flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-xl transition-colors">
+                                                <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                                <span>Details</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             `;
                         }).join('')}
                     </div>
-                    ${discountCode ? `<div class="mt-2 text-xs font-semibold text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-xs">local_offer</span> Promo Applied: ${discountCode}</div>` : ''}
+                    ${discountCode ? `<div class="mt-3 pt-2 border-t border-surface-container/60 text-xs font-semibold text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-xs">local_offer</span> Promo Applied: ${discountCode}</div>` : ''}
                 </div>
                 <div class="flex items-center justify-between pt-2">
                     <div class="flex items-center gap-2">
@@ -462,6 +523,174 @@ function renderOrdersPage() {
         window.filterOrdersLocally();
     }
 }
+
+// Product Detail Modal Handlers for Orders Page
+window.openProductDetailModal = function(itemDataEncoded) {
+    let item;
+    try {
+        item = JSON.parse(decodeURIComponent(itemDataEncoded));
+    } catch (e) {
+        console.error('Error parsing product modal data:', e);
+        return;
+    }
+
+    const modal = document.getElementById('product-detail-modal');
+    const body = document.getElementById('product-detail-modal-body');
+    const storeLink = document.getElementById('product-modal-store-link');
+    const restockBtn = document.getElementById('product-modal-restock-btn');
+    if (!modal || !body) return;
+
+    let matchedProd = null;
+    if (adminProducts && adminProducts.length > 0) {
+        matchedProd = adminProducts.find(p => String(p.id) === String(item.id) || p.name === item.name);
+    }
+
+    let img = item.image;
+    if ((!img || !img.startsWith('http')) && matchedProd) {
+        img = getAdminProductPrimaryImage(matchedProd);
+    }
+    const isEmoji = !img || img.length <= 4 || (!img.startsWith('http') && !img.startsWith('data:image') && !img.startsWith('/'));
+
+    const unitPrice = parseFloat(item.price || (matchedProd ? matchedProd.price : 0) || 0).toFixed(2);
+    const qty = parseInt(item.quantity || 1, 10);
+    const subtotal = (parseFloat(unitPrice) * qty).toFixed(2);
+    const stock = matchedProd ? (matchedProd.stock ?? null) : (item.stock !== undefined ? item.stock : null);
+    const category = (matchedProd && matchedProd.category) ? matchedProd.category : (item.category || 'General');
+    const prodId = matchedProd ? matchedProd.id : item.id;
+    const isOutOfStockContext = Boolean(item.fromOutOfStockList || (stock !== null && parseInt(stock) <= 0 && (!item.quantity || item.quantity <= 1)));
+
+    // Clean description text
+    let descriptionText = '';
+    const rawDesc = (matchedProd && matchedProd.description) ? matchedProd.description : (item.description || '');
+    if (rawDesc) {
+        if (rawDesc.startsWith('{')) {
+            try {
+                const meta = JSON.parse(rawDesc);
+                descriptionText = meta.description || meta.text || '';
+            } catch(e) {
+                descriptionText = rawDesc;
+            }
+        } else {
+            descriptionText = rawDesc;
+        }
+    }
+
+    const badgeText = isOutOfStockContext ? 'Out of Stock (0)' : `Qty: ${qty}`;
+    const badgeClass = isOutOfStockContext ? 'bg-error-container text-error' : 'bg-primary text-white';
+
+    const imgDisplay = isEmoji
+        ? `<div class="w-full h-56 sm:h-64 rounded-2xl bg-surface-container flex items-center justify-center text-6xl shadow-inner">${img || '📦'}</div>`
+        : `<img src="${img}" loading="lazy" alt="${item.name}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-full h-56 sm:h-64 rounded-2xl object-contain bg-surface-container p-3 shadow-inner border border-surface-container/60">`;
+
+    const metricsGrid = isOutOfStockContext ? `
+        <div class="p-3.5 rounded-2xl bg-surface-container-low border border-surface-container/80 grid grid-cols-3 gap-2 text-center">
+            <div class="flex flex-col">
+                <span class="text-[11px] text-outline font-semibold uppercase tracking-wider">Price</span>
+                <span class="font-bold text-sm text-on-surface mt-0.5 font-mono">$${unitPrice}</span>
+            </div>
+            <div class="flex flex-col border-x border-surface-container">
+                <span class="text-[11px] text-outline font-semibold uppercase tracking-wider">Status</span>
+                <span class="font-bold text-sm text-error mt-0.5 font-mono">0 in stock</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[11px] text-outline font-semibold uppercase tracking-wider">Category</span>
+                <span class="font-bold text-sm text-on-surface mt-0.5 truncate">${category}</span>
+            </div>
+        </div>
+    ` : `
+        <div class="p-3.5 rounded-2xl bg-surface-container-low border border-surface-container/80 grid grid-cols-3 gap-2 text-center">
+            <div class="flex flex-col">
+                <span class="text-[11px] text-outline font-semibold uppercase tracking-wider">Unit Price</span>
+                <span class="font-bold text-sm text-on-surface mt-0.5 font-mono">$${unitPrice}</span>
+            </div>
+            <div class="flex flex-col border-x border-surface-container">
+                <span class="text-[11px] text-outline font-semibold uppercase tracking-wider">Quantity</span>
+                <span class="font-bold text-sm text-primary mt-0.5 font-mono">×${qty}</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[11px] text-outline font-semibold uppercase tracking-wider">Subtotal</span>
+                <span class="font-extrabold text-sm text-on-surface mt-0.5 font-mono">$${subtotal}</span>
+            </div>
+        </div>
+    `;
+
+    body.innerHTML = `
+        <div class="flex flex-col gap-3.5">
+            <!-- Big Image with Quantity or Out of Stock Badge -->
+            <div class="relative w-full overflow-hidden rounded-2xl bg-surface-container">
+                ${imgDisplay}
+                <div class="absolute top-3 right-3 px-3 py-1 rounded-full ${badgeClass} font-black text-xs shadow-md">
+                    ${badgeText}
+                </div>
+            </div>
+
+            <!-- Title & Category & Stock -->
+            <div>
+                <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                    <span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm font-semibold text-xs">${category}</span>
+                    ${stock !== null ? (parseInt(stock) > 0 ? `<span class="px-2.5 py-0.5 rounded-full bg-secondary-container/40 text-on-secondary-container font-label-sm font-bold text-xs">In Stock: ${stock}</span>` : `<span class="px-2.5 py-0.5 rounded-full bg-error-container text-error font-label-sm font-bold text-xs">Out of Stock</span>`) : ''}
+                </div>
+                <h2 class="font-headline-md text-lg sm:text-xl font-bold text-on-surface leading-snug break-words">${item.name}</h2>
+            </div>
+
+            <!-- Metrics Grid -->
+            ${metricsGrid}
+
+            <!-- Description (if available) -->
+            ${descriptionText ? `
+                <div class="p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container/60">
+                    <span class="text-[11px] text-outline font-bold uppercase tracking-wider block mb-1">Description</span>
+                    <p class="text-xs text-on-surface-variant leading-relaxed whitespace-pre-line">${descriptionText}</p>
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+    if (storeLink) {
+        if (prodId) {
+            storeLink.href = `/product.html?id=${encodeURIComponent(prodId)}`;
+            storeLink.style.display = 'inline-flex';
+        } else {
+            storeLink.style.display = 'none';
+        }
+    }
+
+    if (restockBtn) {
+        if (prodId) {
+            restockBtn.classList.remove('hidden');
+            restockBtn.classList.add('inline-flex');
+            restockBtn.onclick = function() {
+                closeProductDetailModal();
+                if (typeof window.editProduct === 'function') {
+                    window.editProduct(prodId);
+                }
+            };
+        } else {
+            restockBtn.classList.add('hidden');
+            restockBtn.classList.remove('inline-flex');
+        }
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeProductDetailModal = function() {
+    const modal = document.getElementById('product-detail-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+    document.body.style.overflow = '';
+};
+
+// Dismiss modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        window.closeProductDetailModal();
+    }
+});
 
 // Toggle Order details collapse
 window.toggleOrderDetails = function(id) {
