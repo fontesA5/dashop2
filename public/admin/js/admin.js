@@ -227,28 +227,18 @@ function renderDashboardKPIs() {
                     const primaryImg = getAdminProductPrimaryImage(p);
                     const isEmoji = !primaryImg || primaryImg.length <= 4 || (!primaryImg.startsWith('http') && !primaryImg.startsWith('data:image') && !primaryImg.startsWith('/'));
                     const priceFormatted = '$' + parseFloat(p.price || 0).toFixed(2);
+                    const safeAlt = (p.name || 'Product').replace(/"/g, '&quot;');
 
                     const imgEl = isEmoji 
                         ? `<div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-surface-container flex items-center justify-center text-3xl shrink-0 shadow-xs">${primaryImg}</div>`
-                        : `<img src="${primaryImg}" loading="lazy" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-contain bg-surface-container-low p-1 border border-surface-container/80 shrink-0 shadow-xs" alt="${p.name || 'Product'}">`;
-
-                    const pDataEncoded = encodeURIComponent(JSON.stringify({
-                        id: p.id,
-                        name: p.name,
-                        price: p.price,
-                        stock: p.stock,
-                        image: primaryImg,
-                        category: p.category || '',
-                        description: p.description || '',
-                        fromOutOfStockList: true
-                    }));
+                        : `<img src="${primaryImg}" loading="lazy" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-contain bg-surface-container-low p-1 border border-surface-container/80 shrink-0 shadow-xs" alt="${safeAlt}">`;
 
                     return `
-                    <div onclick="openProductDetailModal('${pDataEncoded}')" class="group flex items-center justify-between p-3 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs hover:border-primary/50 hover:shadow-md transition-all cursor-pointer" title="Click to view product details">
+                    <div onclick="openProductDetailById(${p.id})" class="group flex items-center justify-between p-3 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs hover:border-primary/50 hover:shadow-md transition-all cursor-pointer" title="Click to view product details">
                         <div class="flex items-center gap-3 min-w-0">
                             ${imgEl}
                             <div class="min-w-0">
-                                <h4 class="font-bold text-xs sm:text-sm text-on-surface truncate leading-tight group-hover:text-primary transition-colors" title="${p.name || ''}">${p.name || 'Unnamed Product'}</h4>
+                                <h4 class="font-bold text-xs sm:text-sm text-on-surface truncate leading-tight group-hover:text-primary transition-colors">${p.name || 'Unnamed Product'}</h4>
                                 <div class="flex items-center gap-1.5 mt-1 text-[11px] text-on-surface-variant font-medium">
                                     <span class="px-2 py-0.5 rounded-full bg-error-container text-error font-extrabold text-[10px]">0 in stock</span>
                                     <span>•</span>
@@ -432,7 +422,7 @@ function renderOrdersPage() {
 
                     <!-- Responsive Product Cards Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        ${items.map(item => {
+                        ${items.map((item, itemIdx) => {
                             let img = item.image;
                             let matchedProd = null;
                             if (adminProducts.length > 0) {
@@ -445,24 +435,15 @@ function renderOrdersPage() {
                             const unitPrice = parseFloat(item.price || (matchedProd ? matchedProd.price : 0) || 0).toFixed(2);
                             const qty = parseInt(item.quantity || 1, 10);
                             const subtotal = (parseFloat(unitPrice) * qty).toFixed(2);
-                            const prodId = matchedProd ? matchedProd.id : item.id;
                             const stock = matchedProd ? matchedProd.stock : null;
-                            const itemDataEncoded = encodeURIComponent(JSON.stringify({
-                                id: prodId,
-                                name: item.name,
-                                price: unitPrice,
-                                quantity: qty,
-                                image: img,
-                                category: matchedProd?.category || '',
-                                description: matchedProd?.description || ''
-                            }));
+                            const safeAlt = (item.name || 'Product').replace(/"/g, '&quot;');
 
                             const imgEl = isEmoji 
                                 ? `<div class="w-full h-44 sm:h-48 rounded-xl bg-surface-container flex items-center justify-center text-5xl shrink-0 shadow-inner">${img || '📦'}</div>`
-                                : `<img src="${img}" loading="lazy" alt="${item.name}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-full h-44 sm:h-48 rounded-xl object-contain bg-surface-container p-2 shrink-0 shadow-inner border border-surface-container/60 transition-transform duration-200 group-hover:scale-[1.03]">`;
+                                : `<img src="${img}" loading="lazy" alt="${safeAlt}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-full h-44 sm:h-48 rounded-xl object-contain bg-surface-container p-2 shrink-0 shadow-inner border border-surface-container/60 transition-transform duration-200 group-hover:scale-[1.03]">`;
 
                             return `
-                                <div onclick="openProductDetailModal('${itemDataEncoded}')" class="group bg-surface-container-low/70 hover:bg-surface-container-low border border-surface-container/60 hover:border-primary/50 rounded-2xl p-3 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between relative active:scale-[0.99]">
+                                <div onclick="openOrderItemModal(${o.id}, ${itemIdx})" class="group bg-surface-container-low/70 hover:bg-surface-container-low border border-surface-container/60 hover:border-primary/50 rounded-2xl p-3 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between relative active:scale-[0.99]" title="Click to view product details">
                                     <!-- Photo Section with Quantity Badge -->
                                     <div class="relative w-full overflow-hidden rounded-xl bg-surface-container flex items-center justify-center">
                                         ${imgEl}
@@ -524,13 +505,19 @@ function renderOrdersPage() {
     }
 }
 
-// Product Detail Modal Handlers for Orders Page
-window.openProductDetailModal = function(itemDataEncoded) {
+// Product Detail Modal Handlers for Orders Page & Out of Stock List
+window.openProductDetailModal = function(itemOrData) {
     let item;
-    try {
-        item = JSON.parse(decodeURIComponent(itemDataEncoded));
-    } catch (e) {
-        console.error('Error parsing product modal data:', e);
+    if (typeof itemOrData === 'string') {
+        try {
+            item = JSON.parse(decodeURIComponent(itemOrData));
+        } catch (e) {
+            console.error('Error parsing product modal data:', e);
+            return;
+        }
+    } else if (typeof itemOrData === 'object' && itemOrData !== null) {
+        item = itemOrData;
+    } else {
         return;
     }
 
@@ -683,6 +670,57 @@ window.closeProductDetailModal = function() {
         modal.classList.remove('flex');
     }
     document.body.style.overflow = '';
+};
+
+// Helper to open modal directly by product ID (e.g. from Out of Stock list)
+window.openProductDetailById = function(productId) {
+    const prod = (adminProducts || []).find(p => String(p.id) === String(productId));
+    if (!prod) return;
+    window.openProductDetailModal({
+        id: prod.id,
+        name: prod.name,
+        price: prod.price,
+        stock: prod.stock,
+        image: getAdminProductPrimaryImage(prod),
+        category: prod.category || '',
+        description: prod.description || '',
+        fromOutOfStockList: true
+    });
+};
+
+// Helper to open modal directly by order item (from Orders page)
+window.openOrderItemModal = function(orderId, itemIndex) {
+    const order = (adminOrders || []).find(o => String(o.id) === String(orderId));
+    if (!order) return;
+    let items = [];
+    try {
+        const parsed = typeof order.items_json === 'string' ? JSON.parse(order.items_json) : order.items_json;
+        items = Array.isArray(parsed) ? parsed : (parsed.items || []);
+    } catch(e) {}
+    const item = items[itemIndex];
+    if (!item) return;
+
+    let matchedProd = null;
+    if (adminProducts && adminProducts.length > 0) {
+        matchedProd = adminProducts.find(p => String(p.id) === String(item.id) || p.name === item.name);
+    }
+
+    let img = item.image;
+    if ((!img || !img.startsWith('http')) && matchedProd) {
+        img = getAdminProductPrimaryImage(matchedProd);
+    }
+
+    window.openProductDetailModal({
+        id: matchedProd ? matchedProd.id : item.id,
+        name: item.name,
+        price: item.price || (matchedProd ? matchedProd.price : 0),
+        quantity: item.quantity || 1,
+        image: img,
+        category: (matchedProd && matchedProd.category) ? matchedProd.category : (item.category || ''),
+        description: (matchedProd && matchedProd.description) ? matchedProd.description : '',
+        stock: matchedProd ? matchedProd.stock : null,
+        fromOutOfStockList: false
+    });
 };
 
 // Dismiss modal with Escape key
