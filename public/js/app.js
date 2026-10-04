@@ -180,19 +180,47 @@ async function addToCart(product, quantity = 1, triggerBtn = null) {
     return true;
 }
 
-window.addToCartById = function(id, btnElement = null) {
+window.addToCartById = function(id, btnElement = null, variationIdx = null) {
     const product = allProducts.find(p => String(p.id) === String(id));
-    if (product) {
-        const stock = typeof product.stock !== 'undefined' ? parseInt(product.stock) : 999;
-        if (stock <= 0) {
-            const outMsg = window.i18n ? window.i18n.t('product_out_of_stock') : 'Sorry, this product is out of stock!';
+    if (!product) {
+        console.error('Product not found for ID:', id);
+        return;
+    }
+    const vars = typeof getProductVariations === 'function' ? getProductVariations(product) : [];
+    if (variationIdx !== null && vars && vars[variationIdx]) {
+        const v = vars[variationIdx];
+        const vStock = typeof v.stock !== 'undefined' ? parseInt(v.stock) : (parseInt(product.stock) || 0);
+        if (vStock <= 0) {
+            const outMsg = window.i18n ? window.i18n.t('product_out_of_stock') : 'Sorry, this option is out of stock!';
             showNotification(outMsg);
             return;
         }
-        addToCart(product, 1, btnElement);
-    } else {
-        console.error('Product not found for ID:', id);
+        const varProduct = {
+            ...product,
+            id: `${product.id}-${(v.id || v.name).replace(/\s+/g, '-')}`,
+            name: `${product.name} (${v.name})`,
+            price: parseFloat(v.price) || parseFloat(product.price),
+            image: v.imageUrl || (typeof getProductPrimaryImage === 'function' ? getProductPrimaryImage(product) : (product.image || '')),
+            stock: vStock,
+            barcode: v.barcode || product.barcode || ''
+        };
+        addToCart(varProduct, 1, btnElement);
+        return;
     }
+
+    const stock = typeof product.stock !== 'undefined' ? parseInt(product.stock) : 999;
+    if (stock <= 0) {
+        if (vars && vars.length > 0) {
+            const availableIdx = vars.findIndex(v => (parseInt(v.stock) || 0) > 0);
+            if (availableIdx !== -1) {
+                return window.addToCartById(id, btnElement, availableIdx);
+            }
+        }
+        const outMsg = window.i18n ? window.i18n.t('product_out_of_stock') : 'Sorry, this product is out of stock!';
+        showNotification(outMsg);
+        return;
+    }
+    addToCart(product, 1, btnElement);
 };
 
 // Remove item from cart
@@ -687,6 +715,46 @@ function getProductCleanDescription(product) {
     return product.description;
 }
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[m]));
+}
+
+function getProductVariations(product) {
+    if (!product || !product.description) return [];
+    if (typeof product.description === 'string' && product.description.startsWith('{')) {
+        try {
+            const meta = JSON.parse(product.description);
+            if (Array.isArray(meta.variations)) {
+                return meta.variations.filter(v => v && (v.name || v.price));
+            }
+        } catch(e) {}
+    }
+    return [];
+}
+
+function getProductTotalStock(product) {
+    if (!product) return 0;
+    const baseStock = parseInt(product.stock) || 0;
+    const vars = getProductVariations(product);
+    if (vars.length === 0) return baseStock;
+    const varStock = vars.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
+    return baseStock > 0 ? (baseStock + varStock) : varStock;
+}
+
+function isProductInStock(product) {
+    if (!product) return false;
+    if ((parseInt(product.stock) || 0) > 0) return true;
+    const vars = getProductVariations(product);
+    return vars.some(v => (parseInt(v.stock) || 0) > 0);
+}
+
 function getProductSlug(product) {
     if (product.description && product.description.startsWith('{')) {
         try {
@@ -727,10 +795,34 @@ function getAllProductBarcodes(product) {
     return Array.from(new Set(barcodes.filter(Boolean)));
 }
 
+let currentCatalogViewMode = localStorage.getItem('dashop_catalog_view_mode') || 'grouped';
+
+window.setCatalogViewMode = function(mode) {
+    currentCatalogViewMode = mode;
+    localStorage.setItem('dashop_catalog_view_mode', mode);
+    updateCatalogViewModeButtons();
+    window.filterByCategory(currentActiveCategory);
+};
+
+function updateCatalogViewModeButtons() {
+    const btnGrouped = document.getElementById('view-mode-grouped');
+    const btnVariants = document.getElementById('view-mode-variants');
+    if (btnGrouped && btnVariants) {
+        if (currentCatalogViewMode === 'variants') {
+            btnVariants.className = 'px-2.5 py-1 rounded-lg transition-all bg-primary text-on-primary shadow-xs';
+            btnGrouped.className = 'px-2.5 py-1 rounded-lg transition-all text-on-surface-variant hover:text-on-surface';
+        } else {
+            btnGrouped.className = 'px-2.5 py-1 rounded-lg transition-all bg-primary text-on-primary shadow-xs';
+            btnVariants.className = 'px-2.5 py-1 rounded-lg transition-all text-on-surface-variant hover:text-on-surface';
+        }
+    }
+}
+
 let currentActiveCategory = 'All';
 
 window.filterByCategory = function(category, btnElement) {
     currentActiveCategory = category || 'All';
+    updateCatalogViewModeButtons();
     
     // Update chip styling
     document.querySelectorAll('.category-chip').forEach(chip => {
@@ -750,14 +842,17 @@ window.filterByCategory = function(category, btnElement) {
     const searchInput = document.getElementById('catalog-search') || document.getElementById('search-input');
     const query = (searchInput?.value || '').toLowerCase().trim();
 
-    // Only show in-stock products on catalog
-    let filtered = allProducts.filter(p => (parseInt(p.stock) || 0) > 0);
+    // Only show in-stock products on catalog (including products where variations have stock)
+    let filtered = allProducts.filter(p => isProductInStock(p));
     if (query) {
         filtered = filtered.filter(p => {
             const allB = getAllProductBarcodes(p).map(b => b.toLowerCase());
+            const vars = getProductVariations(p);
+            const varNames = vars.map(v => (v.name || '').toLowerCase());
             return p.name.toLowerCase().includes(query) || 
                    (p.category && p.category.toLowerCase().includes(query)) ||
-                   allB.some(b => b.includes(query));
+                   allB.some(b => b.includes(query)) ||
+                   varNames.some(vn => vn.includes(query));
         });
     }
 
@@ -1043,7 +1138,12 @@ function renderProductGrid(products, grid) {
     if (!grid) return;
     
     // Only display in-stock products on user product list / catalog
-    const inStockProducts = (products || []).filter(p => (parseInt(p.stock) || 0) > 0);
+    const inStockProducts = (products || []).filter(p => isProductInStock(p));
+
+    const countEl = document.getElementById('catalog-products-count');
+    if (countEl) {
+        countEl.textContent = `${inStockProducts.length} ${inStockProducts.length === 1 ? 'Product' : 'Products'}`;
+    }
 
     if (inStockProducts.length === 0) {
         const emptyMsg = window.i18n ? window.i18n.t('no_products') : 'No products found.';
@@ -1052,31 +1152,187 @@ function renderProductGrid(products, grid) {
     }
 
     let html = '';
-    inStockProducts.forEach(p => {
-        const primaryImg = getProductPrimaryImage(p);
-        const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
-        const imgHtml = isEmoji 
-            ? `<div class="text-6xl flex items-center justify-center w-full h-full">${primaryImg || '📦'}</div>`
-            : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${p.name}">`;
 
+    // "All Variants" mode: expand products with variations into standalone variant cards
+    if (currentCatalogViewMode === 'variants') {
+        const expandedItems = [];
+        inStockProducts.forEach(p => {
+            const vars = getProductVariations(p);
+            const baseStock = parseInt(p.stock) || 0;
+            if (vars.length === 0) {
+                expandedItems.push({
+                    product: p,
+                    varIdx: -1,
+                    variation: null,
+                    displayName: p.name,
+                    displayPrice: parseFloat(p.price),
+                    displayImg: getProductPrimaryImage(p),
+                    badge: null
+                });
+            } else {
+                if (baseStock > 0) {
+                    expandedItems.push({
+                        product: p,
+                        varIdx: -1,
+                        variation: null,
+                        displayName: p.name,
+                        displayPrice: parseFloat(p.price),
+                        displayImg: getProductPrimaryImage(p),
+                        badge: 'Original'
+                    });
+                }
+                vars.forEach((v, vIdx) => {
+                    const vStock = typeof v.stock !== 'undefined' ? parseInt(v.stock) : baseStock;
+                    if (vStock > 0 || baseStock <= 0) {
+                        expandedItems.push({
+                            product: p,
+                            varIdx: vIdx,
+                            variation: v,
+                            displayName: `${p.name} - ${v.name}`,
+                            displayPrice: parseFloat(v.price) || parseFloat(p.price),
+                            displayImg: v.imageUrl || getProductPrimaryImage(p),
+                            badge: v.name
+                        });
+                    }
+                });
+            }
+        });
+
+        if (countEl) {
+            countEl.textContent = `${expandedItems.length} ${expandedItems.length === 1 ? 'Item' : 'Items'}`;
+        }
+
+        expandedItems.forEach((item) => {
+            const p = item.product;
+            const primaryImg = item.displayImg;
+            const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
+            const imgHtml = isEmoji 
+                ? `<div class="text-6xl flex items-center justify-center w-full h-full">${primaryImg || '📦'}</div>`
+                : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${escapeHtml(item.displayName)}">`;
+
+            const slug = getProductSlug(p);
+            const category = p.category || 'General';
+            const clickCall = item.varIdx >= 0 ? `viewProduct('${slug}', ${p.id}, ${item.varIdx})` : `viewProduct('${slug}', ${p.id})`;
+            const addCall = item.varIdx >= 0 ? `window.addToCartById(${p.id}, this, ${item.varIdx})` : `window.addToCartById(${p.id}, this)`;
+
+            html += `
+            <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer relative" onclick="${clickCall}">
+                <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
+                    ${imgHtml}
+                    ${item.badge ? `<span class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-primary text-on-primary text-[10px] font-bold shadow-xs truncate max-w-[85%]">${escapeHtml(item.badge)}</span>` : ''}
+                </div>
+                <div class="flex flex-col flex-1 justify-between">
+                    <div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">${category}</span>
+                        <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 leading-snug">
+                            ${escapeHtml(item.displayName)}
+                        </h4>
+                    </div>
+                    <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
+                        <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${item.displayPrice.toFixed(2)}</span>
+                        <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all z-10" onclick="event.stopPropagation(); ${addCall}" type="button">
+                            <span class="material-symbols-outlined text-[18px]">add</span>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        });
+
+        grid.innerHTML = html;
+        return;
+    }
+
+    // Default "Grouped" mode: Products with variant chips/pills directly on the card
+    const searchInput = document.getElementById('catalog-search') || document.getElementById('search-input');
+    const query = (searchInput?.value || '').toLowerCase().trim();
+
+    inStockProducts.forEach(p => {
+        const vars = getProductVariations(p);
         const slug = getProductSlug(p);
         const category = p.category || 'General';
+        const baseStock = parseInt(p.stock) || 0;
+
+        // Auto pre-select matching variation if query matched it
+        let initialVarIdx = -1;
+        if (vars.length > 0) {
+            if (query) {
+                const matchIdx = vars.findIndex(v => 
+                    (v.name && v.name.toLowerCase().includes(query)) ||
+                    (v.barcode && String(v.barcode).toLowerCase().includes(query))
+                );
+                if (matchIdx !== -1) initialVarIdx = matchIdx;
+            }
+            if (initialVarIdx === -1 && baseStock <= 0) {
+                const availableIdx = vars.findIndex(v => (parseInt(v.stock) || 0) > 0);
+                if (availableIdx !== -1) initialVarIdx = availableIdx;
+            }
+        }
+
+        const activeVar = initialVarIdx >= 0 ? vars[initialVarIdx] : null;
+        const displayImg = (activeVar && activeVar.imageUrl) ? activeVar.imageUrl : getProductPrimaryImage(p);
+        const displayPrice = (activeVar && activeVar.price) ? parseFloat(activeVar.price) : parseFloat(p.price);
+        const isEmoji = !displayImg || displayImg.length <= 4 || !displayImg.startsWith('http');
+        const imgHtml = isEmoji 
+            ? `<div id="card-img-${p.id}" class="text-6xl flex items-center justify-center w-full h-full">${displayImg || '📦'}</div>`
+            : `<img id="card-img-${p.id}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${displayImg}" alt="${escapeHtml(p.name)}">`;
+
+        // Render variant pills if variations exist
+        let pillsHtml = '';
+        if (vars.length > 0) {
+            const pills = [];
+            if (baseStock > 0) {
+                const isSelected = initialVarIdx === -1;
+                pills.push(`
+                    <button type="button" class="var-card-pill px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition-all ${isSelected ? 'bg-primary text-on-primary border-primary shadow-xs' : 'bg-surface-container-low text-on-surface border-surface-container hover:bg-surface-container'}" 
+                            data-card-id="${p.id}" data-opt-idx="-1" onclick="window.selectCardVariation(event, ${p.id}, -1)">
+                        Original
+                    </button>
+                `);
+            }
+            vars.forEach((v, vIdx) => {
+                const vStock = typeof v.stock !== 'undefined' ? parseInt(v.stock) : baseStock;
+                if (vStock > 0 || baseStock <= 0) {
+                    const isSelected = initialVarIdx === vIdx;
+                    pills.push(`
+                        <button type="button" class="var-card-pill px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition-all ${isSelected ? 'bg-primary text-on-primary border-primary shadow-xs' : 'bg-surface-container-low text-on-surface border-surface-container hover:bg-surface-container'}" 
+                                data-card-id="${p.id}" data-opt-idx="${vIdx}" onclick="window.selectCardVariation(event, ${p.id}, ${vIdx})">
+                            ${escapeHtml(v.name)}
+                        </button>
+                    `);
+                }
+            });
+            if (pills.length > 1) {
+                pillsHtml = `<div class="flex flex-wrap gap-1 mt-1.5 mb-1 z-10" onclick="event.stopPropagation()">${pills.join('')}</div>`;
+            }
+        }
+
+        const totalOptionsCount = vars.length + (baseStock > 0 ? 1 : 0);
+        const optionsBadge = totalOptionsCount > 1 
+            ? `<span class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-surface-container-lowest/95 backdrop-blur text-primary text-[10px] font-bold shadow-xs border border-surface-container/60 flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">style</span> ${totalOptionsCount} Options</span>`
+            : '';
 
         html += `
-        <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="viewProduct('${slug}', ${p.id})">
+        <div id="product-card-${p.id}" class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer relative" 
+             onclick="window.handleCardClick(event, ${p.id}, '${slug}')"
+             data-product-id="${p.id}"
+             data-slug="${slug}"
+             data-selected-var-idx="${initialVarIdx}">
             <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
+                ${optionsBadge}
             </div>
             <div class="flex flex-col flex-1 justify-between">
                 <div>
                     <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">${category}</span>
                     <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 leading-snug">
-                        ${p.name}
+                        ${escapeHtml(p.name)}
                     </h4>
+                    <span id="card-variant-sub-${p.id}" class="text-[11px] text-primary font-bold ${activeVar ? '' : 'hidden'}">${activeVar ? escapeHtml(activeVar.name) : ''}</span>
+                    ${pillsHtml}
                 </div>
                 <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
-                    <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${parseFloat(p.price).toFixed(2)}</span>
-                    <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="event.stopPropagation(); window.addToCartById(${p.id}, this)" type="button">
+                    <span id="card-price-${p.id}" class="font-price-hero text-price-hero text-on-surface font-extrabold">$${displayPrice.toFixed(2)}</span>
+                    <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all z-10" onclick="event.stopPropagation(); window.handleCardAddToCart(${p.id}, this)" type="button">
                         <span class="material-symbols-outlined text-[18px]">add</span>
                     </button>
                 </div>
@@ -1087,38 +1343,143 @@ function renderProductGrid(products, grid) {
     grid.innerHTML = html;
 }
 
+// Storefront card interactive variation switcher
+window.handleCardClick = function(event, productId, slug) {
+    const card = document.getElementById(`product-card-${productId}`) || event.currentTarget;
+    const varIdx = card ? parseInt(card.dataset.selectedVarIdx) : -1;
+    viewProduct(slug, productId, varIdx >= 0 ? varIdx : null);
+};
+
+window.handleCardAddToCart = function(productId, btnElement) {
+    const card = document.getElementById(`product-card-${productId}`) || (btnElement ? btnElement.closest('[data-selected-var-idx]') : null);
+    const varIdx = card ? parseInt(card.dataset.selectedVarIdx) : -1;
+    window.addToCartById(productId, btnElement, varIdx >= 0 ? varIdx : null);
+};
+
+window.selectCardVariation = function(event, productId, varIdx) {
+    if (event) event.stopPropagation();
+    const card = document.getElementById(`product-card-${productId}`);
+    if (!card) return;
+    const product = allProducts.find(p => String(p.id) === String(productId));
+    if (!product) return;
+    const vars = getProductVariations(product);
+
+    card.dataset.selectedVarIdx = varIdx;
+
+    const pills = card.querySelectorAll('.var-card-pill');
+    pills.forEach(pill => {
+        const pIdx = parseInt(pill.dataset.optIdx);
+        if (pIdx === varIdx) {
+            pill.className = 'var-card-pill px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition-all bg-primary text-on-primary border-primary shadow-xs';
+        } else {
+            pill.className = 'var-card-pill px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition-all bg-surface-container-low text-on-surface border-surface-container hover:bg-surface-container';
+        }
+    });
+
+    const imgEl = document.getElementById(`card-img-${productId}`);
+    const priceEl = document.getElementById(`card-price-${productId}`);
+    const subEl = document.getElementById(`card-variant-sub-${productId}`);
+
+    if (varIdx >= 0 && vars[varIdx]) {
+        const v = vars[varIdx];
+        if (imgEl && v.imageUrl) {
+            if (imgEl.tagName === 'IMG') imgEl.src = v.imageUrl;
+            else imgEl.outerHTML = `<img id="card-img-${productId}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${v.imageUrl}" alt="${escapeHtml(product.name)}">`;
+        }
+        if (priceEl) priceEl.textContent = '$' + (parseFloat(v.price) || parseFloat(product.price)).toFixed(2);
+        if (subEl) {
+            subEl.textContent = v.name;
+            subEl.classList.remove('hidden');
+        }
+    } else {
+        const primaryImg = getProductPrimaryImage(product);
+        if (imgEl) {
+            if (imgEl.tagName === 'IMG') imgEl.src = primaryImg;
+            else imgEl.outerHTML = `<img id="card-img-${productId}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${escapeHtml(product.name)}">`;
+        }
+        if (priceEl) priceEl.textContent = '$' + parseFloat(product.price).toFixed(2);
+        if (subEl) subEl.classList.add('hidden');
+    }
+};
+
 // Dynamic New Arrivals on index.html
 function initNewArrivals() {
     const container = document.getElementById('new-arrivals-container');
     if (!container || allProducts.length === 0) return;
 
     let html = '';
-    const inStockItems = allProducts.filter(p => (parseInt(p.stock) || 0) > 0);
+    const inStockItems = allProducts.filter(p => isProductInStock(p));
     const newItems = inStockItems.slice(0, 8);
     if (newItems.length === 0) return;
 
     newItems.forEach(p => {
-        const primaryImg = getProductPrimaryImage(p);
-        const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
-        const imgHtml = isEmoji 
-            ? `<div class="text-5xl flex items-center justify-center w-full h-full">${primaryImg || '📦'}</div>`
-            : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${p.name}">`;
-
+        const vars = getProductVariations(p);
         const slug = getProductSlug(p);
+        const baseStock = parseInt(p.stock) || 0;
+        let initialVarIdx = -1;
+        if (vars.length > 0 && baseStock <= 0) {
+            const availableIdx = vars.findIndex(v => (parseInt(v.stock) || 0) > 0);
+            if (availableIdx !== -1) initialVarIdx = availableIdx;
+        }
+
+        const activeVar = initialVarIdx >= 0 ? vars[initialVarIdx] : null;
+        const displayImg = (activeVar && activeVar.imageUrl) ? activeVar.imageUrl : getProductPrimaryImage(p);
+        const displayPrice = (activeVar && activeVar.price) ? parseFloat(activeVar.price) : parseFloat(p.price);
+        const isEmoji = !displayImg || displayImg.length <= 4 || !displayImg.startsWith('http');
+        const imgHtml = isEmoji 
+            ? `<div id="arrival-img-${p.id}" class="text-5xl flex items-center justify-center w-full h-full">${displayImg || '📦'}</div>`
+            : `<img id="arrival-img-${p.id}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${displayImg}" alt="${escapeHtml(p.name)}">`;
+
+        let pillsHtml = '';
+        if (vars.length > 0) {
+            const pills = [];
+            if (baseStock > 0) {
+                pills.push(`
+                    <button type="button" class="var-card-pill px-1.5 py-0.5 rounded text-[9px] font-semibold border transition-all ${initialVarIdx === -1 ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-low text-on-surface border-surface-container'}" 
+                            data-arrival-id="${p.id}" data-opt-idx="-1" onclick="window.selectArrivalVariation(event, ${p.id}, -1)">
+                        Original
+                    </button>
+                `);
+            }
+            vars.forEach((v, vIdx) => {
+                const isSelected = initialVarIdx === vIdx;
+                pills.push(`
+                    <button type="button" class="var-card-pill px-1.5 py-0.5 rounded text-[9px] font-semibold border transition-all ${isSelected ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-low text-on-surface border-surface-container'}" 
+                            data-arrival-id="${p.id}" data-opt-idx="${vIdx}" onclick="window.selectArrivalVariation(event, ${p.id}, ${vIdx})">
+                        ${escapeHtml(v.name)}
+                    </button>
+                `);
+            });
+            if (pills.length > 1) {
+                pillsHtml = `<div class="flex flex-wrap gap-1 mt-1 z-10" onclick="event.stopPropagation()">${pills.join('')}</div>`;
+            }
+        }
+
+        const totalOptionsCount = vars.length + (baseStock > 0 ? 1 : 0);
+        const optionsBadge = totalOptionsCount > 1 
+            ? `<span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full bg-surface-container-lowest/90 backdrop-blur text-primary text-[9px] font-bold shadow-xs border border-surface-container/60">${totalOptionsCount} Options</span>`
+            : '';
 
         html += `
-        <div class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1 cursor-pointer" onclick="viewProduct('${slug}', ${p.id})">
+        <div id="arrival-card-${p.id}" class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1 cursor-pointer relative" 
+             onclick="window.handleArrivalClick(event, ${p.id}, '${slug}')"
+             data-arrival-id="${p.id}"
+             data-slug="${slug}"
+             data-selected-var-idx="${initialVarIdx}">
             <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
+                ${optionsBadge}
             </div>
             <div class="flex flex-col flex-1 justify-between">
                 <div>
                     <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">${p.category || 'General'}</span>
-                    <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-0.5 leading-snug">${p.name}</h4>
+                    <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-0.5 leading-snug">${escapeHtml(p.name)}</h4>
+                    <span id="arrival-variant-sub-${p.id}" class="text-[10px] text-primary font-bold ${activeVar ? '' : 'hidden'}">${activeVar ? escapeHtml(activeVar.name) : ''}</span>
+                    ${pillsHtml}
                 </div>
                 <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
-                    <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${parseFloat(p.price).toFixed(2)}</span>
-                    <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="event.stopPropagation(); window.addToCartById(${p.id}, this)" type="button">
+                    <span id="arrival-price-${p.id}" class="font-price-hero text-price-hero text-on-surface font-extrabold">$${displayPrice.toFixed(2)}</span>
+                    <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all z-10" onclick="event.stopPropagation(); window.handleArrivalAddToCart(${p.id}, this)" type="button">
                         <span class="material-symbols-outlined text-[20px]">add</span>
                     </button>
                 </div>
@@ -1128,6 +1489,58 @@ function initNewArrivals() {
 
     container.innerHTML = html;
 }
+
+window.handleArrivalClick = function(event, productId, slug) {
+    const card = document.getElementById(`arrival-card-${productId}`) || event.currentTarget;
+    const varIdx = card ? parseInt(card.dataset.selectedVarIdx) : -1;
+    viewProduct(slug, productId, varIdx >= 0 ? varIdx : null);
+};
+
+window.handleArrivalAddToCart = function(productId, btnElement) {
+    const card = document.getElementById(`arrival-card-${productId}`) || (btnElement ? btnElement.closest('[data-selected-var-idx]') : null);
+    const varIdx = card ? parseInt(card.dataset.selectedVarIdx) : -1;
+    window.addToCartById(productId, btnElement, varIdx >= 0 ? varIdx : null);
+};
+
+window.selectArrivalVariation = function(event, productId, varIdx) {
+    if (event) event.stopPropagation();
+    const card = document.getElementById(`arrival-card-${productId}`);
+    if (!card) return;
+    const product = allProducts.find(p => String(p.id) === String(productId));
+    if (!product) return;
+    const vars = getProductVariations(product);
+
+    card.dataset.selectedVarIdx = varIdx;
+
+    const pills = card.querySelectorAll('.var-card-pill');
+    pills.forEach(pill => {
+        const pIdx = parseInt(pill.dataset.optIdx);
+        if (pIdx === varIdx) {
+            pill.className = 'var-card-pill px-1.5 py-0.5 rounded text-[9px] font-semibold border transition-all bg-primary text-on-primary border-primary';
+        } else {
+            pill.className = 'var-card-pill px-1.5 py-0.5 rounded text-[9px] font-semibold border transition-all bg-surface-container-low text-on-surface border-surface-container';
+        }
+    });
+
+    const imgEl = document.getElementById(`arrival-img-${productId}`);
+    const priceEl = document.getElementById(`arrival-price-${productId}`);
+    const subEl = document.getElementById(`arrival-variant-sub-${productId}`);
+
+    if (varIdx >= 0 && vars[varIdx]) {
+        const v = vars[varIdx];
+        if (imgEl && v.imageUrl && imgEl.tagName === 'IMG') imgEl.src = v.imageUrl;
+        if (priceEl) priceEl.textContent = '$' + (parseFloat(v.price) || parseFloat(product.price)).toFixed(2);
+        if (subEl) {
+            subEl.textContent = v.name;
+            subEl.classList.remove('hidden');
+        }
+    } else {
+        const primaryImg = getProductPrimaryImage(product);
+        if (imgEl && imgEl.tagName === 'IMG') imgEl.src = primaryImg;
+        if (priceEl) priceEl.textContent = '$' + parseFloat(product.price).toFixed(2);
+        if (subEl) subEl.classList.add('hidden');
+    }
+};
 
 // Dynamic Hero Promo Banner Carousel on index.html
 let heroBanners = [];
@@ -1387,36 +1800,76 @@ function initSearchAutocomplete() {
                 return;
             }
 
-            const matches = allProducts.filter(p => 
-                (parseInt(p.stock) || 0) > 0 &&
-                (p.name.toLowerCase().includes(val) || (p.category && p.category.toLowerCase().includes(val)))
-            ).slice(0, 5);
+            const matches = [];
+            allProducts.forEach(p => {
+                if (!isProductInStock(p)) return;
+                const allB = getAllProductBarcodes(p).map(b => b.toLowerCase());
+                const vars = getProductVariations(p);
+                const nameMatch = p.name.toLowerCase().includes(val);
+                const catMatch = p.category && p.category.toLowerCase().includes(val);
+                const barMatch = allB.some(b => b.includes(val));
 
-            if (matches.length === 0) {
+                // Check if specific variations match
+                const matchingVars = vars.filter(v => 
+                    (v.name && v.name.toLowerCase().includes(val)) ||
+                    (v.barcode && String(v.barcode).toLowerCase().includes(val))
+                );
+
+                if (matchingVars.length > 0) {
+                    matchingVars.forEach(v => {
+                        const vIdx = vars.indexOf(v);
+                        matches.push({
+                            product: p,
+                            variation: v,
+                            varIdx: vIdx,
+                            displayName: `${p.name} - ${v.name}`,
+                            displayPrice: parseFloat(v.price) || parseFloat(p.price),
+                            displayImage: v.imageUrl || getProductPrimaryImage(p),
+                            badge: 'Variation'
+                        });
+                    });
+                } else if (nameMatch || catMatch || barMatch) {
+                    matches.push({
+                        product: p,
+                        variation: null,
+                        varIdx: -1,
+                        displayName: p.name,
+                        displayPrice: parseFloat(p.price),
+                        displayImage: getProductPrimaryImage(p),
+                        badge: p.category || 'General'
+                    });
+                }
+            });
+
+            const topMatches = matches.slice(0, 6);
+
+            if (topMatches.length === 0) {
                 dropdown.innerHTML = `<div class="p-3 text-sm text-on-surface-variant text-center">No matching products</div>`;
                 dropdown.classList.remove('hidden');
                 return;
             }
 
             let html = '';
-            matches.forEach(p => {
-                const img = getProductPrimaryImage(p);
+            topMatches.forEach(m => {
+                const p = m.product;
+                const img = m.displayImage;
                 const isEmoji = !img || img.length <= 4 || !img.startsWith('http');
                 const imgEl = isEmoji 
                     ? `<span class="text-2xl">${img || '📦'}</span>` 
                     : `<img src="${img}" class="w-8 h-8 rounded object-contain">`;
                 const slug = getProductSlug(p);
+                const clickCall = m.varIdx >= 0 ? `viewProduct('${slug}', ${p.id}, ${m.varIdx})` : `viewProduct('${slug}', ${p.id})`;
 
                 html += `
-                    <div class="flex items-center justify-between p-2.5 hover:bg-surface-container-low cursor-pointer transition-colors border-b border-surface-container/50 last:border-0" onclick="viewProduct('${slug}', ${p.id})">
+                    <div class="flex items-center justify-between p-2.5 hover:bg-surface-container-low cursor-pointer transition-colors border-b border-surface-container/50 last:border-0" onclick="${clickCall}">
                         <div class="flex items-center gap-3 min-w-0">
                             ${imgEl}
                             <div class="min-w-0">
-                                <span class="font-title-md text-on-surface text-sm font-semibold truncate block">${p.name}</span>
-                                <span class="font-label-sm text-on-surface-variant text-xs">${p.category || 'General'}</span>
+                                <span class="font-title-md text-on-surface text-sm font-semibold truncate block">${escapeHtml(m.displayName)}</span>
+                                <span class="font-label-sm text-on-surface-variant text-xs">${escapeHtml(m.badge)}</span>
                             </div>
                         </div>
-                        <span class="font-bold text-primary text-sm shrink-0 ml-2">$${parseFloat(p.price).toFixed(2)}</span>
+                        <span class="font-bold text-primary text-sm shrink-0 ml-2">$${m.displayPrice.toFixed(2)}</span>
                     </div>
                 `;
             });
@@ -1577,53 +2030,116 @@ async function loadProductDetail() {
 
     const varsContainer = document.getElementById('detail-variations-container');
     const varsList = document.getElementById('detail-variations-list');
-    if (varsContainer && varsList && meta?.variations && meta.variations.length > 0) {
+    const variations = getProductVariations(product);
+
+    if (varsContainer && varsList && variations.length > 0) {
         varsContainer.classList.remove('hidden');
 
         // Check if a specific variation barcode or index was targeted in URL
         const urlParams = new URLSearchParams(window.location.search);
         const targetBarcode = urlParams.get('vbarcode');
         const targetVarIdx = urlParams.get('var');
-        let initialIdx = 0;
-        if (targetVarIdx !== null && !isNaN(parseInt(targetVarIdx))) {
-            const idx = parseInt(targetVarIdx);
-            if (idx >= 0 && idx < meta.variations.length) initialIdx = idx;
+
+        // Build list of all options: Base product (Original) + Variations
+        const optionsList = [];
+        const baseStock = typeof product.stock !== 'undefined' ? parseInt(product.stock) : 0;
+
+        // Base option
+        if (baseStock > 0 || variations.length > 0) {
+            optionsList.push({
+                optId: 'base',
+                name: 'Original',
+                price: parseFloat(product.price),
+                stock: baseStock,
+                barcode: mainBarcode,
+                imageUrl: getProductPrimaryImage(product),
+                isBase: true,
+                varIdx: -1
+            });
+        }
+
+        // Variation options
+        variations.forEach((v, idx) => {
+            optionsList.push({
+                optId: v.id || `var_${idx}`,
+                name: v.name,
+                price: parseFloat(v.price) || parseFloat(product.price),
+                stock: typeof v.stock !== 'undefined' ? parseInt(v.stock) : baseStock,
+                barcode: v.barcode || '',
+                imageUrl: v.imageUrl || '',
+                isBase: false,
+                varIdx: idx
+            });
+        });
+
+        // Determine initial selected option
+        let selectedOptIdx = 0;
+        if (targetVarIdx !== null && targetVarIdx !== '' && !isNaN(parseInt(targetVarIdx))) {
+            const tIdx = parseInt(targetVarIdx);
+            const found = optionsList.findIndex(o => !o.isBase && o.varIdx === tIdx);
+            if (found !== -1) selectedOptIdx = found;
         } else if (targetBarcode) {
-            const idx = meta.variations.findIndex(v => v.barcode && String(v.barcode).trim().toLowerCase() === targetBarcode.trim().toLowerCase());
-            if (idx !== -1) initialIdx = idx;
+            const found = optionsList.findIndex(o => o.barcode && String(o.barcode).trim().toLowerCase() === targetBarcode.trim().toLowerCase());
+            if (found !== -1) selectedOptIdx = found;
+        } else if (baseStock <= 0) {
+            const firstInStock = optionsList.findIndex(o => !o.isBase && o.stock > 0);
+            if (firstInStock !== -1) selectedOptIdx = firstInStock;
+        }
+
+        function applySelectedOption(opt) {
+            const isOutOfStock = opt.stock <= 0;
+            window.maxStock = opt.stock;
+            updateDetailAddButton(isOutOfStock);
+
+            if (priceEl) {
+                priceEl.textContent = '$' + opt.price.toFixed(2);
+            }
+
+            if (opt.imageUrl) {
+                window.switchProductDetailImage(opt.imageUrl);
+            }
+
+            updateBarcodeDisplay(opt.barcode);
+
+            if (nameEl) {
+                if (opt.isBase) {
+                    nameEl.textContent = product.name;
+                } else {
+                    nameEl.innerHTML = `${escapeHtml(product.name)} <span class="text-primary text-lg font-bold block sm:inline">(${escapeHtml(opt.name)})</span>`;
+                }
+            }
+
+            if (stockBadge) {
+                if (opt.stock <= 0) {
+                    stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-error-container text-error font-label-sm font-bold';
+                    stockBadge.textContent = outOfStockText;
+                } else if (opt.stock <= 3) {
+                    stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-label-sm font-bold';
+                    stockBadge.textContent = `Only ${opt.stock} left`;
+                } else {
+                    stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-secondary-container/40 text-on-secondary-container font-label-sm font-bold';
+                    stockBadge.textContent = 'In Stock';
+                }
+            }
+
+            selectedVariation = opt.isBase ? null : opt;
         }
 
         let varHtml = '';
-        meta.variations.forEach((v, idx) => {
-            const vPrice = parseFloat(v.price) || parseFloat(product.price);
-            const vStock = typeof v.stock !== 'undefined' ? parseInt(v.stock) : stockQty;
-            const isVOutOfStock = vStock <= 0;
-            const isSelected = idx === initialIdx;
+        optionsList.forEach((opt, idx) => {
+            const isVOutOfStock = opt.stock <= 0;
+            const isSelected = idx === selectedOptIdx;
             varHtml += `
-                <button type="button" class="variation-pill px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all ${isSelected ? 'border-primary bg-primary text-on-primary shadow-sm' : 'border-surface-container bg-surface-container-low text-on-surface hover:bg-surface-container'} ${isVOutOfStock ? 'opacity-60' : ''}" data-var-idx="${idx}" ${v.barcode ? `title="Barcode: ${v.barcode}"` : ''}>
-                    <span>${v.name}</span>
-                    <span class="font-bold ml-1">$${vPrice.toFixed(2)}</span>
+                <button type="button" class="variation-pill px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all ${isSelected ? 'border-primary bg-primary text-on-primary shadow-sm' : 'border-surface-container bg-surface-container-low text-on-surface hover:bg-surface-container'} ${isVOutOfStock ? 'opacity-60' : ''}" data-opt-idx="${idx}" ${opt.barcode ? `title="Barcode: ${opt.barcode}"` : ''}>
+                    <span>${escapeHtml(opt.name)}</span>
+                    <span class="font-bold ml-1">$${opt.price.toFixed(2)}</span>
                     ${isVOutOfStock ? `<span class="ml-1 text-[10px] text-error font-bold">(${outOfStockText})</span>` : ''}
                 </button>
             `;
         });
         varsList.innerHTML = varHtml;
 
-        selectedVariation = meta.variations[initialIdx];
-        if (selectedVariation) {
-            const vStock = typeof selectedVariation.stock !== 'undefined' ? parseInt(selectedVariation.stock) : stockQty;
-            window.maxStock = vStock;
-            updateDetailAddButton(vStock <= 0);
-            if (selectedVariation.price && priceEl) {
-                priceEl.textContent = '$' + parseFloat(selectedVariation.price).toFixed(2);
-            }
-            if (selectedVariation.imageUrl) {
-                window.switchProductDetailImage(selectedVariation.imageUrl);
-            }
-            updateBarcodeDisplay(selectedVariation.barcode);
-        } else {
-            updateBarcodeDisplay(mainBarcode);
-        }
+        applySelectedOption(optionsList[selectedOptIdx]);
 
         varsList.querySelectorAll('.variation-pill').forEach((pill, idx) => {
             pill.onclick = () => {
@@ -1634,20 +2150,7 @@ async function loadProductDetail() {
                 pill.classList.remove('border-surface-container', 'bg-surface-container-low', 'text-on-surface');
                 pill.classList.add('border-primary', 'bg-primary', 'text-on-primary', 'shadow-sm');
 
-                selectedVariation = meta.variations[idx];
-                if (selectedVariation) {
-                    const currentVarStock = typeof selectedVariation.stock !== 'undefined' ? parseInt(selectedVariation.stock) : stockQty;
-                    window.maxStock = currentVarStock;
-                    updateDetailAddButton(currentVarStock <= 0);
-
-                    if (selectedVariation.price && priceEl) {
-                        priceEl.textContent = '$' + parseFloat(selectedVariation.price).toFixed(2);
-                    }
-                    if (selectedVariation.imageUrl) {
-                        window.switchProductDetailImage(selectedVariation.imageUrl);
-                    }
-                    updateBarcodeDisplay(selectedVariation.barcode);
-                }
+                applySelectedOption(optionsList[idx]);
             };
         });
     } else {
@@ -1705,7 +2208,7 @@ async function renderDiscoverMore(currentProduct) {
     const available = allProducts.filter(p => 
         String(p.id) !== String(currentProduct.id) && 
         p.category !== '__dashop_config__' &&
-        (parseInt(p.stock) || 0) > 0
+        isProductInStock(p)
     );
 
     if (available.length === 0) {
@@ -1790,12 +2293,12 @@ window.switchProductDetailImage = function(url, thumbBtn) {
 };
 
 // Route to product page by slug or id
-function viewProduct(slug, id) {
-    if (slug) {
-        window.location.href = `/product?slug=${encodeURIComponent(slug)}`;
-    } else {
-        window.location.href = `/product?id=${id}`;
+function viewProduct(slug, id, varIdx = null) {
+    let url = slug ? `/product?slug=${encodeURIComponent(slug)}` : `/product?id=${id}`;
+    if (varIdx !== null && varIdx !== undefined && varIdx >= 0) {
+        url += `&var=${varIdx}`;
     }
+    window.location.href = url;
 }
 
 // Notification Toast
@@ -2133,3 +2636,13 @@ window.renderPWAInstallModal = renderPWAInstallModal;
 window.dismissPWAInstallModal = dismissPWAInstallModal;
 window.triggerPWAInstall = triggerPWAInstall;
 window.sendTelegramOrderNotification = sendTelegramOrderNotification;
+window.setCatalogViewMode = setCatalogViewMode;
+window.selectCardVariation = selectCardVariation;
+window.handleCardClick = handleCardClick;
+window.handleCardAddToCart = handleCardAddToCart;
+window.selectArrivalVariation = selectArrivalVariation;
+window.handleArrivalClick = handleArrivalClick;
+window.handleArrivalAddToCart = handleArrivalAddToCart;
+window.getProductVariations = getProductVariations;
+window.getProductTotalStock = getProductTotalStock;
+window.isProductInStock = isProductInStock;

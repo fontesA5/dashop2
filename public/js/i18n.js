@@ -103,7 +103,11 @@ const translations = {
         not_now: "Not Now",
         ios_install_guide: "To install on your iPhone / iPad:",
         ios_install_step1: "Tap the Share button at the bottom of Safari",
-        ios_install_step2: "Scroll down and select 'Add to Home Screen'"
+        ios_install_step2: "Scroll down and select 'Add to Home Screen'",
+        view_grouped: "Grouped",
+        view_all_variants: "All Variants",
+        options_count: "Options",
+        original_option: "Original"
     },
     es: {
         store: "Tienda",
@@ -204,7 +208,11 @@ const translations = {
         not_now: "Ahora no",
         ios_install_guide: "Para instalar en tu iPhone / iPad:",
         ios_install_step1: "Toca el botón Compartir en la barra de Safari",
-        ios_install_step2: "Baja y selecciona 'Agregar a inicio'"
+        ios_install_step2: "Baja y selecciona 'Agregar a inicio'",
+        view_grouped: "Agrupado",
+        view_all_variants: "Todas las variantes",
+        options_count: "Opciones",
+        original_option: "Original"
     },
     pt: {
         store: "Loja",
@@ -305,7 +313,11 @@ const translations = {
         not_now: "Agora não",
         ios_install_guide: "Para instalar no seu iPhone / iPad:",
         ios_install_step1: "Toque no botão Compartilhar na barra do Safari",
-        ios_install_step2: "Role para baixo e selecione 'Adicionar à Tela de Início'"
+        ios_install_step2: "Role para baixo e selecione 'Adicionar à Tela de Início'",
+        view_grouped: "Agrupado",
+        view_all_variants: "Todas as variações",
+        options_count: "Opções",
+        original_option: "Original"
     }
 };
 
