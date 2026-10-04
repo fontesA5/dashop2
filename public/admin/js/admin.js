@@ -795,18 +795,66 @@ window.deleteOrder = async function(orderId) {
     }
 };
 
+// HTML escaping helper for admin UI
+function escapeAdminHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // 4. Product Management (CRUD with Batch Images)
-function renderProductsList() {
+function renderProductsList(filterQuery = '') {
     const container = document.getElementById('admin-products-table-body');
     if (!container) return;
 
-    if (adminProducts.length === 0) {
-        container.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-on-surface-variant">No products found. Click "Add Product" above to create one.</td></tr>`;
+    const searchInput = document.getElementById('manage-products-search-input');
+    const q = (filterQuery !== undefined && filterQuery !== null && filterQuery !== '' 
+        ? filterQuery 
+        : (searchInput ? searchInput.value : '')).trim().toLowerCase();
+
+    let list = adminProducts || [];
+    if (q) {
+        list = list.filter(p => {
+            const nameMatch = (p.name || '').toLowerCase().includes(q);
+            const catMatch = (p.category || '').toLowerCase().includes(q);
+            const barcodeMatch = (p.barcode || '').toLowerCase().includes(q);
+            let metaMatch = false;
+            if (p.description && p.description.startsWith('{')) {
+                try {
+                    const meta = JSON.parse(p.description);
+                    if (meta.barcode && String(meta.barcode).toLowerCase().includes(q)) metaMatch = true;
+                    if (Array.isArray(meta.variations)) {
+                        metaMatch = metaMatch || meta.variations.some(v => 
+                            (v.name && v.name.toLowerCase().includes(q)) || 
+                            (v.barcode && String(v.barcode).toLowerCase().includes(q))
+                        );
+                    }
+                } catch (e) {}
+            }
+            return nameMatch || catMatch || barcodeMatch || metaMatch;
+        });
+    }
+
+    const countEl = document.getElementById('manage-products-count');
+    if (countEl) {
+        countEl.textContent = q 
+            ? `${list.length} of ${adminProducts.length} items` 
+            : `${adminProducts.length} items`;
+    }
+
+    if (list.length === 0) {
+        container.innerHTML = q 
+            ? `<tr><td colspan="6" class="p-6 text-center text-on-surface-variant">No products found matching "<strong>${escapeAdminHtml(q)}</strong>".</td></tr>`
+            : `<tr><td colspan="6" class="p-6 text-center text-on-surface-variant">No products found. Click "Add Product" above to create one.</td></tr>`;
         return;
     }
 
     let html = '';
-    adminProducts.forEach(p => {
+    list.forEach(p => {
         let primaryImg = getAdminProductPrimaryImage(p);
         let imgCount = 1;
         let barcode = p.barcode || '';
@@ -828,10 +876,10 @@ function renderProductsList() {
         <tr class="border-b border-surface-container/60 hover:bg-surface-container-low/50 transition-colors">
             <td class="p-3 w-24 sm:w-28">${imgEl}</td>
             <td class="p-3 font-semibold text-on-surface">
-                <div>${p.name} ${imgCount > 1 ? `<span class="ml-1 text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded-full font-mono font-bold">${imgCount} photos</span>` : ''}</div>
-                ${barcode ? `<div class="flex items-center gap-1 font-mono text-[11px] text-outline mt-0.5"><span class="material-symbols-outlined text-[13px]">barcode</span><span>${barcode}</span></div>` : ''}
+                <div>${escapeAdminHtml(p.name)} ${imgCount > 1 ? `<span class="ml-1 text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded-full font-mono font-bold">${imgCount} photos</span>` : ''}</div>
+                ${barcode ? `<div class="flex items-center gap-1 font-mono text-[11px] text-outline mt-0.5"><span class="material-symbols-outlined text-[13px]">barcode</span><span>${escapeAdminHtml(barcode)}</span></div>` : ''}
             </td>
-            <td class="p-3 text-on-surface-variant text-sm">${p.category || 'General'}</td>
+            <td class="p-3 text-on-surface-variant text-sm">${escapeAdminHtml(p.category || 'General')}</td>
             <td class="p-3 font-bold text-on-surface">$${parseFloat(p.price).toFixed(2)}</td>
             <td class="p-3 text-sm">
                 <span class="px-2 py-0.5 rounded-full text-xs font-bold ${p.stock < 5 ? 'bg-error-container text-error' : 'bg-secondary-container/40 text-on-secondary-container'}">
@@ -855,6 +903,192 @@ function renderProductsList() {
     container.innerHTML = html;
 }
 
+// Search filter for Manage Products Modal
+window.adminFilterManageProducts = function(query) {
+    const clearBtn = document.getElementById('manage-products-search-clear');
+    if (clearBtn) {
+        if (query && query.trim()) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+    }
+    renderProductsList(query);
+};
+
+window.adminClearManageProductsSearch = function() {
+    const input = document.getElementById('manage-products-search-input');
+    if (input) input.value = '';
+    const clearBtn = document.getElementById('manage-products-search-clear');
+    if (clearBtn) clearBtn.classList.add('hidden');
+    renderProductsList('');
+};
+
+// Search existing products in Add Product Modal
+window.adminFilterAddProductSearch = function(query) {
+    const clearBtn = document.getElementById('add-product-search-clear');
+    const resultsContainer = document.getElementById('add-product-search-results');
+    if (!resultsContainer) return;
+
+    const q = (query || '').trim().toLowerCase();
+    if (clearBtn) {
+        if (q) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+    }
+
+    if (!q) {
+        resultsContainer.innerHTML = '';
+        resultsContainer.classList.add('hidden');
+        return;
+    }
+
+    const matches = (adminProducts || []).filter(p => {
+        const nameMatch = (p.name || '').toLowerCase().includes(q);
+        const catMatch = (p.category || '').toLowerCase().includes(q);
+        const barcodeMatch = (p.barcode || '').toLowerCase().includes(q);
+        let metaMatch = false;
+        if (p.description && p.description.startsWith('{')) {
+            try {
+                const meta = JSON.parse(p.description);
+                if (meta.barcode && String(meta.barcode).toLowerCase().includes(q)) metaMatch = true;
+                if (Array.isArray(meta.variations)) {
+                    metaMatch = metaMatch || meta.variations.some(v => 
+                        (v.name && v.name.toLowerCase().includes(q)) || 
+                        (v.barcode && String(v.barcode).toLowerCase().includes(q))
+                    );
+                }
+            } catch (e) {}
+        }
+        return nameMatch || catMatch || barcodeMatch || metaMatch;
+    });
+
+    resultsContainer.classList.remove('hidden');
+
+    if (matches.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="p-3 text-center rounded-xl bg-surface-container-lowest border border-surface-container text-xs text-on-surface-variant">
+                <span>No existing products match "<strong>${escapeAdminHtml(q)}</strong>". Fill in details below to create a new one.</span>
+            </div>
+        `;
+        return;
+    }
+
+    let html = matches.slice(0, 5).map(p => {
+        const primaryImg = getAdminProductPrimaryImage(p);
+        const isEmoji = !primaryImg || primaryImg.length <= 4 || (!primaryImg.startsWith('http') && !primaryImg.startsWith('data:image') && !primaryImg.startsWith('/'));
+        const imgEl = isEmoji 
+            ? `<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-xl shrink-0">${primaryImg}</div>`
+            : `<img src="${primaryImg}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-10 h-10 rounded-lg object-contain bg-surface-container p-0.5 border border-surface-container shrink-0">`;
+        const barcode = p.barcode || '';
+
+        return `
+            <div class="p-2 rounded-xl bg-surface-container-lowest border border-surface-container flex items-center justify-between gap-2 shadow-xs hover:border-primary/50 transition-all">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    ${imgEl}
+                    <div class="min-w-0">
+                        <div class="font-bold text-xs text-on-surface truncate">${escapeAdminHtml(p.name)}</div>
+                        <div class="flex items-center gap-1.5 text-[10px] text-on-surface-variant mt-0.5">
+                            <span class="font-bold text-on-surface">$${parseFloat(p.price || 0).toFixed(2)}</span>
+                            <span>•</span>
+                            <span class="${p.stock < 5 ? 'text-error font-bold' : ''}">${p.stock} in stock</span>
+                            ${p.category ? `<span>•</span><span class="truncate">${escapeAdminHtml(p.category)}</span>` : ''}
+                            ${barcode ? `<span>•</span><span class="font-mono text-[9px] text-outline">${escapeAdminHtml(barcode)}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <button type="button" onclick="adminSelectProductToEdit(${p.id})" class="px-2.5 py-1 rounded-lg bg-primary text-on-primary text-[11px] font-bold hover:bg-primary-container transition active:scale-95 shadow-xs" title="Edit this product">
+                        Edit / Restock
+                    </button>
+                    <button type="button" onclick="adminAutofillAsTemplate(${p.id})" class="px-2 py-1 rounded-lg bg-surface-container text-on-surface-variant text-[11px] font-semibold hover:bg-surface-variant hover:text-on-surface transition active:scale-95" title="Copy info into a new product">
+                        Duplicate
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    if (matches.length > 5) {
+        html += `<div class="text-[11px] text-center text-on-surface-variant py-1">Showing 5 of ${matches.length} matches. Type more to narrow down.</div>`;
+    }
+
+    resultsContainer.innerHTML = html;
+};
+
+window.adminClearAddProductSearch = function() {
+    const input = document.getElementById('add-product-search-input');
+    if (input) input.value = '';
+    const clearBtn = document.getElementById('add-product-search-clear');
+    if (clearBtn) clearBtn.classList.add('hidden');
+    const resultsContainer = document.getElementById('add-product-search-results');
+    if (resultsContainer) {
+        resultsContainer.innerHTML = '';
+        resultsContainer.classList.add('hidden');
+    }
+};
+
+window.adminSelectProductToEdit = function(id) {
+    adminClearAddProductSearch();
+    window.editProduct(id);
+    if (typeof showNotification === 'function') {
+        showNotification('Loaded product for editing');
+    }
+};
+
+window.adminAutofillAsTemplate = function(id) {
+    const product = (adminProducts || []).find(p => p.id === id);
+    if (!product) return;
+    
+    // Clear editing ID so saving creates a NEW product
+    editingProductId = null;
+    
+    const title = document.getElementById('product-modal-title');
+    if (title) title.textContent = window.i18n ? window.i18n.t('add_new_product') : 'Add New Product';
+    
+    const subtitle = document.getElementById('product-modal-subtitle');
+    if (subtitle) {
+        subtitle.innerHTML = `Duplicating template from <strong>${escapeAdminHtml(product.name)}</strong>`;
+        subtitle.classList.remove('hidden');
+    }
+    
+    document.getElementById('prod-name').value = (product.name || '') + ' (Copy)';
+    document.getElementById('prod-price').value = product.price || '';
+    document.getElementById('prod-stock').value = product.stock || '10';
+    document.getElementById('prod-category').value = product.category || 'Household';
+    document.getElementById('prod-image').value = (product.image && product.image.startsWith('http')) ? product.image : '';
+    
+    let cleanDesc = product.description || '';
+    let slug = ((product.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-copy').replace(/^-+|-+$/g, '');
+    let existingImages = [];
+    let variations = [];
+
+    if (product.description && product.description.startsWith('{')) {
+        try {
+            const meta = JSON.parse(product.description);
+            cleanDesc = meta.desc || '';
+            if (meta.slug) slug = meta.slug + '-copy';
+            existingImages = meta.images || [];
+            if (Array.isArray(meta.variations)) variations = meta.variations;
+        } catch (e) {}
+    }
+
+    document.getElementById('prod-desc').value = cleanDesc;
+    document.getElementById('prod-slug').value = slug;
+    document.getElementById('prod-batch-images').value = existingImages.join('\n');
+    
+    const barcodeInput = document.getElementById('prod-barcode');
+    if (barcodeInput) barcodeInput.value = '';
+
+    const varsContainer = document.getElementById('admin-variations-container');
+    if (varsContainer) {
+        varsContainer.innerHTML = '';
+        variations.forEach(v => window.adminAddVariationRow(v));
+    }
+
+    renderImagePreviews(existingImages);
+    adminClearAddProductSearch();
+    if (typeof showNotification === 'function') {
+        showNotification('Template loaded. Edit details and save as a new product.');
+    }
+};
+
 // Open Add Product Modal
 window.openAddProductModal = function() {
     editingProductId = null;
@@ -875,6 +1109,16 @@ window.openAddProductModal = function() {
     
     const title = document.getElementById('product-modal-title');
     if (title) title.textContent = window.i18n ? window.i18n.t('add_new_product') : 'Add New Product';
+
+    const subtitle = document.getElementById('product-modal-subtitle');
+    if (subtitle) {
+        subtitle.textContent = '';
+        subtitle.classList.add('hidden');
+    }
+
+    if (typeof window.adminClearAddProductSearch === 'function') {
+        window.adminClearAddProductSearch();
+    }
     
     const previewContainer = document.getElementById('product-images-preview');
     if (previewContainer) previewContainer.innerHTML = '';
@@ -954,6 +1198,16 @@ window.editProduct = function(id) {
     const title = document.getElementById('product-modal-title');
     if (title) title.textContent = window.i18n ? window.i18n.t('edit_product') : 'Edit Product';
 
+    const subtitle = document.getElementById('product-modal-subtitle');
+    if (subtitle) {
+        subtitle.innerHTML = `Editing <strong>${escapeAdminHtml(product.name)}</strong> • <a href="javascript:void(0)" onclick="openAddProductModal()" class="text-primary hover:underline font-bold">Switch to Add New</a>`;
+        subtitle.classList.remove('hidden');
+    }
+
+    if (typeof window.adminClearAddProductSearch === 'function') {
+        window.adminClearAddProductSearch();
+    }
+
     // Populate inputs
     document.getElementById('prod-name').value = product.name || '';
     document.getElementById('prod-price').value = product.price || '';
@@ -1002,6 +1256,16 @@ window.closeProductModal = function() {
     if (modal) modal.classList.add('hidden');
     editingProductId = null;
     uploadedImageFiles = [];
+
+    const subtitle = document.getElementById('product-modal-subtitle');
+    if (subtitle) {
+        subtitle.textContent = '';
+        subtitle.classList.add('hidden');
+    }
+
+    if (typeof window.adminClearAddProductSearch === 'function') {
+        window.adminClearAddProductSearch();
+    }
 
     if (wasManageProductsOpen) {
         const manageModal = document.getElementById('manage-products-modal');
@@ -1158,7 +1422,11 @@ window.deleteProduct = async function(id) {
 
 // Manage Products Modal Open / Close
 window.openManageProductsModal = function() {
-    renderProductsList();
+    const input = document.getElementById('manage-products-search-input');
+    if (input) input.value = '';
+    const clearBtn = document.getElementById('manage-products-search-clear');
+    if (clearBtn) clearBtn.classList.add('hidden');
+    renderProductsList('');
     const modal = document.getElementById('manage-products-modal');
     if (modal) modal.classList.remove('hidden');
 };
