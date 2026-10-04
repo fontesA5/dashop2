@@ -146,6 +146,13 @@
                 <div id="detail-variations-list" class="flex flex-wrap gap-2"></div>
             </div>
 
+            <!-- Barcode Display (Updates when switching variations) -->
+            <div id="detail-barcode-container" class="px-margin pt-2 flex items-center gap-1.5 text-xs font-mono text-on-surface-variant hidden">
+                <span class="material-symbols-outlined text-[16px] text-primary">barcode</span>
+                <span class="font-sans">Barcode / SKU:</span>
+                <span id="detail-barcode" class="font-bold text-on-surface"></span>
+            </div>
+
             <!-- Description -->
             <div class="px-margin pt-space-md">
                 <div class="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm border border-surface-container/50">
@@ -341,7 +348,7 @@
     <script src="/js/i18n.js"></script>
     <script src="/js/theme.js"></script>
     <script src="/js/promos.js"></script>
-    <script src="/js/app.js"></script>
+    <script src="/js/app.js?v=32"></script>
     <script>
         window.currentQty = 1;
 

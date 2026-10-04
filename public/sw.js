@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dashop-v31';
+const CACHE_NAME = 'dashop-v32';
 
 // Only public storefront assets to cache for offline support
 const STATIC_ASSETS = [

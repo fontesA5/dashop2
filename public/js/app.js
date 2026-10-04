@@ -166,7 +166,8 @@ async function addToCart(product, quantity = 1, triggerBtn = null) {
             price: parseFloat(product.price) || 0,
             image: primaryImage,
             quantity: quantity,
-            stock: availableStock
+            stock: availableStock,
+            barcode: product.barcode || ''
         });
     }
     
@@ -708,6 +709,24 @@ function getProductBarcode(product) {
     return '';
 }
 
+function getAllProductBarcodes(product) {
+    if (!product) return [];
+    const barcodes = [];
+    if (product.barcode) barcodes.push(String(product.barcode).trim());
+    if (product.description && product.description.startsWith('{')) {
+        try {
+            const meta = JSON.parse(product.description);
+            if (meta.barcode) barcodes.push(String(meta.barcode).trim());
+            if (Array.isArray(meta.variations)) {
+                meta.variations.forEach(v => {
+                    if (v.barcode && String(v.barcode).trim()) barcodes.push(String(v.barcode).trim());
+                });
+            }
+        } catch(e) {}
+    }
+    return Array.from(new Set(barcodes.filter(Boolean)));
+}
+
 let currentActiveCategory = 'All';
 
 window.filterByCategory = function(category, btnElement) {
@@ -735,10 +754,10 @@ window.filterByCategory = function(category, btnElement) {
     let filtered = allProducts.filter(p => (parseInt(p.stock) || 0) > 0);
     if (query) {
         filtered = filtered.filter(p => {
-            const b = getProductBarcode(p).toLowerCase();
+            const allB = getAllProductBarcodes(p).map(b => b.toLowerCase());
             return p.name.toLowerCase().includes(query) || 
                    (p.category && p.category.toLowerCase().includes(query)) ||
-                   (b && b.includes(query));
+                   allB.some(b => b.includes(query));
         });
     }
 
@@ -1540,17 +1559,48 @@ async function loadProductDetail() {
         try { meta = JSON.parse(product.description); } catch(e) {}
     }
 
+    const mainBarcode = product.barcode || (meta?.barcode) || '';
+    const barcodeContainer = document.getElementById('detail-barcode-container');
+    const barcodeEl = document.getElementById('detail-barcode');
+
+    function updateBarcodeDisplay(varBarcode) {
+        const activeBarcode = varBarcode || mainBarcode;
+        if (barcodeContainer && barcodeEl) {
+            if (activeBarcode) {
+                barcodeEl.textContent = activeBarcode;
+                barcodeContainer.classList.remove('hidden');
+            } else {
+                barcodeContainer.classList.add('hidden');
+            }
+        }
+    }
+
     const varsContainer = document.getElementById('detail-variations-container');
     const varsList = document.getElementById('detail-variations-list');
     if (varsContainer && varsList && meta?.variations && meta.variations.length > 0) {
         varsContainer.classList.remove('hidden');
+
+        // Check if a specific variation barcode or index was targeted in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetBarcode = urlParams.get('vbarcode');
+        const targetVarIdx = urlParams.get('var');
+        let initialIdx = 0;
+        if (targetVarIdx !== null && !isNaN(parseInt(targetVarIdx))) {
+            const idx = parseInt(targetVarIdx);
+            if (idx >= 0 && idx < meta.variations.length) initialIdx = idx;
+        } else if (targetBarcode) {
+            const idx = meta.variations.findIndex(v => v.barcode && String(v.barcode).trim().toLowerCase() === targetBarcode.trim().toLowerCase());
+            if (idx !== -1) initialIdx = idx;
+        }
+
         let varHtml = '';
         meta.variations.forEach((v, idx) => {
             const vPrice = parseFloat(v.price) || parseFloat(product.price);
             const vStock = typeof v.stock !== 'undefined' ? parseInt(v.stock) : stockQty;
             const isVOutOfStock = vStock <= 0;
+            const isSelected = idx === initialIdx;
             varHtml += `
-                <button type="button" class="variation-pill px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all ${idx === 0 ? 'border-primary bg-primary text-on-primary shadow-sm' : 'border-surface-container bg-surface-container-low text-on-surface hover:bg-surface-container'} ${isVOutOfStock ? 'opacity-60' : ''}" data-var-idx="${idx}">
+                <button type="button" class="variation-pill px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all ${isSelected ? 'border-primary bg-primary text-on-primary shadow-sm' : 'border-surface-container bg-surface-container-low text-on-surface hover:bg-surface-container'} ${isVOutOfStock ? 'opacity-60' : ''}" data-var-idx="${idx}" ${v.barcode ? `title="Barcode: ${v.barcode}"` : ''}>
                     <span>${v.name}</span>
                     <span class="font-bold ml-1">$${vPrice.toFixed(2)}</span>
                     ${isVOutOfStock ? `<span class="ml-1 text-[10px] text-error font-bold">(${outOfStockText})</span>` : ''}
@@ -1559,7 +1609,7 @@ async function loadProductDetail() {
         });
         varsList.innerHTML = varHtml;
 
-        selectedVariation = meta.variations[0];
+        selectedVariation = meta.variations[initialIdx];
         if (selectedVariation) {
             const vStock = typeof selectedVariation.stock !== 'undefined' ? parseInt(selectedVariation.stock) : stockQty;
             window.maxStock = vStock;
@@ -1567,6 +1617,12 @@ async function loadProductDetail() {
             if (selectedVariation.price && priceEl) {
                 priceEl.textContent = '$' + parseFloat(selectedVariation.price).toFixed(2);
             }
+            if (selectedVariation.imageUrl) {
+                window.switchProductDetailImage(selectedVariation.imageUrl);
+            }
+            updateBarcodeDisplay(selectedVariation.barcode);
+        } else {
+            updateBarcodeDisplay(mainBarcode);
         }
 
         varsList.querySelectorAll('.variation-pill').forEach((pill, idx) => {
@@ -1590,11 +1646,13 @@ async function loadProductDetail() {
                     if (selectedVariation.imageUrl) {
                         window.switchProductDetailImage(selectedVariation.imageUrl);
                     }
+                    updateBarcodeDisplay(selectedVariation.barcode);
                 }
             };
         });
-    } else if (varsContainer) {
-        varsContainer.classList.add('hidden');
+    } else {
+        if (varsContainer) varsContainer.classList.add('hidden');
+        updateBarcodeDisplay(mainBarcode);
     }
 
     if (addBtn) {
@@ -1612,7 +1670,8 @@ async function loadProductDetail() {
                     name: `${product.name} (${selectedVariation.name})`,
                     price: parseFloat(selectedVariation.price) || parseFloat(product.price),
                     image: selectedVariation.imageUrl || getProductPrimaryImage(product),
-                    stock: currentStock
+                    stock: currentStock,
+                    barcode: selectedVariation.barcode || product.barcode || ''
                 };
                 addToCart(varProduct, qty, addBtn);
             } else {
@@ -1769,18 +1828,41 @@ window.openBarcodeSearchScanner = function() {
     window.openBarcodeScanner((code) => {
         if (!code) return;
         console.log('Scanned barcode:', code);
+        const cleanCode = String(code).trim().toLowerCase();
 
-        // Find exact match in allProducts
+        // Find match in allProducts (main barcode or variation barcode)
+        let matchedVariation = null;
         const match = allProducts.find(p => {
-            const b = getProductBarcode(p);
-            return b && b.toLowerCase() === code.toLowerCase();
+            const mainB = getProductBarcode(p).toLowerCase();
+            if (mainB && mainB === cleanCode) return true;
+            if (p.description && p.description.startsWith('{')) {
+                try {
+                    const meta = JSON.parse(p.description);
+                    if (Array.isArray(meta.variations)) {
+                        const foundV = meta.variations.find(v => v.barcode && String(v.barcode).trim().toLowerCase() === cleanCode);
+                        if (foundV) {
+                            matchedVariation = foundV;
+                            return true;
+                        }
+                    }
+                } catch(e) {}
+            }
+            return false;
         });
 
         if (match) {
-            showNotification(`Found product: ${match.name}!`);
+            if (matchedVariation) {
+                showNotification(`Found: ${match.name} (${matchedVariation.name})`);
+            } else {
+                showNotification(`Found product: ${match.name}!`);
+            }
             const slug = getProductSlug(match);
             setTimeout(() => {
-                viewProduct(slug, match.id);
+                if (matchedVariation && matchedVariation.barcode) {
+                    window.location.href = `/product?slug=${encodeURIComponent(slug)}&vbarcode=${encodeURIComponent(matchedVariation.barcode)}`;
+                } else {
+                    viewProduct(slug, match.id);
+                }
             }, 300);
         } else {
             // Fill search input and filter catalog

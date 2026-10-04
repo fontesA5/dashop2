@@ -601,6 +601,16 @@ window.openProductDetailModal = function(itemOrData) {
         </div>
     `;
 
+    let variationsList = [];
+    let mainBarcode = (matchedProd && matchedProd.barcode) ? matchedProd.barcode : (item.barcode || '');
+    if (rawDesc && rawDesc.startsWith('{')) {
+        try {
+            const meta = JSON.parse(rawDesc);
+            if (meta.barcode && !mainBarcode) mainBarcode = meta.barcode;
+            if (Array.isArray(meta.variations)) variationsList = meta.variations;
+        } catch(e) {}
+    }
+
     body.innerHTML = `
         <div class="flex flex-col gap-3.5">
             <!-- Big Image with Quantity or Out of Stock Badge -->
@@ -622,6 +632,44 @@ window.openProductDetailModal = function(itemOrData) {
 
             <!-- Metrics Grid -->
             ${metricsGrid}
+
+            <!-- Barcode / SKU -->
+            ${mainBarcode ? `
+                <div class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-low text-xs font-mono text-on-surface border border-surface-container">
+                    <span class="material-symbols-outlined text-[16px] text-primary">barcode</span>
+                    <span class="text-on-surface-variant font-sans">Barcode / SKU:</span>
+                    <strong class="text-on-surface">${escapeAdminHtml(mainBarcode)}</strong>
+                </div>
+            ` : ''}
+
+            <!-- Product Variations & Their Barcodes -->
+            ${variationsList.length > 0 ? `
+                <div class="p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container flex flex-col gap-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] text-outline font-bold uppercase tracking-wider flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[15px] text-primary">style</span>
+                            <span>Variations & Barcodes (${variationsList.length})</span>
+                        </span>
+                    </div>
+                    <div class="flex flex-col gap-1.5 max-h-48 overflow-y-auto pr-1">
+                        ${variationsList.map(v => `
+                            <div class="p-2 rounded-xl bg-surface-container-low/70 border border-surface-container flex items-center justify-between gap-2 text-xs">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    ${v.imageUrl ? `<img src="${v.imageUrl}" class="w-8 h-8 rounded-lg object-contain bg-surface-container border border-surface-container shrink-0" onerror="this.remove()">` : `<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-xs shrink-0 font-bold text-primary">${escapeAdminHtml((v.name || 'V').slice(0, 2).toUpperCase())}</div>`}
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-on-surface truncate">${escapeAdminHtml(v.name)}</div>
+                                        ${v.barcode ? `<div class="flex items-center gap-1 font-mono text-[11px] text-primary mt-0.5"><span class="material-symbols-outlined text-[13px]">barcode</span><span>${escapeAdminHtml(v.barcode)}</span></div>` : `<div class="text-[10px] text-outline italic">No barcode</div>`}
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <div class="font-bold text-on-surface">$${parseFloat(v.price || 0).toFixed(2)}</div>
+                                    <div class="text-[10px] ${parseInt(v.stock || 0) <= 0 ? 'text-error font-bold' : 'text-on-surface-variant'}">${v.stock !== undefined ? `${v.stock} in stock` : ''}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
 
             <!-- Description (if available) -->
             ${descriptionText ? `
@@ -858,6 +906,7 @@ function renderProductsList(filterQuery = '') {
         let primaryImg = getAdminProductPrimaryImage(p);
         let imgCount = 1;
         let barcode = p.barcode || '';
+        let variationBarcodes = [];
         if (p.description && p.description.startsWith('{')) {
             try {
                 const meta = JSON.parse(p.description);
@@ -865,6 +914,12 @@ function renderProductsList(filterQuery = '') {
                     imgCount = meta.images.length;
                 }
                 if (meta.barcode) barcode = meta.barcode;
+                if (Array.isArray(meta.variations)) {
+                    variationBarcodes = meta.variations.filter(v => v.barcode && String(v.barcode).trim()).map(v => ({
+                        name: v.name,
+                        barcode: String(v.barcode).trim()
+                    }));
+                }
             } catch (e) {}
         }
         const isEmoji = !primaryImg || primaryImg.length <= 4 || (!primaryImg.startsWith('http') && !primaryImg.startsWith('data:image') && !primaryImg.startsWith('/'));
@@ -878,6 +933,17 @@ function renderProductsList(filterQuery = '') {
             <td class="p-3 font-semibold text-on-surface">
                 <div>${escapeAdminHtml(p.name)} ${imgCount > 1 ? `<span class="ml-1 text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded-full font-mono font-bold">${imgCount} photos</span>` : ''}</div>
                 ${barcode ? `<div class="flex items-center gap-1 font-mono text-[11px] text-outline mt-0.5"><span class="material-symbols-outlined text-[13px]">barcode</span><span>${escapeAdminHtml(barcode)}</span></div>` : ''}
+                ${variationBarcodes.length > 0 ? `
+                    <div class="mt-1 flex flex-wrap gap-1">
+                        ${variationBarcodes.map(vb => `
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-surface-container-low border border-surface-container text-[10px] font-mono text-on-surface-variant" title="Variation: ${escapeAdminHtml(vb.name)}">
+                                <span class="material-symbols-outlined text-[11px] text-primary">barcode</span>
+                                <span class="font-sans font-semibold text-on-surface">${escapeAdminHtml(vb.name)}:</span>
+                                <span>${escapeAdminHtml(vb.barcode)}</span>
+                            </span>
+                        `).join('')}
+                    </div>
+                ` : ''}
             </td>
             <td class="p-3 text-on-surface-variant text-sm">${escapeAdminHtml(p.category || 'General')}</td>
             <td class="p-3 font-bold text-on-surface">$${parseFloat(p.price).toFixed(2)}</td>
@@ -978,6 +1044,27 @@ window.adminFilterAddProductSearch = function(query) {
             : `<img src="${primaryImg}" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'" class="w-10 h-10 rounded-lg object-contain bg-surface-container p-0.5 border border-surface-container shrink-0">`;
         const barcode = p.barcode || '';
 
+        let matchedVarSnippet = '';
+        if (p.description && p.description.startsWith('{')) {
+            try {
+                const meta = JSON.parse(p.description);
+                if (Array.isArray(meta.variations)) {
+                    const matchedVar = meta.variations.find(v => 
+                        (v.barcode && String(v.barcode).toLowerCase().includes(q)) || 
+                        (v.name && v.name.toLowerCase().includes(q))
+                    );
+                    if (matchedVar) {
+                        matchedVarSnippet = `
+                            <div class="flex items-center gap-1 text-[10px] text-primary font-medium mt-0.5">
+                                <span class="material-symbols-outlined text-[12px]">style</span>
+                                <span>Variation: <strong>${escapeAdminHtml(matchedVar.name)}</strong>${matchedVar.barcode ? ` (${escapeAdminHtml(matchedVar.barcode)})` : ''}</span>
+                            </div>
+                        `;
+                    }
+                }
+            } catch(e) {}
+        }
+
         return `
             <div class="p-2 rounded-xl bg-surface-container-lowest border border-surface-container flex items-center justify-between gap-2 shadow-xs hover:border-primary/50 transition-all">
                 <div class="flex items-center gap-2.5 min-w-0">
@@ -991,6 +1078,7 @@ window.adminFilterAddProductSearch = function(query) {
                             ${p.category ? `<span>•</span><span class="truncate">${escapeAdminHtml(p.category)}</span>` : ''}
                             ${barcode ? `<span>•</span><span class="font-mono text-[9px] text-outline">${escapeAdminHtml(barcode)}</span>` : ''}
                         </div>
+                        ${matchedVarSnippet}
                     </div>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
@@ -1168,8 +1256,19 @@ window.adminAddVariationRow = function(data = {}) {
                 <input type="number" class="var-stock w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container focus:ring-1 focus:ring-primary" placeholder="e.g. 10" value="${stock}" required />
             </div>
             <div>
-                <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Barcode / SKU</label>
-                <input type="text" class="var-barcode w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container font-mono" placeholder="Optional barcode" value="${barcode.replace(/"/g, '&quot;')}" />
+                <div class="flex items-center justify-between mb-0.5">
+                    <label class="text-[11px] font-semibold text-on-surface-variant">Barcode / SKU</label>
+                    <button type="button" onclick="startAdminVariationBarcodeScan('${rowId}')" class="text-[10px] text-primary font-bold hover:underline flex items-center gap-0.5 active:scale-95 transition" title="Scan barcode with camera">
+                        <span class="material-symbols-outlined text-[13px]">barcode_scanner</span>
+                        <span>Scan</span>
+                    </button>
+                </div>
+                <div class="relative flex items-center">
+                    <input type="text" class="var-barcode w-full pl-2.5 pr-7 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container focus:ring-1 focus:ring-primary font-mono" placeholder="Scan or enter barcode" value="${barcode.replace(/"/g, '&quot;')}" />
+                    <button type="button" onclick="startAdminVariationBarcodeScan('${rowId}')" class="absolute right-1 text-on-surface-variant hover:text-primary p-0.5" title="Scan with camera">
+                        <span class="material-symbols-outlined text-[15px]">barcode_scanner</span>
+                    </button>
+                </div>
             </div>
             <div>
                 <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Image URL</label>
@@ -1179,6 +1278,27 @@ window.adminAddVariationRow = function(data = {}) {
     `;
 
     container.appendChild(row);
+};
+
+// Scan barcode directly into variation row
+window.startAdminVariationBarcodeScan = function(rowId) {
+    if (!window.openBarcodeScanner) {
+        alert('Scanner module is loading, please try again in a moment.');
+        return;
+    }
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    const nameInput = row.querySelector('.var-name');
+    const varName = nameInput && nameInput.value.trim() ? nameInput.value.trim() : 'Variation';
+    window.openBarcodeScanner((code) => {
+        const input = row.querySelector('.var-barcode');
+        if (input) {
+            input.value = code;
+            if (typeof showNotification === 'function') {
+                showNotification(`Barcode scanned for ${varName}: ${code}`);
+            }
+        }
+    }, `Scan Barcode for ${varName}`);
 };
 
 // Open Edit Product Modal
@@ -1458,22 +1578,49 @@ window.adminQuickBarcodeLookup = function() {
         return;
     }
     window.openBarcodeScanner((code) => {
-        const product = adminProducts.find(p => {
-            if (p.barcode && String(p.barcode).trim() === code.trim()) return true;
+        if (!code) return;
+        const cleanCode = String(code).trim().toLowerCase();
+        let matchedVariation = null;
+
+        const product = (adminProducts || []).find(p => {
+            if (p.barcode && String(p.barcode).trim().toLowerCase() === cleanCode) return true;
             if (p.description && p.description.startsWith('{')) {
                 try {
                     const meta = JSON.parse(p.description);
-                    if (meta.barcode && String(meta.barcode).trim() === code.trim()) return true;
+                    if (meta.barcode && String(meta.barcode).trim().toLowerCase() === cleanCode) return true;
+                    if (Array.isArray(meta.variations)) {
+                        const foundVar = meta.variations.find(v => v.barcode && String(v.barcode).trim().toLowerCase() === cleanCode);
+                        if (foundVar) {
+                            matchedVariation = foundVar;
+                            return true;
+                        }
+                    }
                 } catch(e) {}
             }
             return false;
         });
 
         if (product) {
-            showNotification(`Found: ${product.name}`);
+            if (matchedVariation) {
+                showNotification(`Found: ${product.name} — Variation: ${matchedVariation.name}`);
+            } else {
+                showNotification(`Found: ${product.name}`);
+            }
             editProduct(product.id);
+            if (matchedVariation) {
+                setTimeout(() => {
+                    const rows = document.querySelectorAll('#admin-variations-container .admin-var-row');
+                    rows.forEach(r => {
+                        const bInput = r.querySelector('.var-barcode');
+                        if (bInput && bInput.value.trim().toLowerCase() === cleanCode) {
+                            r.classList.add('ring-2', 'ring-primary', 'bg-primary/5');
+                            r.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    });
+                }, 300);
+            }
         } else {
-            alert(`No product found with barcode "${code}". You can create a new product with this barcode.`);
+            alert(`No product found with barcode "${code}". You can create a new product or add a variation with this barcode.`);
             openAddProductModal();
             const input = document.getElementById('prod-barcode');
             if (input) input.value = code;
