@@ -162,6 +162,9 @@ async function addToCart(product, quantity = 1, triggerBtn = null) {
         const primaryImage = getProductPrimaryImage(product);
         cart.push({
             id: product.id,
+            productId: product.productId || (typeof product.id === 'string' && product.id.includes('-') ? parseInt(product.id.split('-')[0]) : product.id),
+            variationId: product.variationId || null,
+            variationName: product.variationName || null,
             name: product.name,
             price: parseFloat(product.price) || 0,
             image: primaryImage,
@@ -198,6 +201,9 @@ window.addToCartById = function(id, btnElement = null, variationIdx = null) {
         const varProduct = {
             ...product,
             id: `${product.id}-${(v.id || v.name).replace(/\s+/g, '-')}`,
+            productId: product.id,
+            variationId: v.id || v.name,
+            variationName: v.name,
             name: `${product.name} (${v.name})`,
             price: parseFloat(v.price) || parseFloat(product.price),
             image: v.imageUrl || (typeof getProductPrimaryImage === 'function' ? getProductPrimaryImage(product) : (product.image || '')),
@@ -402,6 +408,199 @@ async function applyPromoCode() {
     }
 }
 
+// Deduct stock in Supabase for ordered items
+async function deductStockForItems(items) {
+    if (!items || items.length === 0 || !window.supabaseClient) return { success: true };
+
+    const productIds = Array.from(new Set(items.map(item => {
+        if (item.productId) return parseInt(item.productId);
+        const s = String(item.id);
+        return s.includes('-') ? parseInt(s.split('-')[0]) : parseInt(s);
+    }).filter(id => !isNaN(id))));
+
+    if (productIds.length === 0) return { success: true };
+
+    const { data: dbProducts, error: fetchErr } = await window.supabaseClient
+        .from('products')
+        .select('*')
+        .in('id', productIds);
+
+    if (fetchErr || !dbProducts) {
+        throw new Error(fetchErr ? fetchErr.message : 'Could not check current stock levels.');
+    }
+
+    const productMap = new Map();
+    dbProducts.forEach(p => {
+        let meta = null;
+        if (p.description && p.description.startsWith('{')) {
+            try { meta = JSON.parse(p.description); } catch(e) {}
+        }
+        productMap.set(p.id, {
+            id: p.id,
+            name: p.name,
+            stock: parseInt(p.stock) || 0,
+            meta: meta
+        });
+    });
+
+    // Check availability and decrement in-memory map
+    for (const item of items) {
+        const pId = item.productId ? parseInt(item.productId) : (String(item.id).includes('-') ? parseInt(String(item.id).split('-')[0]) : parseInt(item.id));
+        const prod = productMap.get(pId);
+        if (!prod) {
+            throw new Error(`Product "${item.name}" was not found in our catalog.`);
+        }
+
+        let targetVar = null;
+        if (prod.meta && Array.isArray(prod.meta.variations)) {
+            const s = String(item.id);
+            const varPart = s.includes('-') ? s.split('-').slice(1).join('-') : null;
+            targetVar = prod.meta.variations.find(v => 
+                (item.variationId && v.id === item.variationId) ||
+                (varPart && (v.id === varPart || (v.id || v.name).replace(/\s+/g, '-') === varPart)) ||
+                (item.name && item.name.includes(`(${v.name})`)) ||
+                (item.barcode && v.barcode && String(v.barcode).trim() === String(item.barcode).trim())
+            );
+        }
+
+        const requiredQty = parseInt(item.quantity) || 1;
+        if (targetVar) {
+            const currentVarStock = typeof targetVar.stock !== 'undefined' ? parseInt(targetVar.stock) : 0;
+            if (currentVarStock < requiredQty) {
+                const stockMsg = currentVarStock <= 0 
+                    ? `Sorry, "${item.name}" has just gone out of stock!` 
+                    : `Sorry, only ${currentVarStock} left of "${item.name}". Please adjust your quantity.`;
+                throw new Error(stockMsg);
+            }
+            targetVar.stock -= requiredQty;
+            prod.stock = Math.max(0, prod.stock - requiredQty);
+        } else {
+            if (prod.stock < requiredQty) {
+                const stockMsg = prod.stock <= 0 
+                    ? `Sorry, "${item.name}" has just gone out of stock!` 
+                    : `Sorry, only ${prod.stock} left of "${item.name}". Please adjust your quantity.`;
+                throw new Error(stockMsg);
+            }
+            prod.stock -= requiredQty;
+        }
+    }
+
+    // Persist decremented stock to Supabase
+    for (const [pId, prod] of productMap.entries()) {
+        const payload = {
+            stock: prod.stock
+        };
+        if (prod.meta) {
+            payload.description = JSON.stringify(prod.meta);
+        }
+        const { error: updErr } = await window.supabaseClient
+            .from('products')
+            .update(payload)
+            .eq('id', pId);
+        if (updErr) {
+            throw new Error(updErr.message || 'Failed to update stock in database.');
+        }
+
+        // Update in-memory allProducts if present
+        if (Array.isArray(allProducts)) {
+            const memProd = allProducts.find(p => p.id === pId);
+            if (memProd) {
+                memProd.stock = prod.stock;
+                if (prod.meta) memProd.description = payload.description;
+            }
+        }
+    }
+
+    return { success: true };
+}
+
+// Restore stock in Supabase for cancelled/deleted items
+async function restoreStockForItems(items) {
+    if (!items || items.length === 0 || !window.supabaseClient) return { success: true };
+
+    const productIds = Array.from(new Set(items.map(item => {
+        if (item.productId) return parseInt(item.productId);
+        const s = String(item.id);
+        return s.includes('-') ? parseInt(s.split('-')[0]) : parseInt(s);
+    }).filter(id => !isNaN(id))));
+
+    if (productIds.length === 0) return { success: true };
+
+    const { data: dbProducts, error: fetchErr } = await window.supabaseClient
+        .from('products')
+        .select('*')
+        .in('id', productIds);
+
+    if (fetchErr || !dbProducts) {
+        console.error('Could not fetch products to restore stock:', fetchErr);
+        return { success: false, error: fetchErr };
+    }
+
+    const productMap = new Map();
+    dbProducts.forEach(p => {
+        let meta = null;
+        if (p.description && p.description.startsWith('{')) {
+            try { meta = JSON.parse(p.description); } catch(e) {}
+        }
+        productMap.set(p.id, {
+            id: p.id,
+            name: p.name,
+            stock: parseInt(p.stock) || 0,
+            meta: meta
+        });
+    });
+
+    for (const item of items) {
+        const pId = item.productId ? parseInt(item.productId) : (String(item.id).includes('-') ? parseInt(String(item.id).split('-')[0]) : parseInt(item.id));
+        const prod = productMap.get(pId);
+        if (!prod) continue;
+
+        let targetVar = null;
+        if (prod.meta && Array.isArray(prod.meta.variations)) {
+            const s = String(item.id);
+            const varPart = s.includes('-') ? s.split('-').slice(1).join('-') : null;
+            targetVar = prod.meta.variations.find(v => 
+                (item.variationId && v.id === item.variationId) ||
+                (varPart && (v.id === varPart || (v.id || v.name).replace(/\s+/g, '-') === varPart)) ||
+                (item.name && item.name.includes(`(${v.name})`)) ||
+                (item.barcode && v.barcode && String(v.barcode).trim() === String(item.barcode).trim())
+            );
+        }
+
+        const qty = parseInt(item.quantity) || 1;
+        if (targetVar) {
+            targetVar.stock = (parseInt(targetVar.stock) || 0) + qty;
+            prod.stock = prod.stock + qty;
+        } else {
+            prod.stock = prod.stock + qty;
+        }
+    }
+
+    for (const [pId, prod] of productMap.entries()) {
+        const payload = {
+            stock: prod.stock
+        };
+        if (prod.meta) {
+            payload.description = JSON.stringify(prod.meta);
+        }
+        await window.supabaseClient
+            .from('products')
+            .update(payload)
+            .eq('id', pId);
+
+        // Update in-memory allProducts if present
+        if (Array.isArray(allProducts)) {
+            const memProd = allProducts.find(p => p.id === pId);
+            if (memProd) {
+                memProd.stock = prod.stock;
+                if (prod.meta) memProd.description = payload.description;
+            }
+        }
+    }
+
+    return { success: true };
+}
+
 // Handle Order Placement
 async function handleCheckout(event) {
     event.preventDefault();
@@ -465,13 +664,23 @@ async function handleCheckout(event) {
             promo_code: appliedPromo ? appliedPromo.promo_code : null,
             phone: phone,
             customer_name: name,
-            customer_email: email
+            customer_email: email,
+            stock_deducted: true
         })
     };
 
+    let stockDeducted = false;
+
     try {
+        // Step 1: Pre-order stock verification & immediate deduction to prevent duplicate orders
+        if (window.supabaseClient) {
+            await deductStockForItems(cart);
+            stockDeducted = true;
+        }
+
         let createdOrder = null;
 
+        // Step 2: Insert order into Supabase
         if (window.supabaseClient) {
             const { data, error } = await window.supabaseClient.from('orders').insert([orderPayload]).select();
             if (error) {
@@ -530,12 +739,25 @@ async function handleCheckout(event) {
         closeCheckout();
         form.reset();
 
+        // Refresh catalog view if on catalog page or storefront
+        if (typeof renderCatalogGrid === 'function' && Array.isArray(allProducts)) {
+            renderCatalogGrid();
+        }
+
         // Display the dedicated Order Success Modal
         showOrderSuccessModal(createdOrder, snapshotItems, snapshotTotal, snapshotPromo);
 
     } catch (e) {
+        // Rollback deducted stock if order creation failed
+        if (stockDeducted && window.supabaseClient) {
+            try {
+                await restoreStockForItems(cart);
+            } catch (restoreErr) {
+                console.error('Failed to restore stock after aborted order:', restoreErr);
+            }
+        }
         console.error('Checkout error:', e);
-        alert('Could not place order: ' + e.message);
+        alert(e.message || 'Could not place order');
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -2170,6 +2392,9 @@ async function loadProductDetail() {
                 const varProduct = {
                     ...product,
                     id: `${product.id}-${(selectedVariation.id || selectedVariation.name).replace(/\s+/g, '-')}`,
+                    productId: product.id,
+                    variationId: selectedVariation.id || selectedVariation.name,
+                    variationName: selectedVariation.name,
                     name: `${product.name} (${selectedVariation.name})`,
                     price: parseFloat(selectedVariation.price) || parseFloat(product.price),
                     image: selectedVariation.imageUrl || getProductPrimaryImage(product),
@@ -2646,3 +2871,5 @@ window.handleArrivalAddToCart = handleArrivalAddToCart;
 window.getProductVariations = getProductVariations;
 window.getProductTotalStock = getProductTotalStock;
 window.isProductInStock = isProductInStock;
+window.deductStockForItems = deductStockForItems;
+window.restoreStockForItems = restoreStockForItems;

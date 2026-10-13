@@ -818,12 +818,114 @@ window.toggleOrderStatus = async function(orderId, currentStatus) {
     }
 };
 
-// Delete Order from Supabase
+// Restore stock in Supabase for items from a deleted order
+async function restoreStockForItems(items) {
+    if (!items || items.length === 0 || !window.supabaseClient) return { success: true };
+
+    const productIds = Array.from(new Set(items.map(item => {
+        if (item.productId) return parseInt(item.productId);
+        const s = String(item.id);
+        return s.includes('-') ? parseInt(s.split('-')[0]) : parseInt(s);
+    }).filter(id => !isNaN(id))));
+
+    if (productIds.length === 0) return { success: true };
+
+    const { data: dbProducts, error: fetchErr } = await window.supabaseClient
+        .from('products')
+        .select('*')
+        .in('id', productIds);
+
+    if (fetchErr || !dbProducts) {
+        console.error('Could not fetch products to restore stock:', fetchErr);
+        return { success: false, error: fetchErr };
+    }
+
+    const productMap = new Map();
+    dbProducts.forEach(p => {
+        let meta = null;
+        if (p.description && p.description.startsWith('{')) {
+            try { meta = JSON.parse(p.description); } catch(e) {}
+        }
+        productMap.set(p.id, {
+            id: p.id,
+            name: p.name,
+            stock: parseInt(p.stock) || 0,
+            meta: meta
+        });
+    });
+
+    for (const item of items) {
+        const pId = item.productId ? parseInt(item.productId) : (String(item.id).includes('-') ? parseInt(String(item.id).split('-')[0]) : parseInt(item.id));
+        const prod = productMap.get(pId);
+        if (!prod) continue;
+
+        let targetVar = null;
+        if (prod.meta && Array.isArray(prod.meta.variations)) {
+            const s = String(item.id);
+            const varPart = s.includes('-') ? s.split('-').slice(1).join('-') : null;
+            targetVar = prod.meta.variations.find(v => 
+                (item.variationId && v.id === item.variationId) ||
+                (varPart && (v.id === varPart || (v.id || v.name).replace(/\s+/g, '-') === varPart)) ||
+                (item.name && item.name.includes(`(${v.name})`)) ||
+                (item.barcode && v.barcode && String(v.barcode).trim() === String(item.barcode).trim())
+            );
+        }
+
+        const qty = parseInt(item.quantity) || 1;
+        if (targetVar) {
+            targetVar.stock = (parseInt(targetVar.stock) || 0) + qty;
+            prod.stock = prod.stock + qty;
+        } else {
+            prod.stock = prod.stock + qty;
+        }
+    }
+
+    for (const [pId, prod] of productMap.entries()) {
+        const payload = {
+            stock: prod.stock
+        };
+        if (prod.meta) {
+            payload.description = JSON.stringify(prod.meta);
+        }
+        await window.supabaseClient
+            .from('products')
+            .update(payload)
+            .eq('id', pId);
+
+        // Also update in-memory adminProducts if present
+        if (Array.isArray(adminProducts)) {
+            const memProd = adminProducts.find(p => p.id === pId);
+            if (memProd) {
+                memProd.stock = prod.stock;
+                if (prod.meta) memProd.description = payload.description;
+            }
+        }
+    }
+
+    return { success: true };
+}
+window.restoreStockForItems = restoreStockForItems;
+
+// Delete Order from Supabase and restore inventory stock
 window.deleteOrder = async function(orderId) {
-    const confirmMsg = window.i18n ? window.i18n.t('delete_confirm_order') : 'Are you sure you want to delete this order?';
+    const confirmMsg = window.i18n ? window.i18n.t('delete_confirm_order') : 'Are you sure you want to delete this order? Items will be returned to stock.';
     if (!confirm(confirmMsg)) return;
 
     try {
+        const order = adminOrders.find(o => o.id === orderId);
+        if (order && order.items_json) {
+            let items = [];
+            try {
+                const parsed = typeof order.items_json === 'string' ? JSON.parse(order.items_json) : order.items_json;
+                items = Array.isArray(parsed) ? parsed : (parsed.items || []);
+            } catch (e) {
+                console.warn('Could not parse items_json for order stock return:', e);
+            }
+            if (items && items.length > 0) {
+                await restoreStockForItems(items);
+            }
+        }
+
         if (window.supabaseClient) {
             const { error } = await window.supabaseClient
                 .from('orders')
@@ -833,10 +935,14 @@ window.deleteOrder = async function(orderId) {
         }
 
         adminOrders = adminOrders.filter(o => o.id !== orderId);
-        renderOrdersPage();
-        renderRecentOrdersFeed();
-        renderDashboardKPIs();
-        showNotification('Order deleted successfully');
+        if (typeof loadAdminData === 'function') {
+            await loadAdminData();
+        } else {
+            renderOrdersPage();
+            renderRecentOrdersFeed();
+            renderDashboardKPIs();
+        }
+        showNotification('Order deleted and product stock returned successfully');
     } catch (e) {
         console.error('Error deleting order:', e);
         alert('Failed to delete order: ' + e.message);
