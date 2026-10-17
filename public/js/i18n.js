@@ -107,7 +107,13 @@ const translations = {
         view_grouped: "Grouped",
         view_all_variants: "All Variants",
         options_count: "Options",
-        original_option: "Original"
+        original_option: "Original",
+        sort_by: "Sort by:",
+        sort_relevance: "Relevance",
+        sort_price_low: "Price: Low to High",
+        sort_price_high: "Price: High to Low",
+        sort_name_az: "Alphabetical (A-Z)",
+        sort_name_za: "Alphabetical (Z-A)"
     },
     es: {
         store: "Tienda",
@@ -212,7 +218,13 @@ const translations = {
         view_grouped: "Agrupado",
         view_all_variants: "Todas las variantes",
         options_count: "Opciones",
-        original_option: "Original"
+        original_option: "Original",
+        sort_by: "Ordenar por:",
+        sort_relevance: "Relevancia",
+        sort_price_low: "Precio: Menor a Mayor",
+        sort_price_high: "Precio: Mayor a Menor",
+        sort_name_az: "Alfabético (A-Z)",
+        sort_name_za: "Alfabético (Z-A)"
     },
     pt: {
         store: "Loja",
@@ -317,7 +329,13 @@ const translations = {
         view_grouped: "Agrupado",
         view_all_variants: "Todas as variações",
         options_count: "Opções",
-        original_option: "Original"
+        original_option: "Original",
+        sort_by: "Ordenar por:",
+        sort_relevance: "Relevância",
+        sort_price_low: "Preço: Menor ao Maior",
+        sort_price_high: "Preço: Maior ao Menor",
+        sort_name_az: "Alfabético (A-Z)",
+        sort_name_za: "Alfabético (Z-A)"
     }
 };
 

@@ -149,12 +149,19 @@
                 </button>
             </div>
 
-            <!-- Catalog View Mode & Results Count -->
-            <div class="flex items-center justify-between pt-3 pb-1">
+            <!-- Catalog Sort Filter & Results Count -->
+            <div class="flex items-center justify-between pt-3 pb-1 gap-2 flex-wrap sm:flex-nowrap">
                 <span class="text-xs font-semibold text-on-surface-variant" id="catalog-products-count">Products</span>
-                <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-surface-container/60 text-xs font-bold">
-                    <button id="view-mode-grouped" onclick="setCatalogViewMode('grouped')" class="px-2.5 py-1 rounded-lg transition-all bg-primary text-on-primary shadow-xs" data-i18n="view_grouped">Grouped</button>
-                    <button id="view-mode-variants" onclick="setCatalogViewMode('variants')" class="px-2.5 py-1 rounded-lg transition-all text-on-surface-variant hover:text-on-surface" data-i18n="view_all_variants">All Variants</button>
+                <div class="flex items-center gap-1.5 bg-surface-container-low px-2.5 py-1.5 rounded-xl border border-surface-container/60 shadow-xs text-xs font-semibold">
+                    <span class="material-symbols-outlined text-[16px] text-primary">sort</span>
+                    <label for="catalog-sort-select" class="text-on-surface-variant font-medium text-[11px] sm:text-xs" data-i18n="sort_by">Sort by:</label>
+                    <select id="catalog-sort-select" onchange="setCatalogSort(this.value)" class="bg-transparent text-xs font-bold text-on-surface outline-none cursor-pointer pr-1">
+                        <option value="relevance" data-i18n="sort_relevance">Relevance</option>
+                        <option value="price_asc" data-i18n="sort_price_low">Price: Low to High</option>
+                        <option value="price_desc" data-i18n="sort_price_high">Price: High to Low</option>
+                        <option value="alphabetical_asc" data-i18n="sort_name_az">Alphabetical (A-Z)</option>
+                        <option value="alphabetical_desc" data-i18n="sort_name_za">Alphabetical (Z-A)</option>
+                    </select>
                 </div>
             </div>
 
@@ -304,12 +311,12 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/supabase-client.js"></script>
-    <script src="/js/i18n.js"></script>
+    <script src="/js/i18n.js?v=35"></script>
     <script src="/js/theme.js"></script>
     <script src="/js/promos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="/js/scanner.js"></script>
-    <script src="/js/app.js?v=34"></script>
+    <script src="/js/app.js?v=35"></script>
     <script>
         function toggleLangMenu(e) {
             e.stopPropagation();

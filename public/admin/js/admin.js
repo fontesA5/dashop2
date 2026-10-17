@@ -961,6 +961,63 @@ function escapeAdminHtml(str) {
 }
 
 // 4. Product Management (CRUD with Batch Images)
+window.currentAdminProductsSort = 'relevance';
+
+function sortAdminProductsList(list, sortKey = 'relevance') {
+    const sorted = [...list];
+    switch (sortKey) {
+        case 'stock_asc':
+            sorted.sort((a, b) => (Number(a.stock) || 0) - (Number(b.stock) || 0));
+            break;
+        case 'stock_desc':
+            sorted.sort((a, b) => (Number(b.stock) || 0) - (Number(a.stock) || 0));
+            break;
+        case 'price_asc':
+            sorted.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+            break;
+        case 'price_desc':
+            sorted.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+            break;
+        case 'name_asc':
+            sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            break;
+        case 'name_desc':
+            sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+            break;
+        case 'relevance':
+        default:
+            sorted.sort((a, b) => {
+                const stockA = Number(a.stock) || 0;
+                const stockB = Number(b.stock) || 0;
+                if (stockB !== stockA) return stockB - stockA;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+            break;
+    }
+    return sorted;
+}
+
+window.adminSetProductsSort = function(sortKey) {
+    window.currentAdminProductsSort = sortKey;
+    const sortSelect = document.getElementById('manage-products-sort-select');
+    if (sortSelect && sortSelect.value !== sortKey) {
+        sortSelect.value = sortKey;
+    }
+    renderProductsList();
+};
+
+window.adminToggleSortColumn = function(col) {
+    let nextSort = 'relevance';
+    if (col === 'name') {
+        nextSort = (window.currentAdminProductsSort === 'name_asc') ? 'name_desc' : 'name_asc';
+    } else if (col === 'price') {
+        nextSort = (window.currentAdminProductsSort === 'price_asc') ? 'price_desc' : 'price_asc';
+    } else if (col === 'stock') {
+        nextSort = (window.currentAdminProductsSort === 'stock_desc') ? 'stock_asc' : 'stock_desc';
+    }
+    window.adminSetProductsSort(nextSort);
+};
+
 function renderProductsList(filterQuery = '') {
     const container = document.getElementById('admin-products-table-body');
     if (!container) return;
@@ -999,6 +1056,11 @@ function renderProductsList(filterQuery = '') {
             ? `${list.length} of ${adminProducts.length} items` 
             : `${adminProducts.length} items`;
     }
+
+    // Apply sorting to products list
+    const sortSelect = document.getElementById('manage-products-sort-select');
+    const sortKey = (sortSelect && sortSelect.value) ? sortSelect.value : (window.currentAdminProductsSort || 'relevance');
+    list = sortAdminProductsList(list, sortKey);
 
     if (list.length === 0) {
         container.innerHTML = q 
@@ -1270,11 +1332,6 @@ window.adminAutofillAsTemplate = function(id) {
     const barcodeInput = document.getElementById('prod-barcode');
     if (barcodeInput) barcodeInput.value = '';
 
-    const varsContainer = document.getElementById('admin-variations-container');
-    if (varsContainer) {
-        varsContainer.innerHTML = '';
-        variations.forEach(v => window.adminAddVariationRow(v));
-    }
 
     renderImagePreviews(existingImages);
     adminClearAddProductSearch();
@@ -1321,91 +1378,8 @@ window.openAddProductModal = function() {
     if (modal) modal.classList.remove('hidden');
 };
 
-// Add a Variation row in Admin Product Editor
-window.adminAddVariationRow = function(data = {}) {
-    const container = document.getElementById('admin-variations-container');
-    if (!container) return;
-
-    const rowId = 'var_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-    const name = data.name || '';
-    const price = data.price !== undefined ? data.price : '';
-    const stock = data.stock !== undefined ? data.stock : '';
-    const barcode = data.barcode || '';
-    const imageUrl = data.imageUrl || '';
-
-    const row = document.createElement('div');
-    row.id = rowId;
-    row.className = 'admin-var-row p-3 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col gap-2 transition-all';
-    row.innerHTML = `
-        <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1">
-                <span class="material-symbols-outlined text-[16px] text-primary">label</span>
-                <span>Variation</span>
-            </span>
-            <button type="button" onclick="document.getElementById('${rowId}').remove()" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-error-container/40 text-error transition-colors" title="Remove variation">
-                <span class="material-symbols-outlined text-[16px]">close</span>
-            </button>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div>
-                <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Name / Scent / Size *</label>
-                <input type="text" class="var-name w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container focus:ring-1 focus:ring-primary" placeholder="e.g. Lavender, 32 oz" value="${name.replace(/"/g, '&quot;')}" required />
-            </div>
-            <div>
-                <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Price ($) *</label>
-                <input type="number" step="0.01" class="var-price w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container focus:ring-1 focus:ring-primary" placeholder="e.g. 4.99" value="${price}" required />
-            </div>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <div>
-                <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Stock Quantity *</label>
-                <input type="number" class="var-stock w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container focus:ring-1 focus:ring-primary" placeholder="e.g. 10" value="${stock}" required />
-            </div>
-            <div>
-                <div class="flex items-center justify-between mb-0.5">
-                    <label class="text-[11px] font-semibold text-on-surface-variant">Barcode / SKU</label>
-                    <button type="button" onclick="startAdminVariationBarcodeScan('${rowId}')" class="text-[10px] text-primary font-bold hover:underline flex items-center gap-0.5 active:scale-95 transition" title="Scan barcode with camera">
-                        <span class="material-symbols-outlined text-[13px]">barcode_scanner</span>
-                        <span>Scan</span>
-                    </button>
-                </div>
-                <div class="relative flex items-center">
-                    <input type="text" class="var-barcode w-full pl-2.5 pr-7 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container focus:ring-1 focus:ring-primary font-mono" placeholder="Scan or enter barcode" value="${barcode.replace(/"/g, '&quot;')}" />
-                    <button type="button" onclick="startAdminVariationBarcodeScan('${rowId}')" class="absolute right-1 text-on-surface-variant hover:text-primary p-0.5" title="Scan with camera">
-                        <span class="material-symbols-outlined text-[15px]">barcode_scanner</span>
-                    </button>
-                </div>
-            </div>
-            <div>
-                <label class="text-[11px] font-semibold text-on-surface-variant block mb-0.5">Image URL</label>
-                <input type="url" class="var-image w-full px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container" placeholder="https://..." value="${imageUrl.replace(/"/g, '&quot;')}" />
-            </div>
-        </div>
-    `;
-
-    container.appendChild(row);
-};
-
-// Scan barcode directly into variation row
-window.startAdminVariationBarcodeScan = function(rowId) {
-    if (!window.openBarcodeScanner) {
-        alert('Scanner module is loading, please try again in a moment.');
-        return;
-    }
-    const row = document.getElementById(rowId);
-    if (!row) return;
-    const nameInput = row.querySelector('.var-name');
-    const varName = nameInput && nameInput.value.trim() ? nameInput.value.trim() : 'Variation';
-    window.openBarcodeScanner((code) => {
-        const input = row.querySelector('.var-barcode');
-        if (input) {
-            input.value = code;
-            if (typeof showNotification === 'function') {
-                showNotification(`Barcode scanned for ${varName}: ${code}`);
-            }
-        }
-    }, `Scan Barcode for ${varName}`);
-};
+window.adminAddVariationRow = function() {};
+window.startAdminVariationBarcodeScan = function() {};
 
 // Open Edit Product Modal
 window.editProduct = function(id) {
@@ -1463,13 +1437,6 @@ window.editProduct = function(id) {
     document.getElementById('prod-batch-images').value = existingImages.join('\n');
     const barcodeInput = document.getElementById('prod-barcode');
     if (barcodeInput) barcodeInput.value = barcode;
-
-    // Populate variations
-    const varsContainer = document.getElementById('admin-variations-container');
-    if (varsContainer) {
-        varsContainer.innerHTML = '';
-        variations.forEach(v => window.adminAddVariationRow(v));
-    }
 
     renderImagePreviews(existingImages);
 
@@ -1550,44 +1517,18 @@ window.handleProductSubmit = async function(event) {
     const primaryImage = allImages[0] ? (allImages[0].length < 50 ? allImages[0] : '📦') : '📦';
     const barcode = (document.getElementById('prod-barcode')?.value || '').trim();
 
-    // Collect variations
-    const varRows = document.querySelectorAll('#admin-variations-container .admin-var-row');
-    const variations = [];
-    let totalVarStock = 0;
-    varRows.forEach(row => {
-        const vName = row.querySelector('.var-name')?.value.trim();
-        const vPrice = parseFloat(row.querySelector('.var-price')?.value) || price;
-        const vStock = parseInt(row.querySelector('.var-stock')?.value) || 0;
-        const vBarcode = row.querySelector('.var-barcode')?.value.trim() || '';
-        const vImage = row.querySelector('.var-image')?.value.trim() || '';
-        if (vName) {
-            variations.push({
-                id: 'var_' + Math.random().toString(36).substr(2, 9),
-                name: vName,
-                price: vPrice,
-                stock: vStock,
-                barcode: vBarcode,
-                imageUrl: vImage
-            });
-            totalVarStock += vStock;
-        }
-    });
-
-    const finalStock = variations.length > 0 ? (stock > 0 ? stock : totalVarStock) : stock;
-
-    // Store metadata in description JSON to support unlimited batch images, slugs, barcodes & variations
+    // Store metadata in description JSON to support unlimited batch images, slugs & barcodes
     const metadataDesc = JSON.stringify({
         desc: descText,
         slug: slug,
         images: allImages,
-        barcode: barcode,
-        variations: variations
+        barcode: barcode
     });
 
     const payload = {
         name,
         price,
-        stock: finalStock,
+        stock,
         category,
         image: primaryImage,
         description: metadataDesc,
@@ -1652,6 +1593,8 @@ window.openManageProductsModal = function() {
     if (input) input.value = '';
     const clearBtn = document.getElementById('manage-products-search-clear');
     if (clearBtn) clearBtn.classList.add('hidden');
+    const sortSelect = document.getElementById('manage-products-sort-select');
+    if (sortSelect) sortSelect.value = window.currentAdminProductsSort || 'relevance';
     renderProductsList('');
     const modal = document.getElementById('manage-products-modal');
     if (modal) modal.classList.remove('hidden');
@@ -1694,39 +1637,16 @@ window.adminQuickBarcodeLookup = function() {
                 try {
                     const meta = JSON.parse(p.description);
                     if (meta.barcode && String(meta.barcode).trim().toLowerCase() === cleanCode) return true;
-                    if (Array.isArray(meta.variations)) {
-                        const foundVar = meta.variations.find(v => v.barcode && String(v.barcode).trim().toLowerCase() === cleanCode);
-                        if (foundVar) {
-                            matchedVariation = foundVar;
-                            return true;
-                        }
-                    }
                 } catch(e) {}
             }
             return false;
         });
 
         if (product) {
-            if (matchedVariation) {
-                showNotification(`Found: ${product.name} — Variation: ${matchedVariation.name}`);
-            } else {
-                showNotification(`Found: ${product.name}`);
-            }
+            showNotification(`Found: ${product.name}`);
             editProduct(product.id);
-            if (matchedVariation) {
-                setTimeout(() => {
-                    const rows = document.querySelectorAll('#admin-variations-container .admin-var-row');
-                    rows.forEach(r => {
-                        const bInput = r.querySelector('.var-barcode');
-                        if (bInput && bInput.value.trim().toLowerCase() === cleanCode) {
-                            r.classList.add('ring-2', 'ring-primary', 'bg-primary/5');
-                            r.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        }
-                    });
-                }, 300);
-            }
         } else {
-            alert(`No product found with barcode "${code}". You can create a new product or add a variation with this barcode.`);
+            alert(`No product found with barcode "${code}". You can create a new product with this barcode.`);
             openAddProductModal();
             const input = document.getElementById('prod-barcode');
             if (input) input.value = code;

@@ -1,0 +1,719 @@
+{
+  "timestamp": "2026-10-17T15:06:45.667Z",
+  "totalVariantParentProducts": 14,
+  "totalVariantItems": 31,
+  "variantProducts": [
+    {
+      "parentProduct": {
+        "id": 50,
+        "name": "Gain Dryer Sheets",
+        "price": 2,
+        "stock": 8,
+        "category": "Household Essentials",
+        "description": "More scent. More softness. Less static. Fewer wrinkles. Are you so obsessed with the scent of Gain that it feels like you can never get enough of it? Gain Dryer Sheets to the rescue to add even more Gain scent to your freshly dried clothes and making them even softer. They're like the cherry on top of your pile of clean and freshly scented laundry. What do dryer sheets actually do? Gain Dryer Sheets do all the things you love like soften clothes, give fabrics a delightful scent, reduce wrinkles, and reduce static so your clothes attract fewer bits of lint. And the best part? They do all this without any extra hassle. Gain Dryer Sheets take your laundry to the next level by getting rid of static and adding a fresh, irresistible scent to fabrics. Evoke memories of a warm and airy spring evening of Moonlight Breeze scent you know and love from Gain while enjoying incredibly soft laundry without wrinkles. For daring noses, we hear the trifecta of Gain Moonlight Breeze Scent (laundry detergent + scent booster + dryer sheets) is the best way to go for freshness. Add Gain Dryer Sheets to every load to give your nose the love it deserves with Gain Moonlight Breeze Scent."
+      },
+      "variations": [
+        {
+          "id": "c6335f66-f820-4b08-84cd-d5f06dd61fbb",
+          "imageUrl": "https://pics.walgreens.com/prodimg/692758/450.jpg",
+          "name": "Original + Wrinkle Release  105.0 ea",
+          "price": 4,
+          "stock": 1
+        },
+        {
+          "imageUrl": "",
+          "stock": 7,
+          "name": "Moonlight Breeze, 60.0 ea",
+          "price": 2,
+          "id": "627267a9-adbc-414b-8ab0-961be0a45fe0"
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 66,
+        "name": "Degree Antiperspirant Deodorant Stick",
+        "price": 4.5,
+        "stock": 0,
+        "category": "Personal Care",
+        "description": "Degree Max Protection Cool Rush is designed to inspire confidence in every move you make. This antiperspirant stick offers a powerful 3-in-1 benefit, shielding you from sweat, odor, and unsightly stains. With its advanced formula, you can trust Degree to keep you dry and fresh, while protecting your clothes from white marks and yellowing. The Cool Rush scent invigorates your senses, making every application a refreshing experience. Degree is the #1 antiperspirant brand in the U.S., trusted for its superior technology that delivers nonstop protection. Whether you're chasing everyday goals or making headlines, Degree ensures you stay confident and unstoppable. Powered by advanced, dermatologist-tested formulas, Degree keeps you fresh and confident all day long.​ With a full range of products including clinical strength, antiperspirants, and whole-body solutions, Degree empowers everyone to move more and worry less."
+      },
+      "variations": [
+        {
+          "price": 4.5,
+          "stock": 4,
+          "imageUrl": "https://www.cvs.com/bizcontent/merchandising/productimages/high_res/7940052740.jpg?im=Resize=(1200,1200),aspect=ignore",
+          "name": "Men Max Protection,  Cool Rush, 2.6 OZ",
+          "id": "f27dcd3f-7d8b-4739-b078-dbaaff619b64"
+        },
+        {
+          "id": "e074e587-6748-4b29-95a7-cc69eb91b9a8",
+          "name": "Cool Rush, 2.7 OZ",
+          "imageUrl": "https://pics.walgreens.com/prodimg/79623/450.jpg",
+          "price": 4.5,
+          "stock": 2
+        },
+        {
+          "id": "64cc525b-06a3-456c-a58c-304d6d634c6b",
+          "name": "Fresh, 2.6 oz",
+          "price": 4.5,
+          "imageUrl": "https://pics.walgreens.com/prodimg/590484/450.jpg",
+          "stock": 2
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 74,
+        "name": "Gillette Razor",
+        "price": 5,
+        "stock": 1,
+        "category": "Personal Care",
+        "description": "The Gillette Fusion5 Power men's razor is a battery-powered razor that provides gentle micro pulses that help the razor glide smoothly over your skin. It features 5 antifriction blades so you can get 5-blade closeness at an affordable price. The blades are spaced closely together for incredible comfort lasting you up to 20 shaves per blade refill. The precision trimmer on the back of the razor makes getting your hard-to-reach places easier and is great for styling your facial hair just the way you want it. Soft micro-fins gently stretch and smooth skin to prepare hairs for a close shave from our thinnest blades (first 4 blades) while the lubrastrip helps the blades glide over your skin more easily. A Lubrastrip is a thin strip that sits at the top of the razor, releasing lubricants while you shave, to produce a great glide. When you are no longer getting an optimal shave, the Lubrastrip fades to white, indicating that it might be time to change the blade. Every Fusion5 handle can fit all Gillette 5-blade razor refills (excluding Gillette Labs)."
+      },
+      "variations": [
+        {
+          "id": "184afc66-86a2-47f1-8993-576d050ba0a1",
+          "barcode": "",
+          "imageUrl": "https://i5.walmartimages.com/seo/Gillette-Fusion5-Power-Men-s-Razor-Handle-Orange-1-Blade-Refill_0858df42-1e1c-4959-a38a-2f6220756254.ad5e812d71bc0c0fdfc4b2e452062fe4.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+          "name": "Fusion5 Power Men's Razor Handle, Orange, 1 Blade Refill",
+          "price": 5,
+          "stock": 2
+        },
+        {
+          "price": 5,
+          "imageUrl": "https://pics.walgreens.com/prodimg/666024/450.jpg",
+          "stock": 1,
+          "name": "Skinguard Razors for Men, Handle and Razor Blade Refills, 1.0 set",
+          "barcode": "",
+          "id": "0f0b3d11-11c0-40dc-950d-2d78e549eae9"
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 132,
+        "name": "Tide Power PODS Downy April Fresh Laundry Detergent Pacs 9 ct",
+        "price": 4,
+        "stock": 2,
+        "category": "Household Essentials",
+        "description": "Get the Tide clean you trust with the softness you love from Downy. New Tide Power PODS with Downy Soft Boosters combine your favorite laundry detergent with your favorite softener to make every load feel as good as it looks. Plus, Tide PODS Plus Downy have the signature Downy April Fresh Scent so you can enjoy outstanding freshness with every wash. Tide Power PODS are bigger than regular PODS: 1 Power POD equals 2 PODS for even more clean that tackles 100% of common stains-even in cold water. Toss in Tide Power PODS with Downy before clothes to get the most out of your Tide Laundry Detergent. Experience the power of America's #1 trusted detergent brand and the softness you love with Tide Power PODS with Downy (Tide is consumers' #1 trusted laundry detergent brand in BrandSpark survey)."
+      },
+      "variations": [
+        {
+          "id": "var_ly54p9bah",
+          "name": "OXI BOOST",
+          "price": 4,
+          "stock": 1,
+          "barcode": "030772171288",
+          "imageUrl": "https://i5.walmartimages.com/seo/Tide-Laundry-Detergent-Liquid-Mega-Pod-Not-Applicable-Original-Oxi-Boost_705a622e-1e22-49ee-919e-dc21cd69665c.734604e00d3206d082eeafb709d933d9.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF"
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 92,
+        "name": "Olay Body Wash",
+        "price": 4,
+        "stock": 0,
+        "category": "Personal Care",
+        "description": "Elevate your skincare routine with the improved Olay Ultra Moisture Age Defy Body Wash with Vitamin E, expertly formulated to repair* skin's moisture barrier to prevent dryness from reoccurring *with continued use. Infused with a powerful blend of Vitamin B3, Hyaluronic, and essential lipids, this rich and creamy body wash deeply penetrates to lock in moisture, ensuring your skin remains hydrated and radiant with 24/7 visibly healthy and soft skin. Transform your shower into a nourishing experience and embrace the beauty of healthy, hydrated skin with Olay Ultra Moisture Age Defy Body Wash with Vitamin E. Your skin will thank you!"
+      },
+      "variations": [
+        {
+          "name": "Age Defy, Vitamin E, B3 and Hyaluronic Blend, 22.0 fl",
+          "id": "dc45589f-8788-40e5-81f5-4b698ceef090",
+          "imageUrl": "https://pics.walgreens.com/prodimg/592389/450.jpg",
+          "stock": 0,
+          "price": 4
+        },
+        {
+          "id": "c9ab7b33-5b2d-4f9b-abfb-11a8b1f40b51",
+          "name": "Ultra Moisture Vanilla Creme, 22.0 fl",
+          "stock": 0,
+          "price": 4,
+          "imageUrl": "https://pics.walgreens.com/prodimg/690196/450.jpg"
+        },
+        {
+          "name": "Ultra Moisture Soothing, Oat Extract, 22.0 fl",
+          "stock": 1,
+          "imageUrl": "https://pics.walgreens.com/prodimg/677373/450.jpg",
+          "price": 4,
+          "id": "7f5e3d14-e50f-4b13-bee0-f3370b26bbed"
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 167,
+        "name": "Gillette Sensor3 Men's Disposable Razor, Blue, 4 Razors",
+        "price": 4,
+        "stock": 1,
+        "category": "Beauty",
+        "description": "Looking for a men's disposable razor that can get you up to 12 comfortable shaves? Gillette's Sensor3 Comfort disposable razors do just that thanks to its 3 chromium-coated, skin sensing blades and a 40 degree pivoting head that automatically adjusts to the skin's surface to give a close, smooth and comfortable shave. Additionally, the skin-guard fins have five elastomer fins that gently stretch the skin to create a smooth, even surface for an optimal shave. Each razor can last up to 12 comfortable shaves. Sensor3 disposable razors for men feature an enhanced Lubrastrip with water activated Comfort-gel technology for ultimate comfort and smooth shaving. Complete with an ergonomic shaped non-slip rubber handle for great control and maneuverability and easy rinse blades for 100% better rinsing (vs Sensor2 Plus disposable razors). See why Gillette Sensor3 Men's Disposable razor is the world's #1 selling 3 blade disposable razor*. For best results, use with your favorite Gillette shave gel, cream or foam. *Based on Nielsen sales data among 3 bladed male disposable razors."
+      },
+      "variations": [
+        {
+          "id": "var_7t4yozui7",
+          "name": "Comfort",
+          "price": 4,
+          "stock": 1,
+          "barcode": "047400078116",
+          "imageUrl": "https://pics.walgreens.com/prodimg/632037/450.jpg"
+        },
+        {
+          "id": "var_yi0uygkp6",
+          "name": "sensetive",
+          "price": 4,
+          "stock": 1,
+          "barcode": "047400689268",
+          "imageUrl": "https://pics.walgreens.com/prodimg/666021/450.jpg"
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 150,
+        "name": "Tide PODS Laundry Detergent Soap Pacs",
+        "price": 9,
+        "stock": 0,
+        "category": "Household Essentials",
+        "description": "Discover the effortless, powerful clean of Tide PODS laundry detergent pacs, designed to work on 100% of common stains, even in cold water. With a 3-in-1 concentrated formula that combines stain removers, odor fighters, and color protectors, you get exceptional cleaning performance in just one simple step. Tide PODS laundry soap dissolves quickly, activating stain removal and odor fighting in any wash temperature. Say goodbye to grease stains and hello to fresh, vibrant laundry with America’s top trusted laundry brand*. Don’t pay for water, pay for clean. Tide PODS laundry soap is concentrated with 3X cleaning ingredients per dose compared to leading bargain liquid detergent, ensuring you get the most out of every load. Just toss Tide PODS laundry soap into the drum before adding clothes, it's that easy! For larger or heavily soiled loads, simply add another Tide POD. "
+      },
+      "variations": [
+        {
+          "name": "Spring Meadow Scent, 57 Count",
+          "stock": 0,
+          "imageUrl": "https://i5.walmartimages.com/seo/Tide-PODS-Laundry-Detergent-Packs-Spring-Meadow-Scent-57-Count_d81e63f6-e47b-43b9-a55d-db231bdb1022.bf4d34df4bd171bc5773dfe5841fc63c.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF",
+          "price": 10,
+          "id": "2eb88326-4118-488a-8a2c-3c63667dcbc3"
+        },
+        {
+          "id": "535c9101-0da4-4bb3-ba55-21bced13ca2a",
+          "name": "Original Scent, 42 Count",
+          "price": 9,
+          "imageUrl": "https://i5.walmartimages.com/seo/Tide-PODS-Liquid-Laundry-Detergent-Pacs-Original-Scent-42-Count_a35a9bc7-f97e-4988-9df2-cd0a6a06c5af.421703fe1176600cbc167dc287fc2725.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+          "stock": 0
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 179,
+        "name": "Gain Flings Liquid Laundry Detergent",
+        "price": 4,
+        "stock": 0,
+        "category": "Household Essentials",
+        "description": "Gain flings! laundry detergent pacs are packed with 50% more scent than Gain liquid laundry detergent. Armed with the stain-fighting power of Oxi and Febreze, they give you nothing but great, clean, amazing-smelling laundry. Use with any laundry set-up, because Gain flings! Pacs dissolve in both hot and cold water and are HE compatible. Whisk yourself away to a tropical paradise with the help of Gain Flings Island Fresh! Upon dissolving in your wash, these super-concentrated laundry detergent pacs release the alluring scent of exotic fruits and flowers, wrapping your clothes in ahhhmazing freshness."
+      },
+      "variations": [
+        {
+          "name": "Island Fresh Scent, 16 Flings",
+          "stock": 0,
+          "id": "927b0c00-5953-4fe0-9e21-a528ade82933",
+          "price": 4,
+          "imageUrl": "https://i5.walmartimages.com/seo/Gain-Flings-Liquid-Laundry-Detergent-Island-Fresh-Scent-16-Count_e8b76ede-89ac-4bc5-8166-0875c7c90701.637123fc768a4ff610774eca6ac1a95a.png?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF"
+        },
+        {
+          "id": "37a82fde-82a4-4441-b672-679a3120fd40",
+          "imageUrl": "https://www.cvs.com/bizcontent/merchandising/productimages/high_res/3077224784.jpg?im=Resize=(1200,1200),aspect=ignore",
+          "price": 4,
+          "stock": 0,
+          "name": "Moonlight Breeze Scent, 15 Flings"
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 190,
+        "name": "Venus ComfortGlide Disposable Razor for Women",
+        "price": 4.5,
+        "stock": 2,
+        "category": "Beauty",
+        "description": "Venus female razor blades are designed with a woman's body in mind. From handles designed for a comfortable grip, to pivoting heads that contour to curves, Venus razors for women are designed to help reveal touchably smooth skin. Venus Comfort Glide White Tea disposable women's razors feature 3 curve hugging blades for a smooth, close shave that lasts. These razors come equipped with built in flexible gel bars that, when wet, release rich White Tea scented body butter lather for glide and comfort. The flexible gel bars release a rich White Tea scented body butter lather, guarding your skin against nicks, cuts and irritation. Venus Comfort Glide women's disposable razors feature an adaptive, pivoting design that adjusts to your body's contours and a rounded head that hugs curves and fits easily into hard to shave areas. No awkwardly angling your razor. Also features an ergonomic handle for great control. With Venus Comfort Glide White Tea disposable razors, you can just use and replace when you're ready for a new one. No refills needed. All Skin Types"
+      },
+      "variations": [
+        {
+          "id": "b456c07c-f7ef-484c-a956-841214ca473b",
+          "imageUrl": "https://i5.walmartimages.com/seo/Venus-ComfortGlide-3-White-Tea-Women-s-3-Blade-Disposable-Razor-2-count-Pink_df4b28ff-f423-464d-b3d2-0a90abd81981.156397b0e239b03c8b2006a147f9220f.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF",
+          "name": "White Tea, 3 Blades, 2 ct",
+          "price": 4.5,
+          "stock": 2
+        },
+        {
+          "price": 4.5,
+          "stock": 1,
+          "imageUrl": "https://i5.walmartimages.com/seo/VENUS-CG5-SENS-ALOE-2CT-DISP_7e762a4b-e17e-4f38-bf55-eb2a77bcbc53.0605d787e3537f965c7dafc0737b08bf.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+          "id": "8b446162-3214-4ab0-ab7e-5b97dc7d50d6",
+          "name": "Sensitive, 5 Blades, 2ct"
+        },
+        {
+          "id": "2c35f08c-cb83-456a-a9b1-c39c023f94b6",
+          "name": "GlisseConfort, Touch of Vitamin E, 2.0 ea",
+          "price": 4.5,
+          "imageUrl": "https://pics.walgreens.com/prodimg/692208/450.jpg",
+          "stock": 1
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 256,
+        "name": "Head and Shoulders 2 in 1 Dandruff Shampoo and Conditioner",
+        "price": 3,
+        "stock": 1,
+        "category": "Personal Care",
+        "description": "Healthy hair starts at the scalp. That's why America's #1 dermatologist-recommended brand created Head and Shoulders Tea Tree Oil Shampoo and Conditioner. Ignite your senses and feel it working with every wash. This anti-itch,* anti dandruff shampoo and conditioner formula, infused with tea tree oil, helps rid your scalp of dandruff, and hydrates and cools for scalp relief.+ Now you can rinse away residue, oil, and flakes and improve your scalp and hair health every time you shower.^ Head and Shoulders' unique formula works 7 surface layers deep in your scalp to help stop dandruff at its source and maintain healthy hair. Our unique formula, with zinc pyrithione, delivers multiple benefits:Fights drynessCalms itching+Relieves irritation+Reduces redness+Controls oiliness^Removes flakes+^* visible flakes; with regular use** based on volume of sales+ associated with dandruff^ washes away oil and flakes. For Adults"
+      },
+      "variations": [
+        {
+          "id": "var_39wfn5kr4",
+          "name": "Itchy Scalp",
+          "price": 3,
+          "stock": 1,
+          "barcode": "",
+          "imageUrl": "https://i5.walmartimages.com/seo/Head-and-Shoulders-2-in-1-Dandruff-Shampoo-and-Conditioner-Itchy-Scalp-Care-20-7-fl-oz_32a5efe1-7739-4920-974b-0c61bd43ed40.07d3d52e890b52baeaafc71b7e8e9c34.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF"
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 88,
+        "name": "Palmolive Ultra Strength Liquid Dish Soap, 20 fl oz Bottle",
+        "price": 1.5,
+        "stock": 1,
+        "category": "Household Essentials",
+        "description": "Palmolive Ultra Strength Liquid Dish Soap is the signature green dish soap and trusted liquid dish soap for every home. This dishwashing liquid features a fresh scent and delivers superior cleaning power; it removes 99.9% of grease and 99.9% of sticky food residue, making it a highly effective dish soap at removing food residue. It works on contact to cut grease and grime. With no soaking required; this dish soap no soaking formula helps you finish the job in one go. It is a paraben free dish soap, contains no phthalates, perfect for families and daily dishwashing. Thanks to its versatility as a multi-purpose cleaner, you can use it as a bbq grill cleaner, car tire cleaner, or pre-treat laundry stain remover in addition to dishes, glasses, pots, pans, and most cookware. It is also powerful on plastics, ensuring even your plastic containers, lunchboxes, and storage lids come out sparkling clean. Palmolive Ultra Strength Dish Soap is the solution for all your kitchen cleaning needs."
+      },
+      "variations": [
+        {
+          "id": "var_vnadlcfhf",
+          "name": "Ultra",
+          "price": 1.5,
+          "stock": 2,
+          "barcode": "035000451187",
+          "imageUrl": "https://i5.walmartimages.com/seo/Palmolive-Ultra-Strength-Liquid-Dish-Soap-20-oz-Bottle_40ae2808-3371-4f30-9bd9-87bb9cf3c976.fa413f1c273ce4123596b87d3eb854d2.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF"
+        },
+        {
+          "id": "var_su30wubas",
+          "name": "Oxy",
+          "price": 1.5,
+          "stock": 5,
+          "barcode": "035000450418",
+          "imageUrl": "https://i5.walmartimages.com/seo/Palmolive-Ultra-Liquid-Dish-Soap-Oxy-Power-Degreaser-20-Fluid-Ounce-Bottle_1e9848ba-7a82-4b46-812e-1fd65c38540e.ddec2297d08f6f0f7e20a6f788159d3b.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF"
+        },
+        {
+          "id": "var_hnv6jx413",
+          "name": "Orange Scent",
+          "price": 1.5,
+          "stock": 2,
+          "barcode": "035000450388",
+          "imageUrl": "https://i5.walmartimages.com/seo/Palmolive-Ultra-Concentrated-Antibacterial-Liquid-Dish-Soap-Orange-Scent-20-Fluid-Ounce_68439932-0288-4c05-93e5-d278413a14e4.b04e537c076880de1b5900edae481a42.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF"
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 64,
+        "name": "Colgate Optic White Advanced, 3.2 oz",
+        "price": 1.5,
+        "stock": 6,
+        "category": "Personal Care",
+        "description": "Powered by HP Complex, our unique formulation of Hydrogen Peroxide, Optic White Advanced Stain Prevention Toothpaste removes 5 years of deep-set stains, for visibly whiter teeth*. This clinically proven formula contains Hydrogen Peroxide, the same whitening ingredient used by dentists. Designed for no tooth sensitivity, our Mint Toothpaste provides enamel-safe stain removal for noticeable results*. *when brushing twice daily for 2 weeks."
+      },
+      "variations": [
+        {
+          "id": "var_nyrurnryc",
+          "name": "Shimmering Mint",
+          "price": 1.5,
+          "stock": 1,
+          "barcode": "",
+          "imageUrl": "https://pics.walgreens.com/prodimg/693014/450.jpg"
+        },
+        {
+          "id": "var_13402vgif",
+          "name": "Icy Fresh",
+          "price": 1.5,
+          "stock": 3,
+          "barcode": "035000971593",
+          "imageUrl": "https://i5.walmartimages.com/seo/Colgate-Optic-White-Advanced-Hydrogen-Peroxide-Whitening-Toothpaste-Icy-Fresh-3-2-oz-Tube_4d6c1c4e-0711-41f3-9733-258727f24f8d.80b7d4e58d767971d1e9e04f8ee7d3c2.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF"
+        },
+        {
+          "id": "var_86pf87n4c",
+          "name": "Enamel Strength",
+          "price": 1.5,
+          "stock": 2,
+          "barcode": "827854026686",
+          "imageUrl": "https://pics.walgreens.com/prodimg/693015/450.jpg"
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 31,
+        "name": "Tide Plus Ultra Oxi Boost 73.0 fl oz",
+        "price": 9,
+        "stock": 1,
+        "category": "Household Essentials",
+        "description": "Get the Tide clean you trust and the Downy freshness you love-all in one liquid laundry detergent. Tide Plus Boost of Ultra Downy Liquid Laundry Detergent now comes with 20% more Downy freshness* in every drop, combining the power of Tide and the scent of Downy April Fresh to refresh your senses- and your laundry! Tide Plus Boost of Ultra Downy Liquid Laundry Detergent gives you long-lasting freshness from day to night. Unlike leading baking soda-based detergent brands, Tide's laundry detergent liquid gets you 2x the cleaning ingredients in every wash. The clear cap makes measuring and pouring your liquid laundry detergent incredibly convenient. And if you want to upgrade your routine even more, pair with Downy April Fresh Laundry Beads and Downy April Fresh Liquid Fabric Softener and get even longer-lasting freshness + softness. You trust Tide, and you love Downy April Fresh scent, so now experience the improved power of both with Tide Plus Boost of Ultra Downy Liquid Laundry Detergent! From Tide, the #1 brand used by dermatologists."
+      },
+      "variations": [
+        {
+          "id": "var_mcuteobo2",
+          "name": "Downy April Fresh",
+          "price": 9,
+          "stock": 1,
+          "barcode": "030772175231",
+          "imageUrl": "https://pics.walgreens.com/prodimg/678829/450.jpg"
+        }
+      ]
+    },
+    {
+      "parentProduct": {
+        "id": 198,
+        "name": "Colgate Total Active Prevention, 5.1 oz",
+        "price": 2,
+        "stock": 1,
+        "category": "Personal Care",
+        "description": "Help stop oral health problems (1) before they start with Colgate Total Active Prevention Fresh Mint Toothpaste. This anticavity toothpaste fights bacteria, the root cause of many oral health issues such as gingivitis, tartar, plaque, stains, weak enamel, sensitivity, bad breath, and cavities. This science-backed fluoride toothpaste uses a unique, clinically-proven stannous fluoride formula to help fight plaque bacteria. Plus, this mint toothpaste blends peppermint and spearmint together for a mild cooling effect and helps minimize bad breath. Colgate Total Active Prevention Fresh Mint Fluoride Toothpaste can help improve your oral health by tackling many oral health issues (1) before they begin. This Colgate Total anticavity toothpaste offers 24 hours of long-lasting antibacterial protection when brushing twice daily with 4 weeks of continued use. Feel secure knowing that Colgate Total Active Prevention Fresh Mint Toothpaste has your cavities, gingivitis, and sensitivity prevention needs covered for a healthy and confident smile. (1) such as cavities and gingivitis (2) vs. non-antibacterial fluoride toothpaste with 3 months of continued use"
+      },
+      "variations": [
+        {
+          "id": "var_977gk3xtc",
+          "name": "Fresh Mint",
+          "price": 2,
+          "stock": 4,
+          "barcode": "827854001898",
+          "imageUrl": "https://i5.walmartimages.com/seo/Colgate-Total-Active-Prevention-Fresh-Mint-Toothpaste-5-1-oz_04a1e7e3-86dd-4c82-86f7-d09f1793ca61.4851cee1d136010d6122f0378dd22cef.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF"
+        },
+        {
+          "id": "var_51br8s4ow",
+          "name": "Whitening Charcoal",
+          "price": 2,
+          "stock": 9,
+          "barcode": "827854001812",
+          "imageUrl": "https://pics.walgreens.com/prodimg/654720/450.jpg"
+        },
+        {
+          "id": "var_1hgey5jpi",
+          "name": "Whitening paste",
+          "price": 2,
+          "stock": 7,
+          "barcode": "827854001881",
+          "imageUrl": "https://d2lnr5mha7bycj.cloudfront.net/product-image/file/large_adc4de77-b379-466f-ab6f-4a7dd916e716.png"
+        }
+      ]
+    }
+  ],
+  "readyToRelistStandaloneProducts": [
+    {
+      "sourceParentId": 50,
+      "suggestedName": "Gain Dryer Sheets - Original + Wrinkle Release  105.0 ea",
+      "category": "Household Essentials",
+      "price": 4,
+      "stock": 1,
+      "barcode": "",
+      "image_url": "https://pics.walgreens.com/prodimg/692758/450.jpg",
+      "description": "More scent. More softness. Less static. Fewer wrinkles. Are you so obsessed with the scent of Gain that it feels like you can never get enough of it? Gain Dryer Sheets to the rescue to add even more Gain scent to your freshly dried clothes and making them even softer. They're like the cherry on top of your pile of clean and freshly scented laundry. What do dryer sheets actually do? Gain Dryer Sheets do all the things you love like soften clothes, give fabrics a delightful scent, reduce wrinkles, and reduce static so your clothes attract fewer bits of lint. And the best part? They do all this without any extra hassle. Gain Dryer Sheets take your laundry to the next level by getting rid of static and adding a fresh, irresistible scent to fabrics. Evoke memories of a warm and airy spring evening of Moonlight Breeze scent you know and love from Gain while enjoying incredibly soft laundry without wrinkles. For daring noses, we hear the trifecta of Gain Moonlight Breeze Scent (laundry detergent + scent booster + dryer sheets) is the best way to go for freshness. Add Gain Dryer Sheets to every load to give your nose the love it deserves with Gain Moonlight Breeze Scent."
+    },
+    {
+      "sourceParentId": 50,
+      "suggestedName": "Gain Dryer Sheets - Moonlight Breeze, 60.0 ea",
+      "category": "Household Essentials",
+      "price": 2,
+      "stock": 7,
+      "barcode": "",
+      "description": "More scent. More softness. Less static. Fewer wrinkles. Are you so obsessed with the scent of Gain that it feels like you can never get enough of it? Gain Dryer Sheets to the rescue to add even more Gain scent to your freshly dried clothes and making them even softer. They're like the cherry on top of your pile of clean and freshly scented laundry. What do dryer sheets actually do? Gain Dryer Sheets do all the things you love like soften clothes, give fabrics a delightful scent, reduce wrinkles, and reduce static so your clothes attract fewer bits of lint. And the best part? They do all this without any extra hassle. Gain Dryer Sheets take your laundry to the next level by getting rid of static and adding a fresh, irresistible scent to fabrics. Evoke memories of a warm and airy spring evening of Moonlight Breeze scent you know and love from Gain while enjoying incredibly soft laundry without wrinkles. For daring noses, we hear the trifecta of Gain Moonlight Breeze Scent (laundry detergent + scent booster + dryer sheets) is the best way to go for freshness. Add Gain Dryer Sheets to every load to give your nose the love it deserves with Gain Moonlight Breeze Scent."
+    },
+    {
+      "sourceParentId": 66,
+      "suggestedName": "Degree Antiperspirant Deodorant Stick - Men Max Protection,  Cool Rush, 2.6 OZ",
+      "category": "Personal Care",
+      "price": 4.5,
+      "stock": 4,
+      "barcode": "",
+      "image_url": "https://www.cvs.com/bizcontent/merchandising/productimages/high_res/7940052740.jpg?im=Resize=(1200,1200),aspect=ignore",
+      "description": "Degree Max Protection Cool Rush is designed to inspire confidence in every move you make. This antiperspirant stick offers a powerful 3-in-1 benefit, shielding you from sweat, odor, and unsightly stains. With its advanced formula, you can trust Degree to keep you dry and fresh, while protecting your clothes from white marks and yellowing. The Cool Rush scent invigorates your senses, making every application a refreshing experience. Degree is the #1 antiperspirant brand in the U.S., trusted for its superior technology that delivers nonstop protection. Whether you're chasing everyday goals or making headlines, Degree ensures you stay confident and unstoppable. Powered by advanced, dermatologist-tested formulas, Degree keeps you fresh and confident all day long.​ With a full range of products including clinical strength, antiperspirants, and whole-body solutions, Degree empowers everyone to move more and worry less."
+    },
+    {
+      "sourceParentId": 66,
+      "suggestedName": "Degree Antiperspirant Deodorant Stick - Cool Rush, 2.7 OZ",
+      "category": "Personal Care",
+      "price": 4.5,
+      "stock": 2,
+      "barcode": "",
+      "image_url": "https://pics.walgreens.com/prodimg/79623/450.jpg",
+      "description": "Degree Max Protection Cool Rush is designed to inspire confidence in every move you make. This antiperspirant stick offers a powerful 3-in-1 benefit, shielding you from sweat, odor, and unsightly stains. With its advanced formula, you can trust Degree to keep you dry and fresh, while protecting your clothes from white marks and yellowing. The Cool Rush scent invigorates your senses, making every application a refreshing experience. Degree is the #1 antiperspirant brand in the U.S., trusted for its superior technology that delivers nonstop protection. Whether you're chasing everyday goals or making headlines, Degree ensures you stay confident and unstoppable. Powered by advanced, dermatologist-tested formulas, Degree keeps you fresh and confident all day long.​ With a full range of products including clinical strength, antiperspirants, and whole-body solutions, Degree empowers everyone to move more and worry less."
+    },
+    {
+      "sourceParentId": 66,
+      "suggestedName": "Degree Antiperspirant Deodorant Stick - Fresh, 2.6 oz",
+      "category": "Personal Care",
+      "price": 4.5,
+      "stock": 2,
+      "barcode": "",
+      "image_url": "https://pics.walgreens.com/prodimg/590484/450.jpg",
+      "description": "Degree Max Protection Cool Rush is designed to inspire confidence in every move you make. This antiperspirant stick offers a powerful 3-in-1 benefit, shielding you from sweat, odor, and unsightly stains. With its advanced formula, you can trust Degree to keep you dry and fresh, while protecting your clothes from white marks and yellowing. The Cool Rush scent invigorates your senses, making every application a refreshing experience. Degree is the #1 antiperspirant brand in the U.S., trusted for its superior technology that delivers nonstop protection. Whether you're chasing everyday goals or making headlines, Degree ensures you stay confident and unstoppable. Powered by advanced, dermatologist-tested formulas, Degree keeps you fresh and confident all day long.​ With a full range of products including clinical strength, antiperspirants, and whole-body solutions, Degree empowers everyone to move more and worry less."
+    },
+    {
+      "sourceParentId": 74,
+      "suggestedName": "Gillette Razor - Fusion5 Power Men's Razor Handle, Orange, 1 Blade Refill",
+      "category": "Personal Care",
+      "price": 5,
+      "stock": 2,
+      "barcode": "",
+      "image_url": "https://i5.walmartimages.com/seo/Gillette-Fusion5-Power-Men-s-Razor-Handle-Orange-1-Blade-Refill_0858df42-1e1c-4959-a38a-2f6220756254.ad5e812d71bc0c0fdfc4b2e452062fe4.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+      "description": "The Gillette Fusion5 Power men's razor is a battery-powered razor that provides gentle micro pulses that help the razor glide smoothly over your skin. It features 5 antifriction blades so you can get 5-blade closeness at an affordable price. The blades are spaced closely together for incredible comfort lasting you up to 20 shaves per blade refill. The precision trimmer on the back of the razor makes getting your hard-to-reach places easier and is great for styling your facial hair just the way you want it. Soft micro-fins gently stretch and smooth skin to prepare hairs for a close shave from our thinnest blades (first 4 blades) while the lubrastrip helps the blades glide over your skin more easily. A Lubrastrip is a thin strip that sits at the top of the razor, releasing lubricants while you shave, to produce a great glide. When you are no longer getting an optimal shave, the Lubrastrip fades to white, indicating that it might be time to change the blade. Every Fusion5 handle can fit all Gillette 5-blade razor refills (excluding Gillette Labs)."
+    },
+    {
+      "sourceParentId": 74,
+      "suggestedName": "Gillette Razor - Skinguard Razors for Men, Handle and Razor Blade Refills, 1.0 set",
+      "category": "Personal Care",
+      "price": 5,
+      "stock": 1,
+      "barcode": "",
+      "image_url": "https://pics.walgreens.com/prodimg/666024/450.jpg",
+      "description": "The Gillette Fusion5 Power men's razor is a battery-powered razor that provides gentle micro pulses that help the razor glide smoothly over your skin. It features 5 antifriction blades so you can get 5-blade closeness at an affordable price. The blades are spaced closely together for incredible comfort lasting you up to 20 shaves per blade refill. The precision trimmer on the back of the razor makes getting your hard-to-reach places easier and is great for styling your facial hair just the way you want it. Soft micro-fins gently stretch and smooth skin to prepare hairs for a close shave from our thinnest blades (first 4 blades) while the lubrastrip helps the blades glide over your skin more easily. A Lubrastrip is a thin strip that sits at the top of the razor, releasing lubricants while you shave, to produce a great glide. When you are no longer getting an optimal shave, the Lubrastrip fades to white, indicating that it might be time to change the blade. Every Fusion5 handle can fit all Gillette 5-blade razor refills (excluding Gillette Labs)."
+    },
+    {
+      "sourceParentId": 132,
+      "suggestedName": "Tide Power PODS Downy April Fresh Laundry Detergent Pacs 9 ct - OXI BOOST",
+      "category": "Household Essentials",
+      "price": 4,
+      "stock": 1,
+      "barcode": "030772171288",
+      "image_url": "https://i5.walmartimages.com/seo/Tide-Laundry-Detergent-Liquid-Mega-Pod-Not-Applicable-Original-Oxi-Boost_705a622e-1e22-49ee-919e-dc21cd69665c.734604e00d3206d082eeafb709d933d9.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+      "description": "Get the Tide clean you trust with the softness you love from Downy. New Tide Power PODS with Downy Soft Boosters combine your favorite laundry detergent with your favorite softener to make every load feel as good as it looks. Plus, Tide PODS Plus Downy have the signature Downy April Fresh Scent so you can enjoy outstanding freshness with every wash. Tide Power PODS are bigger than regular PODS: 1 Power POD equals 2 PODS for even more clean that tackles 100% of common stains-even in cold water. Toss in Tide Power PODS with Downy before clothes to get the most out of your Tide Laundry Detergent. Experience the power of America's #1 trusted detergent brand and the softness you love with Tide Power PODS with Downy (Tide is consumers' #1 trusted laundry detergent brand in BrandSpark survey)."
+    },
+    {
+      "sourceParentId": 92,
+      "suggestedName": "Olay Body Wash - Age Defy, Vitamin E, B3 and Hyaluronic Blend, 22.0 fl",
+      "category": "Personal Care",
+      "price": 4,
+      "stock": 0,
+      "barcode": "",
+      "image_url": "https://pics.walgreens.com/prodimg/592389/450.jpg",
+      "description": "Elevate your skincare routine with the improved Olay Ultra Moisture Age Defy Body Wash with Vitamin E, expertly formulated to repair* skin's moisture barrier to prevent dryness from reoccurring *with continued use. Infused with a powerful blend of Vitamin B3, Hyaluronic, and essential lipids, this rich and creamy body wash deeply penetrates to lock in moisture, ensuring your skin remains hydrated and radiant with 24/7 visibly healthy and soft skin. Transform your shower into a nourishing experience and embrace the beauty of healthy, hydrated skin with Olay Ultra Moisture Age Defy Body Wash with Vitamin E. Your skin will thank you!"
+    },
+    {
+      "sourceParentId": 92,
+      "suggestedName": "Olay Body Wash - Ultra Moisture Vanilla Creme, 22.0 fl",
+      "category": "Personal Care",
+      "price": 4,
+      "stock": 0,
+      "barcode": "",
+      "image_url": "https://pics.walgreens.com/prodimg/690196/450.jpg",
+      "description": "Elevate your skincare routine with the improved Olay Ultra Moisture Age Defy Body Wash with Vitamin E, expertly formulated to repair* skin's moisture barrier to prevent dryness from reoccurring *with continued use. Infused with a powerful blend of Vitamin B3, Hyaluronic, and essential lipids, this rich and creamy body wash deeply penetrates to lock in moisture, ensuring your skin remains hydrated and radiant with 24/7 visibly healthy and soft skin. Transform your shower into a nourishing experience and embrace the beauty of healthy, hydrated skin with Olay Ultra Moisture Age Defy Body Wash with Vitamin E. Your skin will thank you!"
+    },
+    {
+      "sourceParentId": 92,
+      "suggestedName": "Olay Body Wash - Ultra Moisture Soothing, Oat Extract, 22.0 fl",
+      "category": "Personal Care",
+      "price": 4,
+      "stock": 1,
+      "barcode": "",
+      "image_url": "https://pics.walgreens.com/prodimg/677373/450.jpg",
+      "description": "Elevate your skincare routine with the improved Olay Ultra Moisture Age Defy Body Wash with Vitamin E, expertly formulated to repair* skin's moisture barrier to prevent dryness from reoccurring *with continued use. Infused with a powerful blend of Vitamin B3, Hyaluronic, and essential lipids, this rich and creamy body wash deeply penetrates to lock in moisture, ensuring your skin remains hydrated and radiant with 24/7 visibly healthy and soft skin. Transform your shower into a nourishing experience and embrace the beauty of healthy, hydrated skin with Olay Ultra Moisture Age Defy Body Wash with Vitamin E. Your skin will thank you!"
+    },
+    {
+      "sourceParentId": 167,
+      "suggestedName": "Gillette Sensor3 Men's Disposable Razor, Blue, 4 Razors - Comfort",
+      "category": "Beauty",
+      "price": 4,
+      "stock": 1,
+      "barcode": "047400078116",
+      "image_url": "https://pics.walgreens.com/prodimg/632037/450.jpg",
+      "description": "Looking for a men's disposable razor that can get you up to 12 comfortable shaves? Gillette's Sensor3 Comfort disposable razors do just that thanks to its 3 chromium-coated, skin sensing blades and a 40 degree pivoting head that automatically adjusts to the skin's surface to give a close, smooth and comfortable shave. Additionally, the skin-guard fins have five elastomer fins that gently stretch the skin to create a smooth, even surface for an optimal shave. Each razor can last up to 12 comfortable shaves. Sensor3 disposable razors for men feature an enhanced Lubrastrip with water activated Comfort-gel technology for ultimate comfort and smooth shaving. Complete with an ergonomic shaped non-slip rubber handle for great control and maneuverability and easy rinse blades for 100% better rinsing (vs Sensor2 Plus disposable razors). See why Gillette Sensor3 Men's Disposable razor is the world's #1 selling 3 blade disposable razor*. For best results, use with your favorite Gillette shave gel, cream or foam. *Based on Nielsen sales data among 3 bladed male disposable razors."
+    },
+    {
+      "sourceParentId": 167,
+      "suggestedName": "Gillette Sensor3 Men's Disposable Razor, Blue, 4 Razors - sensetive",
+      "category": "Beauty",
+      "price": 4,
+      "stock": 1,
+      "barcode": "047400689268",
+      "image_url": "https://pics.walgreens.com/prodimg/666021/450.jpg",
+      "description": "Looking for a men's disposable razor that can get you up to 12 comfortable shaves? Gillette's Sensor3 Comfort disposable razors do just that thanks to its 3 chromium-coated, skin sensing blades and a 40 degree pivoting head that automatically adjusts to the skin's surface to give a close, smooth and comfortable shave. Additionally, the skin-guard fins have five elastomer fins that gently stretch the skin to create a smooth, even surface for an optimal shave. Each razor can last up to 12 comfortable shaves. Sensor3 disposable razors for men feature an enhanced Lubrastrip with water activated Comfort-gel technology for ultimate comfort and smooth shaving. Complete with an ergonomic shaped non-slip rubber handle for great control and maneuverability and easy rinse blades for 100% better rinsing (vs Sensor2 Plus disposable razors). See why Gillette Sensor3 Men's Disposable razor is the world's #1 selling 3 blade disposable razor*. For best results, use with your favorite Gillette shave gel, cream or foam. *Based on Nielsen sales data among 3 bladed male disposable razors."
+    },
+    {
+      "sourceParentId": 150,
+      "suggestedName": "Tide PODS Laundry Detergent Soap Pacs - Spring Meadow Scent, 57 Count",
+      "category": "Household Essentials",
+      "price": 10,
+      "stock": 0,
+      "barcode": "",
+      "image_url": "https://i5.walmartimages.com/seo/Tide-PODS-Laundry-Detergent-Packs-Spring-Meadow-Scent-57-Count_d81e63f6-e47b-43b9-a55d-db231bdb1022.bf4d34df4bd171bc5773dfe5841fc63c.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF",
+      "description": "Discover the effortless, powerful clean of Tide PODS laundry detergent pacs, designed to work on 100% of common stains, even in cold water. With a 3-in-1 concentrated formula that combines stain removers, odor fighters, and color protectors, you get exceptional cleaning performance in just one simple step. Tide PODS laundry soap dissolves quickly, activating stain removal and odor fighting in any wash temperature. Say goodbye to grease stains and hello to fresh, vibrant laundry with America’s top trusted laundry brand*. Don’t pay for water, pay for clean. Tide PODS laundry soap is concentrated with 3X cleaning ingredients per dose compared to leading bargain liquid detergent, ensuring you get the most out of every load. Just toss Tide PODS laundry soap into the drum before adding clothes, it's that easy! For larger or heavily soiled loads, simply add another Tide POD. "
+    },
+    {
+      "sourceParentId": 150,
+      "suggestedName": "Tide PODS Laundry Detergent Soap Pacs - Original Scent, 42 Count",
+      "category": "Household Essentials",
+      "price": 9,
+      "stock": 0,
+      "barcode": "",
+      "image_url": "https://i5.walmartimages.com/seo/Tide-PODS-Liquid-Laundry-Detergent-Pacs-Original-Scent-42-Count_a35a9bc7-f97e-4988-9df2-cd0a6a06c5af.421703fe1176600cbc167dc287fc2725.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+      "description": "Discover the effortless, powerful clean of Tide PODS laundry detergent pacs, designed to work on 100% of common stains, even in cold water. With a 3-in-1 concentrated formula that combines stain removers, odor fighters, and color protectors, you get exceptional cleaning performance in just one simple step. Tide PODS laundry soap dissolves quickly, activating stain removal and odor fighting in any wash temperature. Say goodbye to grease stains and hello to fresh, vibrant laundry with America’s top trusted laundry brand*. Don’t pay for water, pay for clean. Tide PODS laundry soap is concentrated with 3X cleaning ingredients per dose compared to leading bargain liquid detergent, ensuring you get the most out of every load. Just toss Tide PODS laundry soap into the drum before adding clothes, it's that easy! For larger or heavily soiled loads, simply add another Tide POD. "
+    },
+    {
+      "sourceParentId": 179,
+      "suggestedName": "Gain Flings Liquid Laundry Detergent - Island Fresh Scent, 16 Flings",
+      "category": "Household Essentials",
+      "price": 4,
+      "stock": 0,
+      "barcode": "",
+      "image_url": "https://i5.walmartimages.com/seo/Gain-Flings-Liquid-Laundry-Detergent-Island-Fresh-Scent-16-Count_e8b76ede-89ac-4bc5-8166-0875c7c90701.637123fc768a4ff610774eca6ac1a95a.png?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF",
+      "description": "Gain flings! laundry detergent pacs are packed with 50% more scent than Gain liquid laundry detergent. Armed with the stain-fighting power of Oxi and Febreze, they give you nothing but great, clean, amazing-smelling laundry. Use with any laundry set-up, because Gain flings! Pacs dissolve in both hot and cold water and are HE compatible. Whisk yourself away to a tropical paradise with the help of Gain Flings Island Fresh! Upon dissolving in your wash, these super-concentrated laundry detergent pacs release the alluring scent of exotic fruits and flowers, wrapping your clothes in ahhhmazing freshness."
+    },
+    {
+      "sourceParentId": 179,
+      "suggestedName": "Gain Flings Liquid Laundry Detergent - Moonlight Breeze Scent, 15 Flings",
+      "category": "Household Essentials",
+      "price": 4,
+      "stock": 0,
+      "barcode": "",
+      "image_url": "https://www.cvs.com/bizcontent/merchandising/productimages/high_res/3077224784.jpg?im=Resize=(1200,1200),aspect=ignore",
+      "description": "Gain flings! laundry detergent pacs are packed with 50% more scent than Gain liquid laundry detergent. Armed with the stain-fighting power of Oxi and Febreze, they give you nothing but great, clean, amazing-smelling laundry. Use with any laundry set-up, because Gain flings! Pacs dissolve in both hot and cold water and are HE compatible. Whisk yourself away to a tropical paradise with the help of Gain Flings Island Fresh! Upon dissolving in your wash, these super-concentrated laundry detergent pacs release the alluring scent of exotic fruits and flowers, wrapping your clothes in ahhhmazing freshness."
+    },
+    {
+      "sourceParentId": 190,
+      "suggestedName": "Venus ComfortGlide Disposable Razor for Women - White Tea, 3 Blades, 2 ct",
+      "category": "Beauty",
+      "price": 4.5,
+      "stock": 2,
+      "barcode": "",
+      "image_url": "https://i5.walmartimages.com/seo/Venus-ComfortGlide-3-White-Tea-Women-s-3-Blade-Disposable-Razor-2-count-Pink_df4b28ff-f423-464d-b3d2-0a90abd81981.156397b0e239b03c8b2006a147f9220f.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF",
+      "description": "Venus female razor blades are designed with a woman's body in mind. From handles designed for a comfortable grip, to pivoting heads that contour to curves, Venus razors for women are designed to help reveal touchably smooth skin. Venus Comfort Glide White Tea disposable women's razors feature 3 curve hugging blades for a smooth, close shave that lasts. These razors come equipped with built in flexible gel bars that, when wet, release rich White Tea scented body butter lather for glide and comfort. The flexible gel bars release a rich White Tea scented body butter lather, guarding your skin against nicks, cuts and irritation. Venus Comfort Glide women's disposable razors feature an adaptive, pivoting design that adjusts to your body's contours and a rounded head that hugs curves and fits easily into hard to shave areas. No awkwardly angling your razor. Also features an ergonomic handle for great control. With Venus Comfort Glide White Tea disposable razors, you can just use and replace when you're ready for a new one. No refills needed. All Skin Types"
+    },
+    {
+      "sourceParentId": 190,
+      "suggestedName": "Venus ComfortGlide Disposable Razor for Women - Sensitive, 5 Blades, 2ct",
+      "category": "Beauty",
+      "price": 4.5,
+      "stock": 1,
+      "barcode": "",
+      "image_url": "https://i5.walmartimages.com/seo/VENUS-CG5-SENS-ALOE-2CT-DISP_7e762a4b-e17e-4f38-bf55-eb2a77bcbc53.0605d787e3537f965c7dafc0737b08bf.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+      "description": "Venus female razor blades are designed with a woman's body in mind. From handles designed for a comfortable grip, to pivoting heads that contour to curves, Venus razors for women are designed to help reveal touchably smooth skin. Venus Comfort Glide White Tea disposable women's razors feature 3 curve hugging blades for a smooth, close shave that lasts. These razors come equipped with built in flexible gel bars that, when wet, release rich White Tea scented body butter lather for glide and comfort. The flexible gel bars release a rich White Tea scented body butter lather, guarding your skin against nicks, cuts and irritation. Venus Comfort Glide women's disposable razors feature an adaptive, pivoting design that adjusts to your body's contours and a rounded head that hugs curves and fits easily into hard to shave areas. No awkwardly angling your razor. Also features an ergonomic handle for great control. With Venus Comfort Glide White Tea disposable razors, you can just use and replace when you're ready for a new one. No refills needed. All Skin Types"
+    },
+    {
+      "sourceParentId": 190,
+      "suggestedName": "Venus ComfortGlide Disposable Razor for Women - GlisseConfort, Touch of Vitamin E, 2.0 ea",
+      "category": "Beauty",
+      "price": 4.5,
+      "stock": 1,
+      "barcode": "",
+      "image_url": "https://pics.walgreens.com/prodimg/692208/450.jpg",
+      "description": "Venus female razor blades are designed with a woman's body in mind. From handles designed for a comfortable grip, to pivoting heads that contour to curves, Venus razors for women are designed to help reveal touchably smooth skin. Venus Comfort Glide White Tea disposable women's razors feature 3 curve hugging blades for a smooth, close shave that lasts. These razors come equipped with built in flexible gel bars that, when wet, release rich White Tea scented body butter lather for glide and comfort. The flexible gel bars release a rich White Tea scented body butter lather, guarding your skin against nicks, cuts and irritation. Venus Comfort Glide women's disposable razors feature an adaptive, pivoting design that adjusts to your body's contours and a rounded head that hugs curves and fits easily into hard to shave areas. No awkwardly angling your razor. Also features an ergonomic handle for great control. With Venus Comfort Glide White Tea disposable razors, you can just use and replace when you're ready for a new one. No refills needed. All Skin Types"
+    },
+    {
+      "sourceParentId": 256,
+      "suggestedName": "Head and Shoulders 2 in 1 Dandruff Shampoo and Conditioner - Itchy Scalp",
+      "category": "Personal Care",
+      "price": 3,
+      "stock": 1,
+      "barcode": "",
+      "image_url": "https://i5.walmartimages.com/seo/Head-and-Shoulders-2-in-1-Dandruff-Shampoo-and-Conditioner-Itchy-Scalp-Care-20-7-fl-oz_32a5efe1-7739-4920-974b-0c61bd43ed40.07d3d52e890b52baeaafc71b7e8e9c34.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+      "description": "Healthy hair starts at the scalp. That's why America's #1 dermatologist-recommended brand created Head and Shoulders Tea Tree Oil Shampoo and Conditioner. Ignite your senses and feel it working with every wash. This anti-itch,* anti dandruff shampoo and conditioner formula, infused with tea tree oil, helps rid your scalp of dandruff, and hydrates and cools for scalp relief.+ Now you can rinse away residue, oil, and flakes and improve your scalp and hair health every time you shower.^ Head and Shoulders' unique formula works 7 surface layers deep in your scalp to help stop dandruff at its source and maintain healthy hair. Our unique formula, with zinc pyrithione, delivers multiple benefits:Fights drynessCalms itching+Relieves irritation+Reduces redness+Controls oiliness^Removes flakes+^* visible flakes; with regular use** based on volume of sales+ associated with dandruff^ washes away oil and flakes. For Adults"
+    },
+    {
+      "sourceParentId": 88,
+      "suggestedName": "Palmolive Ultra Strength Liquid Dish Soap, 20 fl oz Bottle - Ultra",
+      "category": "Household Essentials",
+      "price": 1.5,
+      "stock": 2,
+      "barcode": "035000451187",
+      "image_url": "https://i5.walmartimages.com/seo/Palmolive-Ultra-Strength-Liquid-Dish-Soap-20-oz-Bottle_40ae2808-3371-4f30-9bd9-87bb9cf3c976.fa413f1c273ce4123596b87d3eb854d2.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF",
+      "description": "Palmolive Ultra Strength Liquid Dish Soap is the signature green dish soap and trusted liquid dish soap for every home. This dishwashing liquid features a fresh scent and delivers superior cleaning power; it removes 99.9% of grease and 99.9% of sticky food residue, making it a highly effective dish soap at removing food residue. It works on contact to cut grease and grime. With no soaking required; this dish soap no soaking formula helps you finish the job in one go. It is a paraben free dish soap, contains no phthalates, perfect for families and daily dishwashing. Thanks to its versatility as a multi-purpose cleaner, you can use it as a bbq grill cleaner, car tire cleaner, or pre-treat laundry stain remover in addition to dishes, glasses, pots, pans, and most cookware. It is also powerful on plastics, ensuring even your plastic containers, lunchboxes, and storage lids come out sparkling clean. Palmolive Ultra Strength Dish Soap is the solution for all your kitchen cleaning needs."
+    },
+    {
+      "sourceParentId": 88,
+      "suggestedName": "Palmolive Ultra Strength Liquid Dish Soap, 20 fl oz Bottle - Oxy",
+      "category": "Household Essentials",
+      "price": 1.5,
+      "stock": 5,
+      "barcode": "035000450418",
+      "image_url": "https://i5.walmartimages.com/seo/Palmolive-Ultra-Liquid-Dish-Soap-Oxy-Power-Degreaser-20-Fluid-Ounce-Bottle_1e9848ba-7a82-4b46-812e-1fd65c38540e.ddec2297d08f6f0f7e20a6f788159d3b.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+      "description": "Palmolive Ultra Strength Liquid Dish Soap is the signature green dish soap and trusted liquid dish soap for every home. This dishwashing liquid features a fresh scent and delivers superior cleaning power; it removes 99.9% of grease and 99.9% of sticky food residue, making it a highly effective dish soap at removing food residue. It works on contact to cut grease and grime. With no soaking required; this dish soap no soaking formula helps you finish the job in one go. It is a paraben free dish soap, contains no phthalates, perfect for families and daily dishwashing. Thanks to its versatility as a multi-purpose cleaner, you can use it as a bbq grill cleaner, car tire cleaner, or pre-treat laundry stain remover in addition to dishes, glasses, pots, pans, and most cookware. It is also powerful on plastics, ensuring even your plastic containers, lunchboxes, and storage lids come out sparkling clean. Palmolive Ultra Strength Dish Soap is the solution for all your kitchen cleaning needs."
+    },
+    {
+      "sourceParentId": 88,
+      "suggestedName": "Palmolive Ultra Strength Liquid Dish Soap, 20 fl oz Bottle - Orange Scent",
+      "category": "Household Essentials",
+      "price": 1.5,
+      "stock": 2,
+      "barcode": "035000450388",
+      "image_url": "https://i5.walmartimages.com/seo/Palmolive-Ultra-Concentrated-Antibacterial-Liquid-Dish-Soap-Orange-Scent-20-Fluid-Ounce_68439932-0288-4c05-93e5-d278413a14e4.b04e537c076880de1b5900edae481a42.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+      "description": "Palmolive Ultra Strength Liquid Dish Soap is the signature green dish soap and trusted liquid dish soap for every home. This dishwashing liquid features a fresh scent and delivers superior cleaning power; it removes 99.9% of grease and 99.9% of sticky food residue, making it a highly effective dish soap at removing food residue. It works on contact to cut grease and grime. With no soaking required; this dish soap no soaking formula helps you finish the job in one go. It is a paraben free dish soap, contains no phthalates, perfect for families and daily dishwashing. Thanks to its versatility as a multi-purpose cleaner, you can use it as a bbq grill cleaner, car tire cleaner, or pre-treat laundry stain remover in addition to dishes, glasses, pots, pans, and most cookware. It is also powerful on plastics, ensuring even your plastic containers, lunchboxes, and storage lids come out sparkling clean. Palmolive Ultra Strength Dish Soap is the solution for all your kitchen cleaning needs."
+    },
+    {
+      "sourceParentId": 64,
+      "suggestedName": "Colgate Optic White Advanced, 3.2 oz - Shimmering Mint",
+      "category": "Personal Care",
+      "price": 1.5,
+      "stock": 1,
+      "barcode": "",
+      "image_url": "https://pics.walgreens.com/prodimg/693014/450.jpg",
+      "description": "Powered by HP Complex, our unique formulation of Hydrogen Peroxide, Optic White Advanced Stain Prevention Toothpaste removes 5 years of deep-set stains, for visibly whiter teeth*. This clinically proven formula contains Hydrogen Peroxide, the same whitening ingredient used by dentists. Designed for no tooth sensitivity, our Mint Toothpaste provides enamel-safe stain removal for noticeable results*. *when brushing twice daily for 2 weeks."
+    },
+    {
+      "sourceParentId": 64,
+      "suggestedName": "Colgate Optic White Advanced, 3.2 oz - Icy Fresh",
+      "category": "Personal Care",
+      "price": 1.5,
+      "stock": 3,
+      "barcode": "035000971593",
+      "image_url": "https://i5.walmartimages.com/seo/Colgate-Optic-White-Advanced-Hydrogen-Peroxide-Whitening-Toothpaste-Icy-Fresh-3-2-oz-Tube_4d6c1c4e-0711-41f3-9733-258727f24f8d.80b7d4e58d767971d1e9e04f8ee7d3c2.jpeg?odnHeight=573&odnWidth=573&odnBg=FFFFFF",
+      "description": "Powered by HP Complex, our unique formulation of Hydrogen Peroxide, Optic White Advanced Stain Prevention Toothpaste removes 5 years of deep-set stains, for visibly whiter teeth*. This clinically proven formula contains Hydrogen Peroxide, the same whitening ingredient used by dentists. Designed for no tooth sensitivity, our Mint Toothpaste provides enamel-safe stain removal for noticeable results*. *when brushing twice daily for 2 weeks."
+    },
+    {
+      "sourceParentId": 64,
+      "suggestedName": "Colgate Optic White Advanced, 3.2 oz - Enamel Strength",
+      "category": "Personal Care",
+      "price": 1.5,
+      "stock": 2,
+      "barcode": "827854026686",
+      "image_url": "https://pics.walgreens.com/prodimg/693015/450.jpg",
+      "description": "Powered by HP Complex, our unique formulation of Hydrogen Peroxide, Optic White Advanced Stain Prevention Toothpaste removes 5 years of deep-set stains, for visibly whiter teeth*. This clinically proven formula contains Hydrogen Peroxide, the same whitening ingredient used by dentists. Designed for no tooth sensitivity, our Mint Toothpaste provides enamel-safe stain removal for noticeable results*. *when brushing twice daily for 2 weeks."
+    },
+    {
+      "sourceParentId": 31,
+      "suggestedName": "Tide Plus Ultra Oxi Boost 73.0 fl oz - Downy April Fresh",
+      "category": "Household Essentials",
+      "price": 9,
+      "stock": 1,
+      "barcode": "030772175231",
+      "image_url": "https://pics.walgreens.com/prodimg/678829/450.jpg",
+      "description": "Get the Tide clean you trust and the Downy freshness you love-all in one liquid laundry detergent. Tide Plus Boost of Ultra Downy Liquid Laundry Detergent now comes with 20% more Downy freshness* in every drop, combining the power of Tide and the scent of Downy April Fresh to refresh your senses- and your laundry! Tide Plus Boost of Ultra Downy Liquid Laundry Detergent gives you long-lasting freshness from day to night. Unlike leading baking soda-based detergent brands, Tide's laundry detergent liquid gets you 2x the cleaning ingredients in every wash. The clear cap makes measuring and pouring your liquid laundry detergent incredibly convenient. And if you want to upgrade your routine even more, pair with Downy April Fresh Laundry Beads and Downy April Fresh Liquid Fabric Softener and get even longer-lasting freshness + softness. You trust Tide, and you love Downy April Fresh scent, so now experience the improved power of both with Tide Plus Boost of Ultra Downy Liquid Laundry Detergent! From Tide, the #1 brand used by dermatologists."
+    },
+    {
+      "sourceParentId": 198,
+      "suggestedName": "Colgate Total Active Prevention, 5.1 oz - Fresh Mint",
+      "category": "Personal Care",
+      "price": 2,
+      "stock": 4,
+      "barcode": "827854001898",
+      "image_url": "https://i5.walmartimages.com/seo/Colgate-Total-Active-Prevention-Fresh-Mint-Toothpaste-5-1-oz_04a1e7e3-86dd-4c82-86f7-d09f1793ca61.4851cee1d136010d6122f0378dd22cef.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF",
+      "description": "Help stop oral health problems (1) before they start with Colgate Total Active Prevention Fresh Mint Toothpaste. This anticavity toothpaste fights bacteria, the root cause of many oral health issues such as gingivitis, tartar, plaque, stains, weak enamel, sensitivity, bad breath, and cavities. This science-backed fluoride toothpaste uses a unique, clinically-proven stannous fluoride formula to help fight plaque bacteria. Plus, this mint toothpaste blends peppermint and spearmint together for a mild cooling effect and helps minimize bad breath. Colgate Total Active Prevention Fresh Mint Fluoride Toothpaste can help improve your oral health by tackling many oral health issues (1) before they begin. This Colgate Total anticavity toothpaste offers 24 hours of long-lasting antibacterial protection when brushing twice daily with 4 weeks of continued use. Feel secure knowing that Colgate Total Active Prevention Fresh Mint Toothpaste has your cavities, gingivitis, and sensitivity prevention needs covered for a healthy and confident smile. (1) such as cavities and gingivitis (2) vs. non-antibacterial fluoride toothpaste with 3 months of continued use"
+    },
+    {
+      "sourceParentId": 198,
+      "suggestedName": "Colgate Total Active Prevention, 5.1 oz - Whitening Charcoal",
+      "category": "Personal Care",
+      "price": 2,
+      "stock": 9,
+      "barcode": "827854001812",
+      "image_url": "https://pics.walgreens.com/prodimg/654720/450.jpg",
+      "description": "Help stop oral health problems (1) before they start with Colgate Total Active Prevention Fresh Mint Toothpaste. This anticavity toothpaste fights bacteria, the root cause of many oral health issues such as gingivitis, tartar, plaque, stains, weak enamel, sensitivity, bad breath, and cavities. This science-backed fluoride toothpaste uses a unique, clinically-proven stannous fluoride formula to help fight plaque bacteria. Plus, this mint toothpaste blends peppermint and spearmint together for a mild cooling effect and helps minimize bad breath. Colgate Total Active Prevention Fresh Mint Fluoride Toothpaste can help improve your oral health by tackling many oral health issues (1) before they begin. This Colgate Total anticavity toothpaste offers 24 hours of long-lasting antibacterial protection when brushing twice daily with 4 weeks of continued use. Feel secure knowing that Colgate Total Active Prevention Fresh Mint Toothpaste has your cavities, gingivitis, and sensitivity prevention needs covered for a healthy and confident smile. (1) such as cavities and gingivitis (2) vs. non-antibacterial fluoride toothpaste with 3 months of continued use"
+    },
+    {
+      "sourceParentId": 198,
+      "suggestedName": "Colgate Total Active Prevention, 5.1 oz - Whitening paste",
+      "category": "Personal Care",
+      "price": 2,
+      "stock": 7,
+      "barcode": "827854001881",
+      "image_url": "https://d2lnr5mha7bycj.cloudfront.net/product-image/file/large_adc4de77-b379-466f-ab6f-4a7dd916e716.png",
+      "description": "Help stop oral health problems (1) before they start with Colgate Total Active Prevention Fresh Mint Toothpaste. This anticavity toothpaste fights bacteria, the root cause of many oral health issues such as gingivitis, tartar, plaque, stains, weak enamel, sensitivity, bad breath, and cavities. This science-backed fluoride toothpaste uses a unique, clinically-proven stannous fluoride formula to help fight plaque bacteria. Plus, this mint toothpaste blends peppermint and spearmint together for a mild cooling effect and helps minimize bad breath. Colgate Total Active Prevention Fresh Mint Fluoride Toothpaste can help improve your oral health by tackling many oral health issues (1) before they begin. This Colgate Total anticavity toothpaste offers 24 hours of long-lasting antibacterial protection when brushing twice daily with 4 weeks of continued use. Feel secure knowing that Colgate Total Active Prevention Fresh Mint Toothpaste has your cavities, gingivitis, and sensitivity prevention needs covered for a healthy and confident smile. (1) such as cavities and gingivitis (2) vs. non-antibacterial fluoride toothpaste with 3 months of continued use"
+    }
+  ]
+}

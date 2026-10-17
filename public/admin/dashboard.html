@@ -458,24 +458,6 @@
                         <div id="product-images-preview" class="flex gap-2 overflow-x-auto py-1"></div>
                     </div>
 
-                    <!-- Product Variations / Options (Scent, Size, Color, Flavor, etc.) -->
-                    <div class="flex flex-col gap-2 p-3.5 rounded-2xl bg-surface-container-low/60 border border-surface-container">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-primary text-[20px]">style</span>
-                                <span class="font-label-md font-bold text-on-surface">Product Variations & Options</span>
-                            </div>
-                            <button type="button" onclick="adminAddVariationRow()" class="px-3 py-1 rounded-full bg-primary text-on-primary text-xs font-bold flex items-center gap-1 active:scale-95 transition shadow-sm hover:bg-primary-container">
-                                <span class="material-symbols-outlined text-[14px]">add</span>
-                                <span>Add Variation</span>
-                            </button>
-                        </div>
-                        <p class="text-xs text-on-surface-variant">Add flavors, scents, or sizes with their own price, stock, photo, and barcode.</p>
-                        
-                        <div id="admin-variations-container" class="flex flex-col gap-2 mt-1">
-                            <!-- Dynamic Variation Rows -->
-                        </div>
-                    </div>
 
                     <div class="flex flex-col gap-1">
                         <label class="font-label-md font-semibold text-on-surface" data-i18n="description">Description</label>
@@ -506,8 +488,22 @@
                             <span class="material-symbols-outlined text-[14px]">barcode_scanner</span> Scan Barcode
                         </button>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="relative w-full sm:w-64">
+                    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <!-- Sort Filter -->
+                        <div class="flex items-center gap-1.5 bg-surface-container-low px-2.5 py-1.5 rounded-xl border border-surface-container text-xs font-semibold shadow-xs">
+                            <span class="material-symbols-outlined text-[16px] text-primary">sort</span>
+                            <label for="manage-products-sort-select" class="text-on-surface-variant font-medium text-[11px] hidden sm:inline">Sort:</label>
+                            <select id="manage-products-sort-select" onchange="adminSetProductsSort(this.value)" class="bg-transparent text-xs font-bold text-on-surface outline-none cursor-pointer pr-1">
+                                <option value="relevance">Relevance</option>
+                                <option value="stock_desc">Stock: High to Low</option>
+                                <option value="stock_asc">Stock: Low to High</option>
+                                <option value="price_asc">Price: Low to High</option>
+                                <option value="price_desc">Price: High to Low</option>
+                                <option value="name_asc">Name: A-Z</option>
+                                <option value="name_desc">Name: Z-A</option>
+                            </select>
+                        </div>
+                        <div class="relative w-full sm:w-56">
                             <span class="material-symbols-outlined absolute left-2.5 top-2 text-on-surface-variant text-[18px]">search</span>
                             <input id="manage-products-search-input" type="text" placeholder="Search products..." oninput="adminFilterManageProducts(this.value)" class="w-full pl-8 pr-7 py-1.5 rounded-xl bg-surface-container-low text-on-surface text-xs outline-none border border-surface-container focus:ring-2 focus:ring-primary shadow-xs">
                             <button id="manage-products-search-clear" type="button" onclick="adminClearManageProductsSearch()" class="absolute right-2 top-2 text-on-surface-variant hover:text-on-surface hidden p-0.5" title="Clear search">
@@ -524,12 +520,12 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
                             <thead>
-                                <tr class="border-b border-surface-container text-on-surface-variant text-xs uppercase">
+                                <tr class="border-b border-surface-container text-on-surface-variant text-xs uppercase select-none">
                                     <th class="p-3 w-24 min-w-[90px]">Photo</th>
-                                    <th class="p-3">Name</th>
+                                    <th class="p-3 cursor-pointer hover:text-primary transition-colors" onclick="adminToggleSortColumn('name')" title="Sort by Name">Name <span class="material-symbols-outlined text-[13px] align-middle">unfold_more</span></th>
                                     <th class="p-3">Category</th>
-                                    <th class="p-3">Price</th>
-                                    <th class="p-3">Stock</th>
+                                    <th class="p-3 cursor-pointer hover:text-primary transition-colors" onclick="adminToggleSortColumn('price')" title="Sort by Price">Price <span class="material-symbols-outlined text-[13px] align-middle">unfold_more</span></th>
+                                    <th class="p-3 cursor-pointer hover:text-primary transition-colors" onclick="adminToggleSortColumn('stock')" title="Sort by Stock">Stock <span class="material-symbols-outlined text-[13px] align-middle">unfold_more</span></th>
                                     <th class="p-3 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -869,9 +865,9 @@
     <script src="/js/scanner.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/supabase-client.js"></script>
-    <script src="/js/i18n.js"></script>
+    <script src="/js/i18n.js?v=35"></script>
     <script src="/js/theme.js"></script>
     <script src="/js/promos.js"></script>
-    <script src="/admin/js/admin.js?v=34"></script>
+    <script src="/admin/js/admin.js?v=35"></script>
 </body>
 </html>

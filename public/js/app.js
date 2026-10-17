@@ -162,9 +162,6 @@ async function addToCart(product, quantity = 1, triggerBtn = null) {
         const primaryImage = getProductPrimaryImage(product);
         cart.push({
             id: product.id,
-            productId: product.productId || (typeof product.id === 'string' && product.id.includes('-') ? parseInt(product.id.split('-')[0]) : product.id),
-            variationId: product.variationId || null,
-            variationName: product.variationName || null,
             name: product.name,
             price: parseFloat(product.price) || 0,
             image: primaryImage,
@@ -183,45 +180,14 @@ async function addToCart(product, quantity = 1, triggerBtn = null) {
     return true;
 }
 
-window.addToCartById = function(id, btnElement = null, variationIdx = null) {
+window.addToCartById = function(id, btnElement = null) {
     const product = allProducts.find(p => String(p.id) === String(id));
     if (!product) {
         console.error('Product not found for ID:', id);
         return;
     }
-    const vars = typeof getProductVariations === 'function' ? getProductVariations(product) : [];
-    if (variationIdx !== null && vars && vars[variationIdx]) {
-        const v = vars[variationIdx];
-        const vStock = typeof v.stock !== 'undefined' ? parseInt(v.stock) : (parseInt(product.stock) || 0);
-        if (vStock <= 0) {
-            const outMsg = window.i18n ? window.i18n.t('product_out_of_stock') : 'Sorry, this option is out of stock!';
-            showNotification(outMsg);
-            return;
-        }
-        const varProduct = {
-            ...product,
-            id: `${product.id}-${(v.id || v.name).replace(/\s+/g, '-')}`,
-            productId: product.id,
-            variationId: v.id || v.name,
-            variationName: v.name,
-            name: `${product.name} (${v.name})`,
-            price: parseFloat(v.price) || parseFloat(product.price),
-            image: v.imageUrl || (typeof getProductPrimaryImage === 'function' ? getProductPrimaryImage(product) : (product.image || '')),
-            stock: vStock,
-            barcode: v.barcode || product.barcode || ''
-        };
-        addToCart(varProduct, 1, btnElement);
-        return;
-    }
-
     const stock = typeof product.stock !== 'undefined' ? parseInt(product.stock) : 999;
     if (stock <= 0) {
-        if (vars && vars.length > 0) {
-            const availableIdx = vars.findIndex(v => (parseInt(v.stock) || 0) > 0);
-            if (availableIdx !== -1) {
-                return window.addToCartById(id, btnElement, availableIdx);
-            }
-        }
         const outMsg = window.i18n ? window.i18n.t('product_out_of_stock') : 'Sorry, this product is out of stock!';
         showNotification(outMsg);
         return;
@@ -431,15 +397,10 @@ async function deductStockForItems(items) {
 
     const productMap = new Map();
     dbProducts.forEach(p => {
-        let meta = null;
-        if (p.description && p.description.startsWith('{')) {
-            try { meta = JSON.parse(p.description); } catch(e) {}
-        }
         productMap.set(p.id, {
             id: p.id,
             name: p.name,
-            stock: parseInt(p.stock) || 0,
-            meta: meta
+            stock: parseInt(p.stock) || 0
         });
     });
 
@@ -451,38 +412,14 @@ async function deductStockForItems(items) {
             throw new Error(`Product "${item.name}" was not found in our catalog.`);
         }
 
-        let targetVar = null;
-        if (prod.meta && Array.isArray(prod.meta.variations)) {
-            const s = String(item.id);
-            const varPart = s.includes('-') ? s.split('-').slice(1).join('-') : null;
-            targetVar = prod.meta.variations.find(v => 
-                (item.variationId && v.id === item.variationId) ||
-                (varPart && (v.id === varPart || (v.id || v.name).replace(/\s+/g, '-') === varPart)) ||
-                (item.name && item.name.includes(`(${v.name})`)) ||
-                (item.barcode && v.barcode && String(v.barcode).trim() === String(item.barcode).trim())
-            );
-        }
-
         const requiredQty = parseInt(item.quantity) || 1;
-        if (targetVar) {
-            const currentVarStock = typeof targetVar.stock !== 'undefined' ? parseInt(targetVar.stock) : 0;
-            if (currentVarStock < requiredQty) {
-                const stockMsg = currentVarStock <= 0 
-                    ? `Sorry, "${item.name}" has just gone out of stock!` 
-                    : `Sorry, only ${currentVarStock} left of "${item.name}". Please adjust your quantity.`;
-                throw new Error(stockMsg);
-            }
-            targetVar.stock -= requiredQty;
-            prod.stock = Math.max(0, prod.stock - requiredQty);
-        } else {
-            if (prod.stock < requiredQty) {
-                const stockMsg = prod.stock <= 0 
-                    ? `Sorry, "${item.name}" has just gone out of stock!` 
-                    : `Sorry, only ${prod.stock} left of "${item.name}". Please adjust your quantity.`;
-                throw new Error(stockMsg);
-            }
-            prod.stock -= requiredQty;
+        if (prod.stock < requiredQty) {
+            const stockMsg = prod.stock <= 0 
+                ? `Sorry, "${item.name}" has just gone out of stock!` 
+                : `Sorry, only ${prod.stock} left of "${item.name}". Please adjust your quantity.`;
+            throw new Error(stockMsg);
         }
+        prod.stock -= requiredQty;
     }
 
     // Persist decremented stock to Supabase
@@ -490,9 +427,6 @@ async function deductStockForItems(items) {
         const payload = {
             stock: prod.stock
         };
-        if (prod.meta) {
-            payload.description = JSON.stringify(prod.meta);
-        }
         const { error: updErr } = await window.supabaseClient
             .from('products')
             .update(payload)
@@ -506,7 +440,6 @@ async function deductStockForItems(items) {
             const memProd = allProducts.find(p => p.id === pId);
             if (memProd) {
                 memProd.stock = prod.stock;
-                if (prod.meta) memProd.description = payload.description;
             }
         }
     }
@@ -538,15 +471,10 @@ async function restoreStockForItems(items) {
 
     const productMap = new Map();
     dbProducts.forEach(p => {
-        let meta = null;
-        if (p.description && p.description.startsWith('{')) {
-            try { meta = JSON.parse(p.description); } catch(e) {}
-        }
         productMap.set(p.id, {
             id: p.id,
             name: p.name,
-            stock: parseInt(p.stock) || 0,
-            meta: meta
+            stock: parseInt(p.stock) || 0
         });
     });
 
@@ -555,34 +483,14 @@ async function restoreStockForItems(items) {
         const prod = productMap.get(pId);
         if (!prod) continue;
 
-        let targetVar = null;
-        if (prod.meta && Array.isArray(prod.meta.variations)) {
-            const s = String(item.id);
-            const varPart = s.includes('-') ? s.split('-').slice(1).join('-') : null;
-            targetVar = prod.meta.variations.find(v => 
-                (item.variationId && v.id === item.variationId) ||
-                (varPart && (v.id === varPart || (v.id || v.name).replace(/\s+/g, '-') === varPart)) ||
-                (item.name && item.name.includes(`(${v.name})`)) ||
-                (item.barcode && v.barcode && String(v.barcode).trim() === String(item.barcode).trim())
-            );
-        }
-
         const qty = parseInt(item.quantity) || 1;
-        if (targetVar) {
-            targetVar.stock = (parseInt(targetVar.stock) || 0) + qty;
-            prod.stock = prod.stock + qty;
-        } else {
-            prod.stock = prod.stock + qty;
-        }
+        prod.stock = prod.stock + qty;
     }
 
     for (const [pId, prod] of productMap.entries()) {
         const payload = {
             stock: prod.stock
         };
-        if (prod.meta) {
-            payload.description = JSON.stringify(prod.meta);
-        }
         await window.supabaseClient
             .from('products')
             .update(payload)
@@ -593,7 +501,6 @@ async function restoreStockForItems(items) {
             const memProd = allProducts.find(p => p.id === pId);
             if (memProd) {
                 memProd.stock = prod.stock;
-                if (prod.meta) memProd.description = payload.description;
             }
         }
     }
@@ -972,9 +879,7 @@ function getProductTotalStock(product) {
 
 function isProductInStock(product) {
     if (!product) return false;
-    if ((parseInt(product.stock) || 0) > 0) return true;
-    const vars = getProductVariations(product);
-    return vars.some(v => (parseInt(v.stock) || 0) > 0);
+    return (parseInt(product.stock) || 0) > 0;
 }
 
 function getProductSlug(product) {
@@ -1007,36 +912,46 @@ function getAllProductBarcodes(product) {
         try {
             const meta = JSON.parse(product.description);
             if (meta.barcode) barcodes.push(String(meta.barcode).trim());
-            if (Array.isArray(meta.variations)) {
-                meta.variations.forEach(v => {
-                    if (v.barcode && String(v.barcode).trim()) barcodes.push(String(v.barcode).trim());
-                });
-            }
         } catch(e) {}
     }
     return Array.from(new Set(barcodes.filter(Boolean)));
 }
 
-let currentCatalogViewMode = localStorage.getItem('dashop_catalog_view_mode') || 'grouped';
+let currentCatalogSort = localStorage.getItem('dashop_catalog_sort') || 'relevance';
 
-window.setCatalogViewMode = function(mode) {
-    currentCatalogViewMode = mode;
-    localStorage.setItem('dashop_catalog_view_mode', mode);
-    updateCatalogViewModeButtons();
+window.setCatalogSort = function(sortKey) {
+    currentCatalogSort = sortKey || 'relevance';
+    localStorage.setItem('dashop_catalog_sort', currentCatalogSort);
+    const sel = document.getElementById('catalog-sort-select');
+    if (sel && sel.value !== currentCatalogSort) {
+        sel.value = currentCatalogSort;
+    }
     window.filterByCategory(currentActiveCategory);
 };
 
-function updateCatalogViewModeButtons() {
-    const btnGrouped = document.getElementById('view-mode-grouped');
-    const btnVariants = document.getElementById('view-mode-variants');
-    if (btnGrouped && btnVariants) {
-        if (currentCatalogViewMode === 'variants') {
-            btnVariants.className = 'px-2.5 py-1 rounded-lg transition-all bg-primary text-on-primary shadow-xs';
-            btnGrouped.className = 'px-2.5 py-1 rounded-lg transition-all text-on-surface-variant hover:text-on-surface';
-        } else {
-            btnGrouped.className = 'px-2.5 py-1 rounded-lg transition-all bg-primary text-on-primary shadow-xs';
-            btnVariants.className = 'px-2.5 py-1 rounded-lg transition-all text-on-surface-variant hover:text-on-surface';
-        }
+// Organize products by price, alphabetical, and relevance (higher stock = more relevant)
+function sortProductsList(items, sortKey = currentCatalogSort) {
+    const list = [...items];
+    switch (sortKey) {
+        case 'price_asc':
+            return list.sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0));
+        case 'price_desc':
+            return list.sort((a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0));
+        case 'alphabetical_asc':
+            return list.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+        case 'alphabetical_desc':
+            return list.sort((a, b) => (b.name || '').localeCompare(a.name || '', undefined, { sensitivity: 'base' }));
+        case 'relevance':
+        default:
+            // Relevance: products with higher number of stock are more relevant
+            return list.sort((a, b) => {
+                const stockA = parseInt(a.stock) || 0;
+                const stockB = parseInt(b.stock) || 0;
+                if (stockB !== stockA) {
+                    return stockB - stockA; // Higher stock first
+                }
+                return (b.id || 0) - (a.id || 0);
+            });
     }
 }
 
@@ -1044,8 +959,13 @@ let currentActiveCategory = 'All';
 
 window.filterByCategory = function(category, btnElement) {
     currentActiveCategory = category || 'All';
-    updateCatalogViewModeButtons();
     
+    // Sync sort dropdown value if present
+    const sel = document.getElementById('catalog-sort-select');
+    if (sel && sel.value !== currentCatalogSort) {
+        sel.value = currentCatalogSort;
+    }
+
     // Update chip styling
     document.querySelectorAll('.category-chip').forEach(chip => {
         chip.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm');
@@ -1064,17 +984,14 @@ window.filterByCategory = function(category, btnElement) {
     const searchInput = document.getElementById('catalog-search') || document.getElementById('search-input');
     const query = (searchInput?.value || '').toLowerCase().trim();
 
-    // Only show in-stock products on catalog (including products where variations have stock)
+    // Only show in-stock products on catalog
     let filtered = allProducts.filter(p => isProductInStock(p));
     if (query) {
         filtered = filtered.filter(p => {
             const allB = getAllProductBarcodes(p).map(b => b.toLowerCase());
-            const vars = getProductVariations(p);
-            const varNames = vars.map(v => (v.name || '').toLowerCase());
             return p.name.toLowerCase().includes(query) || 
                    (p.category && p.category.toLowerCase().includes(query)) ||
-                   allB.some(b => b.includes(query)) ||
-                   varNames.some(vn => vn.includes(query));
+                   allB.some(b => b.includes(query));
         });
     }
 
@@ -1090,6 +1007,9 @@ window.filterByCategory = function(category, btnElement) {
             );
         }
     }
+
+    // Apply sorting
+    filtered = sortProductsList(filtered, currentCatalogSort);
 
     renderProductGrid(filtered, grid);
 };
@@ -1375,173 +1295,21 @@ function renderProductGrid(products, grid) {
 
     let html = '';
 
-    // "All Variants" mode: expand products with variations into standalone variant cards
-    if (currentCatalogViewMode === 'variants') {
-        const expandedItems = [];
-        inStockProducts.forEach(p => {
-            const vars = getProductVariations(p);
-            const baseStock = parseInt(p.stock) || 0;
-            if (vars.length === 0) {
-                expandedItems.push({
-                    product: p,
-                    varIdx: -1,
-                    variation: null,
-                    displayName: p.name,
-                    displayPrice: parseFloat(p.price),
-                    displayImg: getProductPrimaryImage(p),
-                    badge: null
-                });
-            } else {
-                if (baseStock > 0) {
-                    expandedItems.push({
-                        product: p,
-                        varIdx: -1,
-                        variation: null,
-                        displayName: p.name,
-                        displayPrice: parseFloat(p.price),
-                        displayImg: getProductPrimaryImage(p),
-                        badge: 'Original'
-                    });
-                }
-                vars.forEach((v, vIdx) => {
-                    const vStock = typeof v.stock !== 'undefined' ? parseInt(v.stock) : baseStock;
-                    if (vStock > 0 || baseStock <= 0) {
-                        expandedItems.push({
-                            product: p,
-                            varIdx: vIdx,
-                            variation: v,
-                            displayName: `${p.name} - ${v.name}`,
-                            displayPrice: parseFloat(v.price) || parseFloat(p.price),
-                            displayImg: v.imageUrl || getProductPrimaryImage(p),
-                            badge: v.name
-                        });
-                    }
-                });
-            }
-        });
-
-        if (countEl) {
-            countEl.textContent = `${expandedItems.length} ${expandedItems.length === 1 ? 'Item' : 'Items'}`;
-        }
-
-        expandedItems.forEach((item) => {
-            const p = item.product;
-            const primaryImg = item.displayImg;
-            const isEmoji = !primaryImg || primaryImg.length <= 4 || !primaryImg.startsWith('http');
-            const imgHtml = isEmoji 
-                ? `<div class="text-6xl flex items-center justify-center w-full h-full">${primaryImg || '📦'}</div>`
-                : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${escapeHtml(item.displayName)}">`;
-
-            const slug = getProductSlug(p);
-            const category = p.category || 'General';
-            const clickCall = item.varIdx >= 0 ? `viewProduct('${slug}', ${p.id}, ${item.varIdx})` : `viewProduct('${slug}', ${p.id})`;
-            const addCall = item.varIdx >= 0 ? `window.addToCartById(${p.id}, this, ${item.varIdx})` : `window.addToCartById(${p.id}, this)`;
-
-            html += `
-            <div class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer relative" onclick="${clickCall}">
-                <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
-                    ${imgHtml}
-                    ${item.badge ? `<span class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-primary text-on-primary text-[10px] font-bold shadow-xs truncate max-w-[85%]">${escapeHtml(item.badge)}</span>` : ''}
-                </div>
-                <div class="flex flex-col flex-1 justify-between">
-                    <div>
-                        <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">${category}</span>
-                        <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 leading-snug">
-                            ${escapeHtml(item.displayName)}
-                        </h4>
-                    </div>
-                    <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
-                        <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${item.displayPrice.toFixed(2)}</span>
-                        <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all z-10" onclick="event.stopPropagation(); ${addCall}" type="button">
-                            <span class="material-symbols-outlined text-[18px]">add</span>
-                        </button>
-                    </div>
-                </div>
-            </div>`;
-        });
-
-        grid.innerHTML = html;
-        return;
-    }
-
-    // Default "Grouped" mode: Products with variant chips/pills directly on the card
-    const searchInput = document.getElementById('catalog-search') || document.getElementById('search-input');
-    const query = (searchInput?.value || '').toLowerCase().trim();
-
     inStockProducts.forEach(p => {
-        const vars = getProductVariations(p);
         const slug = getProductSlug(p);
         const category = p.category || 'General';
-        const baseStock = parseInt(p.stock) || 0;
-
-        // Auto pre-select matching variation if query matched it
-        let initialVarIdx = -1;
-        if (vars.length > 0) {
-            if (query) {
-                const matchIdx = vars.findIndex(v => 
-                    (v.name && v.name.toLowerCase().includes(query)) ||
-                    (v.barcode && String(v.barcode).toLowerCase().includes(query))
-                );
-                if (matchIdx !== -1) initialVarIdx = matchIdx;
-            }
-            if (initialVarIdx === -1 && baseStock <= 0) {
-                const availableIdx = vars.findIndex(v => (parseInt(v.stock) || 0) > 0);
-                if (availableIdx !== -1) initialVarIdx = availableIdx;
-            }
-        }
-
-        const activeVar = initialVarIdx >= 0 ? vars[initialVarIdx] : null;
-        const displayImg = (activeVar && activeVar.imageUrl) ? activeVar.imageUrl : getProductPrimaryImage(p);
-        const displayPrice = (activeVar && activeVar.price) ? parseFloat(activeVar.price) : parseFloat(p.price);
+        const displayImg = getProductPrimaryImage(p);
+        const price = parseFloat(p.price) || 0;
         const isEmoji = !displayImg || displayImg.length <= 4 || !displayImg.startsWith('http');
         const imgHtml = isEmoji 
-            ? `<div id="card-img-${p.id}" class="text-6xl flex items-center justify-center w-full h-full">${displayImg || '📦'}</div>`
-            : `<img id="card-img-${p.id}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${displayImg}" alt="${escapeHtml(p.name)}">`;
-
-        // Render variant pills if variations exist
-        let pillsHtml = '';
-        if (vars.length > 0) {
-            const pills = [];
-            if (baseStock > 0) {
-                const isSelected = initialVarIdx === -1;
-                pills.push(`
-                    <button type="button" class="var-card-pill px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition-all ${isSelected ? 'bg-primary text-on-primary border-primary shadow-xs' : 'bg-surface-container-low text-on-surface border-surface-container hover:bg-surface-container'}" 
-                            data-card-id="${p.id}" data-opt-idx="-1" onclick="window.selectCardVariation(event, ${p.id}, -1)">
-                        Original
-                    </button>
-                `);
-            }
-            vars.forEach((v, vIdx) => {
-                const vStock = typeof v.stock !== 'undefined' ? parseInt(v.stock) : baseStock;
-                if (vStock > 0 || baseStock <= 0) {
-                    const isSelected = initialVarIdx === vIdx;
-                    pills.push(`
-                        <button type="button" class="var-card-pill px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition-all ${isSelected ? 'bg-primary text-on-primary border-primary shadow-xs' : 'bg-surface-container-low text-on-surface border-surface-container hover:bg-surface-container'}" 
-                                data-card-id="${p.id}" data-opt-idx="${vIdx}" onclick="window.selectCardVariation(event, ${p.id}, ${vIdx})">
-                            ${escapeHtml(v.name)}
-                        </button>
-                    `);
-                }
-            });
-            if (pills.length > 1) {
-                pillsHtml = `<div class="flex flex-wrap gap-1 mt-1.5 mb-1 z-10" onclick="event.stopPropagation()">${pills.join('')}</div>`;
-            }
-        }
-
-        const totalOptionsCount = vars.length + (baseStock > 0 ? 1 : 0);
-        const optionsBadge = totalOptionsCount > 1 
-            ? `<span class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-surface-container-lowest/95 backdrop-blur text-primary text-[10px] font-bold shadow-xs border border-surface-container/60 flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">style</span> ${totalOptionsCount} Options</span>`
-            : '';
+            ? `<div class="text-6xl flex items-center justify-center w-full h-full">${displayImg || '📦'}</div>`
+            : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${displayImg}" alt="${escapeHtml(p.name)}">`;
 
         html += `
         <div id="product-card-${p.id}" class="group flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-sm hover:shadow-md transition-all cursor-pointer relative" 
-             onclick="window.handleCardClick(event, ${p.id}, '${slug}')"
-             data-product-id="${p.id}"
-             data-slug="${slug}"
-             data-selected-var-idx="${initialVarIdx}">
+             onclick="viewProduct('${slug}', ${p.id})">
             <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
-                ${optionsBadge}
             </div>
             <div class="flex flex-col flex-1 justify-between">
                 <div>
@@ -1549,12 +1317,10 @@ function renderProductGrid(products, grid) {
                     <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 leading-snug">
                         ${escapeHtml(p.name)}
                     </h4>
-                    <span id="card-variant-sub-${p.id}" class="text-[11px] text-primary font-bold ${activeVar ? '' : 'hidden'}">${activeVar ? escapeHtml(activeVar.name) : ''}</span>
-                    ${pillsHtml}
                 </div>
                 <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
-                    <span id="card-price-${p.id}" class="font-price-hero text-price-hero text-on-surface font-extrabold">$${displayPrice.toFixed(2)}</span>
-                    <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all z-10" onclick="event.stopPropagation(); window.handleCardAddToCart(${p.id}, this)" type="button">
+                    <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${price.toFixed(2)}</span>
+                    <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all z-10" onclick="event.stopPropagation(); window.addToCartById(${p.id}, this)" type="button">
                         <span class="material-symbols-outlined text-[18px]">add</span>
                     </button>
                 </div>
@@ -1565,64 +1331,15 @@ function renderProductGrid(products, grid) {
     grid.innerHTML = html;
 }
 
-// Storefront card interactive variation switcher
 window.handleCardClick = function(event, productId, slug) {
-    const card = document.getElementById(`product-card-${productId}`) || event.currentTarget;
-    const varIdx = card ? parseInt(card.dataset.selectedVarIdx) : -1;
-    viewProduct(slug, productId, varIdx >= 0 ? varIdx : null);
+    viewProduct(slug, productId);
 };
 
 window.handleCardAddToCart = function(productId, btnElement) {
-    const card = document.getElementById(`product-card-${productId}`) || (btnElement ? btnElement.closest('[data-selected-var-idx]') : null);
-    const varIdx = card ? parseInt(card.dataset.selectedVarIdx) : -1;
-    window.addToCartById(productId, btnElement, varIdx >= 0 ? varIdx : null);
+    window.addToCartById(productId, btnElement);
 };
 
-window.selectCardVariation = function(event, productId, varIdx) {
-    if (event) event.stopPropagation();
-    const card = document.getElementById(`product-card-${productId}`);
-    if (!card) return;
-    const product = allProducts.find(p => String(p.id) === String(productId));
-    if (!product) return;
-    const vars = getProductVariations(product);
-
-    card.dataset.selectedVarIdx = varIdx;
-
-    const pills = card.querySelectorAll('.var-card-pill');
-    pills.forEach(pill => {
-        const pIdx = parseInt(pill.dataset.optIdx);
-        if (pIdx === varIdx) {
-            pill.className = 'var-card-pill px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition-all bg-primary text-on-primary border-primary shadow-xs';
-        } else {
-            pill.className = 'var-card-pill px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition-all bg-surface-container-low text-on-surface border-surface-container hover:bg-surface-container';
-        }
-    });
-
-    const imgEl = document.getElementById(`card-img-${productId}`);
-    const priceEl = document.getElementById(`card-price-${productId}`);
-    const subEl = document.getElementById(`card-variant-sub-${productId}`);
-
-    if (varIdx >= 0 && vars[varIdx]) {
-        const v = vars[varIdx];
-        if (imgEl && v.imageUrl) {
-            if (imgEl.tagName === 'IMG') imgEl.src = v.imageUrl;
-            else imgEl.outerHTML = `<img id="card-img-${productId}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${v.imageUrl}" alt="${escapeHtml(product.name)}">`;
-        }
-        if (priceEl) priceEl.textContent = '$' + (parseFloat(v.price) || parseFloat(product.price)).toFixed(2);
-        if (subEl) {
-            subEl.textContent = v.name;
-            subEl.classList.remove('hidden');
-        }
-    } else {
-        const primaryImg = getProductPrimaryImage(product);
-        if (imgEl) {
-            if (imgEl.tagName === 'IMG') imgEl.src = primaryImg;
-            else imgEl.outerHTML = `<img id="card-img-${productId}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${primaryImg}" alt="${escapeHtml(product.name)}">`;
-        }
-        if (priceEl) priceEl.textContent = '$' + parseFloat(product.price).toFixed(2);
-        if (subEl) subEl.classList.add('hidden');
-    }
-};
+window.selectCardVariation = function() {};
 
 // Dynamic New Arrivals on index.html
 function initNewArrivals() {
@@ -1635,73 +1352,28 @@ function initNewArrivals() {
     if (newItems.length === 0) return;
 
     newItems.forEach(p => {
-        const vars = getProductVariations(p);
         const slug = getProductSlug(p);
-        const baseStock = parseInt(p.stock) || 0;
-        let initialVarIdx = -1;
-        if (vars.length > 0 && baseStock <= 0) {
-            const availableIdx = vars.findIndex(v => (parseInt(v.stock) || 0) > 0);
-            if (availableIdx !== -1) initialVarIdx = availableIdx;
-        }
-
-        const activeVar = initialVarIdx >= 0 ? vars[initialVarIdx] : null;
-        const displayImg = (activeVar && activeVar.imageUrl) ? activeVar.imageUrl : getProductPrimaryImage(p);
-        const displayPrice = (activeVar && activeVar.price) ? parseFloat(activeVar.price) : parseFloat(p.price);
+        const displayImg = getProductPrimaryImage(p);
+        const price = parseFloat(p.price) || 0;
         const isEmoji = !displayImg || displayImg.length <= 4 || !displayImg.startsWith('http');
         const imgHtml = isEmoji 
-            ? `<div id="arrival-img-${p.id}" class="text-5xl flex items-center justify-center w-full h-full">${displayImg || '📦'}</div>`
-            : `<img id="arrival-img-${p.id}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${displayImg}" alt="${escapeHtml(p.name)}">`;
-
-        let pillsHtml = '';
-        if (vars.length > 0) {
-            const pills = [];
-            if (baseStock > 0) {
-                pills.push(`
-                    <button type="button" class="var-card-pill px-1.5 py-0.5 rounded text-[9px] font-semibold border transition-all ${initialVarIdx === -1 ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-low text-on-surface border-surface-container'}" 
-                            data-arrival-id="${p.id}" data-opt-idx="-1" onclick="window.selectArrivalVariation(event, ${p.id}, -1)">
-                        Original
-                    </button>
-                `);
-            }
-            vars.forEach((v, vIdx) => {
-                const isSelected = initialVarIdx === vIdx;
-                pills.push(`
-                    <button type="button" class="var-card-pill px-1.5 py-0.5 rounded text-[9px] font-semibold border transition-all ${isSelected ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-low text-on-surface border-surface-container'}" 
-                            data-arrival-id="${p.id}" data-opt-idx="${vIdx}" onclick="window.selectArrivalVariation(event, ${p.id}, ${vIdx})">
-                        ${escapeHtml(v.name)}
-                    </button>
-                `);
-            });
-            if (pills.length > 1) {
-                pillsHtml = `<div class="flex flex-wrap gap-1 mt-1 z-10" onclick="event.stopPropagation()">${pills.join('')}</div>`;
-            }
-        }
-
-        const totalOptionsCount = vars.length + (baseStock > 0 ? 1 : 0);
-        const optionsBadge = totalOptionsCount > 1 
-            ? `<span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full bg-surface-container-lowest/90 backdrop-blur text-primary text-[9px] font-bold shadow-xs border border-surface-container/60">${totalOptionsCount} Options</span>`
-            : '';
+            ? `<div class="text-5xl flex items-center justify-center w-full h-full">${displayImg || '📦'}</div>`
+            : `<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${displayImg}" alt="${escapeHtml(p.name)}">`;
 
         html += `
         <div id="arrival-card-${p.id}" class="w-48 shrink-0 flex flex-col rounded-2xl bg-surface-container-lowest p-space-sm shadow-md transition-transform duration-200 hover:-translate-y-1 cursor-pointer relative" 
-             onclick="window.handleArrivalClick(event, ${p.id}, '${slug}')"
-             data-arrival-id="${p.id}"
-             data-slug="${slug}"
-             data-selected-var-idx="${initialVarIdx}">
+             onclick="viewProduct('${slug}', ${p.id})">
             <div class="relative w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden mb-space-xs">
                 ${imgHtml}
-                ${optionsBadge}
             </div>
             <div class="flex flex-col flex-1 justify-between">
                 <div>
                     <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">${p.category || 'General'}</span>
                     <h4 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-0.5 leading-snug">${escapeHtml(p.name)}</h4>
-                    <span id="arrival-variant-sub-${p.id}" class="text-[10px] text-primary font-bold ${activeVar ? '' : 'hidden'}">${activeVar ? escapeHtml(activeVar.name) : ''}</span>
-                    ${pillsHtml}
                 </div>
                 <div class="flex items-center justify-between pt-space-sm mt-space-2xs">
-                    <span id="arrival-price-${p.id}" class="font-price-hero text-price-hero text-on-surface font-extrabold">$${displayPrice.toFixed(2)}</span>
-                    <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all z-10" onclick="event.stopPropagation(); window.handleArrivalAddToCart(${p.id}, this)" type="button">
+                    <span class="font-price-hero text-price-hero text-on-surface font-extrabold">$${price.toFixed(2)}</span>
+                    <button class="cart-btn w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-all z-10" onclick="event.stopPropagation(); window.addToCartById(${p.id}, this)" type="button">
                         <span class="material-symbols-outlined text-[20px]">add</span>
                     </button>
                 </div>
@@ -1713,56 +1385,14 @@ function initNewArrivals() {
 }
 
 window.handleArrivalClick = function(event, productId, slug) {
-    const card = document.getElementById(`arrival-card-${productId}`) || event.currentTarget;
-    const varIdx = card ? parseInt(card.dataset.selectedVarIdx) : -1;
-    viewProduct(slug, productId, varIdx >= 0 ? varIdx : null);
+    viewProduct(slug, productId);
 };
 
 window.handleArrivalAddToCart = function(productId, btnElement) {
-    const card = document.getElementById(`arrival-card-${productId}`) || (btnElement ? btnElement.closest('[data-selected-var-idx]') : null);
-    const varIdx = card ? parseInt(card.dataset.selectedVarIdx) : -1;
-    window.addToCartById(productId, btnElement, varIdx >= 0 ? varIdx : null);
+    window.addToCartById(productId, btnElement);
 };
 
-window.selectArrivalVariation = function(event, productId, varIdx) {
-    if (event) event.stopPropagation();
-    const card = document.getElementById(`arrival-card-${productId}`);
-    if (!card) return;
-    const product = allProducts.find(p => String(p.id) === String(productId));
-    if (!product) return;
-    const vars = getProductVariations(product);
-
-    card.dataset.selectedVarIdx = varIdx;
-
-    const pills = card.querySelectorAll('.var-card-pill');
-    pills.forEach(pill => {
-        const pIdx = parseInt(pill.dataset.optIdx);
-        if (pIdx === varIdx) {
-            pill.className = 'var-card-pill px-1.5 py-0.5 rounded text-[9px] font-semibold border transition-all bg-primary text-on-primary border-primary';
-        } else {
-            pill.className = 'var-card-pill px-1.5 py-0.5 rounded text-[9px] font-semibold border transition-all bg-surface-container-low text-on-surface border-surface-container';
-        }
-    });
-
-    const imgEl = document.getElementById(`arrival-img-${productId}`);
-    const priceEl = document.getElementById(`arrival-price-${productId}`);
-    const subEl = document.getElementById(`arrival-variant-sub-${productId}`);
-
-    if (varIdx >= 0 && vars[varIdx]) {
-        const v = vars[varIdx];
-        if (imgEl && v.imageUrl && imgEl.tagName === 'IMG') imgEl.src = v.imageUrl;
-        if (priceEl) priceEl.textContent = '$' + (parseFloat(v.price) || parseFloat(product.price)).toFixed(2);
-        if (subEl) {
-            subEl.textContent = v.name;
-            subEl.classList.remove('hidden');
-        }
-    } else {
-        const primaryImg = getProductPrimaryImage(product);
-        if (imgEl && imgEl.tagName === 'IMG') imgEl.src = primaryImg;
-        if (priceEl) priceEl.textContent = '$' + parseFloat(product.price).toFixed(2);
-        if (subEl) subEl.classList.add('hidden');
-    }
-};
+window.selectArrivalVariation = function() {};
 
 // Dynamic Hero Promo Banner Carousel on index.html
 let heroBanners = [];
@@ -2227,184 +1857,19 @@ async function loadProductDetail() {
         thumbsContainer.classList.remove('hidden');
     }
 
-    // Options & Variations Handling
-    let selectedVariation = null;
-    let meta = null;
-    if (product.description && product.description.startsWith('{')) {
-        try { meta = JSON.parse(product.description); } catch(e) {}
-    }
-
-    const mainBarcode = product.barcode || (meta?.barcode) || '';
-    const barcodeContainer = document.getElementById('detail-barcode-container');
-    const barcodeEl = document.getElementById('detail-barcode');
-
-    function updateBarcodeDisplay(varBarcode) {
-        const activeBarcode = varBarcode || mainBarcode;
-        if (barcodeContainer && barcodeEl) {
-            if (activeBarcode) {
-                barcodeEl.textContent = activeBarcode;
-                barcodeContainer.classList.remove('hidden');
-            } else {
-                barcodeContainer.classList.add('hidden');
-            }
-        }
-    }
 
     const varsContainer = document.getElementById('detail-variations-container');
-    const varsList = document.getElementById('detail-variations-list');
-    const variations = getProductVariations(product);
-
-    if (varsContainer && varsList && variations.length > 0) {
-        varsContainer.classList.remove('hidden');
-
-        // Check if a specific variation barcode or index was targeted in URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const targetBarcode = urlParams.get('vbarcode');
-        const targetVarIdx = urlParams.get('var');
-
-        // Build list of all options: Base product (Original) + Variations
-        const optionsList = [];
-        const baseStock = typeof product.stock !== 'undefined' ? parseInt(product.stock) : 0;
-
-        // Base option
-        if (baseStock > 0 || variations.length > 0) {
-            optionsList.push({
-                optId: 'base',
-                name: 'Original',
-                price: parseFloat(product.price),
-                stock: baseStock,
-                barcode: mainBarcode,
-                imageUrl: getProductPrimaryImage(product),
-                isBase: true,
-                varIdx: -1
-            });
-        }
-
-        // Variation options
-        variations.forEach((v, idx) => {
-            optionsList.push({
-                optId: v.id || `var_${idx}`,
-                name: v.name,
-                price: parseFloat(v.price) || parseFloat(product.price),
-                stock: typeof v.stock !== 'undefined' ? parseInt(v.stock) : baseStock,
-                barcode: v.barcode || '',
-                imageUrl: v.imageUrl || '',
-                isBase: false,
-                varIdx: idx
-            });
-        });
-
-        // Determine initial selected option
-        let selectedOptIdx = 0;
-        if (targetVarIdx !== null && targetVarIdx !== '' && !isNaN(parseInt(targetVarIdx))) {
-            const tIdx = parseInt(targetVarIdx);
-            const found = optionsList.findIndex(o => !o.isBase && o.varIdx === tIdx);
-            if (found !== -1) selectedOptIdx = found;
-        } else if (targetBarcode) {
-            const found = optionsList.findIndex(o => o.barcode && String(o.barcode).trim().toLowerCase() === targetBarcode.trim().toLowerCase());
-            if (found !== -1) selectedOptIdx = found;
-        } else if (baseStock <= 0) {
-            const firstInStock = optionsList.findIndex(o => !o.isBase && o.stock > 0);
-            if (firstInStock !== -1) selectedOptIdx = firstInStock;
-        }
-
-        function applySelectedOption(opt) {
-            const isOutOfStock = opt.stock <= 0;
-            window.maxStock = opt.stock;
-            updateDetailAddButton(isOutOfStock);
-
-            if (priceEl) {
-                priceEl.textContent = '$' + opt.price.toFixed(2);
-            }
-
-            if (opt.imageUrl) {
-                window.switchProductDetailImage(opt.imageUrl);
-            }
-
-            updateBarcodeDisplay(opt.barcode);
-
-            if (nameEl) {
-                if (opt.isBase) {
-                    nameEl.textContent = product.name;
-                } else {
-                    nameEl.innerHTML = `${escapeHtml(product.name)} <span class="text-primary text-lg font-bold block sm:inline">(${escapeHtml(opt.name)})</span>`;
-                }
-            }
-
-            if (stockBadge) {
-                if (opt.stock <= 0) {
-                    stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-error-container text-error font-label-sm font-bold';
-                    stockBadge.textContent = outOfStockText;
-                } else if (opt.stock <= 3) {
-                    stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-label-sm font-bold';
-                    stockBadge.textContent = `Only ${opt.stock} left`;
-                } else {
-                    stockBadge.className = 'px-2.5 py-0.5 rounded-full bg-secondary-container/40 text-on-secondary-container font-label-sm font-bold';
-                    stockBadge.textContent = 'In Stock';
-                }
-            }
-
-            selectedVariation = opt.isBase ? null : opt;
-        }
-
-        let varHtml = '';
-        optionsList.forEach((opt, idx) => {
-            const isVOutOfStock = opt.stock <= 0;
-            const isSelected = idx === selectedOptIdx;
-            varHtml += `
-                <button type="button" class="variation-pill px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all ${isSelected ? 'border-primary bg-primary text-on-primary shadow-sm' : 'border-surface-container bg-surface-container-low text-on-surface hover:bg-surface-container'} ${isVOutOfStock ? 'opacity-60' : ''}" data-opt-idx="${idx}" ${opt.barcode ? `title="Barcode: ${opt.barcode}"` : ''}>
-                    <span>${escapeHtml(opt.name)}</span>
-                    <span class="font-bold ml-1">$${opt.price.toFixed(2)}</span>
-                    ${isVOutOfStock ? `<span class="ml-1 text-[10px] text-error font-bold">(${outOfStockText})</span>` : ''}
-                </button>
-            `;
-        });
-        varsList.innerHTML = varHtml;
-
-        applySelectedOption(optionsList[selectedOptIdx]);
-
-        varsList.querySelectorAll('.variation-pill').forEach((pill, idx) => {
-            pill.onclick = () => {
-                varsList.querySelectorAll('.variation-pill').forEach(p => {
-                    p.classList.remove('border-primary', 'bg-primary', 'text-on-primary', 'shadow-sm');
-                    p.classList.add('border-surface-container', 'bg-surface-container-low', 'text-on-surface');
-                });
-                pill.classList.remove('border-surface-container', 'bg-surface-container-low', 'text-on-surface');
-                pill.classList.add('border-primary', 'bg-primary', 'text-on-primary', 'shadow-sm');
-
-                applySelectedOption(optionsList[idx]);
-            };
-        });
-    } else {
-        if (varsContainer) varsContainer.classList.add('hidden');
-        updateBarcodeDisplay(mainBarcode);
-    }
+    if (varsContainer) varsContainer.classList.add('hidden');
 
     if (addBtn) {
         addBtn.onclick = () => {
-            const currentStock = typeof window.maxStock !== 'undefined' ? window.maxStock : stockQty;
+            const currentStock = typeof product.stock !== 'undefined' ? parseInt(product.stock) : 999;
             if (currentStock <= 0) {
                 showNotification(window.i18n ? window.i18n.t('product_out_of_stock') : 'Sorry, this product is out of stock!');
                 return;
             }
             const qty = window.currentQty || 1;
-            if (selectedVariation) {
-                const varProduct = {
-                    ...product,
-                    id: `${product.id}-${(selectedVariation.id || selectedVariation.name).replace(/\s+/g, '-')}`,
-                    productId: product.id,
-                    variationId: selectedVariation.id || selectedVariation.name,
-                    variationName: selectedVariation.name,
-                    name: `${product.name} (${selectedVariation.name})`,
-                    price: parseFloat(selectedVariation.price) || parseFloat(product.price),
-                    image: selectedVariation.imageUrl || getProductPrimaryImage(product),
-                    stock: currentStock,
-                    barcode: selectedVariation.barcode || product.barcode || ''
-                };
-                addToCart(varProduct, qty, addBtn);
-            } else {
-                addToCart(product, qty, addBtn);
-            }
+            addToCart(product, qty, addBtn);
         };
     }
 
@@ -2559,38 +2024,16 @@ window.openBarcodeSearchScanner = function() {
         const cleanCode = String(code).trim().toLowerCase();
 
         // Find match in allProducts (main barcode or variation barcode)
-        let matchedVariation = null;
         const match = allProducts.find(p => {
             const mainB = getProductBarcode(p).toLowerCase();
-            if (mainB && mainB === cleanCode) return true;
-            if (p.description && p.description.startsWith('{')) {
-                try {
-                    const meta = JSON.parse(p.description);
-                    if (Array.isArray(meta.variations)) {
-                        const foundV = meta.variations.find(v => v.barcode && String(v.barcode).trim().toLowerCase() === cleanCode);
-                        if (foundV) {
-                            matchedVariation = foundV;
-                            return true;
-                        }
-                    }
-                } catch(e) {}
-            }
-            return false;
+            return mainB && mainB === cleanCode;
         });
 
         if (match) {
-            if (matchedVariation) {
-                showNotification(`Found: ${match.name} (${matchedVariation.name})`);
-            } else {
-                showNotification(`Found product: ${match.name}!`);
-            }
+            showNotification(`Found product: ${match.name}!`);
             const slug = getProductSlug(match);
             setTimeout(() => {
-                if (matchedVariation && matchedVariation.barcode) {
-                    window.location.href = `/product?slug=${encodeURIComponent(slug)}&vbarcode=${encodeURIComponent(matchedVariation.barcode)}`;
-                } else {
-                    viewProduct(slug, match.id);
-                }
+                viewProduct(slug, match.id);
             }, 300);
         } else {
             // Fill search input and filter catalog
@@ -2861,7 +2304,8 @@ window.renderPWAInstallModal = renderPWAInstallModal;
 window.dismissPWAInstallModal = dismissPWAInstallModal;
 window.triggerPWAInstall = triggerPWAInstall;
 window.sendTelegramOrderNotification = sendTelegramOrderNotification;
-window.setCatalogViewMode = setCatalogViewMode;
+window.setCatalogSort = setCatalogSort;
+window.setCatalogViewMode = function() {};
 window.selectCardVariation = selectCardVariation;
 window.handleCardClick = handleCardClick;
 window.handleCardAddToCart = handleCardAddToCart;
