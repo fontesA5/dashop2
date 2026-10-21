@@ -565,6 +565,11 @@
                         <span class="material-symbols-outlined text-[18px]">loyalty</span>
                         <span>Discount Codes</span>
                     </button>
+                    <button id="promo-tab-btn-bundles" onclick="switchPromoTab('bundles')" class="py-3 px-4 font-title-md font-bold text-sm border-b-2 border-transparent text-on-surface-variant hover:text-on-surface flex items-center gap-2 transition-all shrink-0">
+                        <span class="material-symbols-outlined text-[18px]">bolt</span>
+                        <span>Flash Deal Combos</span>
+                        <span id="active-bundles-count-badge" class="px-1.5 py-0.5 rounded-full text-[11px] bg-error/10 text-error font-bold">0</span>
+                    </button>
                 </div>
 
                 <!-- Tab Panels Container -->
@@ -574,6 +579,7 @@
                     <div id="promo-panel-banners" class="flex flex-col gap-4">
                         <!-- Add Banner Form -->
                         <form onsubmit="handleCreateBanner(event)" class="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-3.5">
+                            <input type="hidden" id="banner-edit-id" value="" />
                             <div class="flex items-center justify-between">
                                 <span class="font-title-md font-bold text-on-surface flex items-center gap-1.5">
                                     <span class="material-symbols-outlined text-primary text-[20px]">add_photo_alternate</span>
@@ -730,6 +736,59 @@
                         <div class="flex flex-col gap-2">
                             <span class="font-title-md font-semibold text-on-surface">Active Promo Codes</span>
                             <div id="promos-list-container" class="flex flex-col gap-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: Flash Deal Bundles (Combo Promos) -->
+                    <div id="promo-panel-bundles" class="flex flex-col gap-4 hidden">
+                        <!-- Add/Edit Bundle Form -->
+                        <form onsubmit="handleCreateBundle(event)" class="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-3.5">
+                            <input type="hidden" id="bundle-edit-id" value="" />
+                            <div class="flex items-center justify-between pb-2 border-b border-surface-container">
+                                <span class="font-title-md font-bold text-on-surface flex items-center gap-1.5 text-error">
+                                    <span class="material-symbols-outlined text-[20px]">bolt</span>
+                                    <span id="bundle-form-title-text">Create Flash Deal Combo</span>
+                                </span>
+                                <span class="text-xs text-on-surface-variant font-medium">Limit 1 per order</span>
+                            </div>
+
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-semibold text-on-surface-variant">Combo Title</label>
+                                <input id="bundle-title" type="text" required placeholder="e.g. Household Cleaning Combo" class="px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-sm outline-none border border-surface-container focus:border-primary font-medium" />
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-semibold text-on-surface-variant">Products in Bundle (2 to 6 Products)</label>
+                                    <button type="button" id="bundle-add-item-btn" onclick="addBundleProductRow()" class="px-2.5 py-1 rounded-lg border border-primary/40 text-primary hover:bg-primary/5 font-bold text-xs flex items-center gap-1 active:scale-95 transition">
+                                        <span class="material-symbols-outlined text-[15px]">add</span> Add Product
+                                    </button>
+                                </div>
+                                <div id="bundle-items-container" class="flex flex-col gap-2">
+                                    <!-- Rendered dynamically with 2 to 6 product dropdowns -->
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-semibold text-on-surface-variant">Bundle Price ($)</label>
+                                <input id="bundle-price-input" type="number" step="0.01" min="0.01" required placeholder="e.g. 15.00" class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface font-extrabold text-sm outline-none border border-surface-container focus:border-primary" />
+                            </div>
+
+                            <div class="flex items-center gap-2 pt-1">
+                                <button id="bundle-submit-btn" type="submit" class="flex-1 py-2.5 bg-error text-white hover:bg-error/90 rounded-xl font-bold text-sm shadow active:scale-95 transition-all flex items-center justify-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                                    <span id="bundle-submit-btn-text">Create Combo Promotion</span>
+                                </button>
+                                <button id="bundle-cancel-edit-btn" type="button" onclick="cancelEditBundle()" class="hidden px-4 py-2.5 rounded-xl border border-surface-container hover:bg-surface-container font-semibold text-xs text-on-surface-variant transition">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Bundles List -->
+                        <div class="flex flex-col gap-2">
+                            <span class="font-title-md font-semibold text-on-surface">Active & Saved Combos</span>
+                            <div id="bundles-list-container" class="flex flex-col gap-2"></div>
                         </div>
                     </div>
 

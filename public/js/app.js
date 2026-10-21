@@ -1,3 +1,104 @@
+
+// ==========================================
+// Flash Deal Bundle Promos Engine
+// ==========================================
+let appliedBundlesList = [];
+
+async function evaluateCartBundleDiscounts() {
+    if (!window.bundleManager || !Array.isArray(cart) || cart.length === 0) {
+        appliedBundlesList = [];
+        return { totalDiscount: 0, appliedBundles: [] };
+    }
+    const activeBundles = await window.bundleManager.getActiveBundles();
+    if (!activeBundles || activeBundles.length === 0) {
+        appliedBundlesList = [];
+        return { totalDiscount: 0, appliedBundles: [] };
+    }
+
+    let totalDiscount = 0;
+    const applied = [];
+
+    activeBundles.forEach(b => {
+        const itemIds = Array.isArray(b.items) && b.items.length >= 2
+            ? b.items
+            : [b.item1_id, b.item2_id].filter(Boolean);
+
+        if (itemIds.length < 2) return;
+
+        // Check if all items in bundle are present in cart with quantity >= 1
+        const cartItems = itemIds.map(id => cart.find(c => String(c.id) === String(id)));
+        const allPresent = cartItems.every(c => c && c.quantity >= 1);
+
+        if (allPresent) {
+            const regularTotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+            const bundlePrice = parseFloat(b.bundle_price) || 0;
+            const savings = Math.max(0, regularTotal - bundlePrice);
+
+            // Capped at 1 per order per bundle
+            if (savings > 0) {
+                totalDiscount += savings;
+                applied.push({
+                    bundleId: b.id,
+                    title: b.title,
+                    itemIds: itemIds.map(String),
+                    items: cartItems.map(item => item.name),
+                    bundlePrice: bundlePrice,
+                    savings: savings
+                });
+            }
+        }
+    });
+
+    appliedBundlesList = applied;
+    return { totalDiscount, appliedBundles: applied };
+}
+
+// Add entire bundle/combo (2 to 6 products) directly to cart
+window.addBundleToCart = async function(bundleOrId, maybeSecondId) {
+    let productIds = [];
+    if (typeof bundleOrId === 'string' && !maybeSecondId) {
+        // Passed bundle ID
+        if (window.bundleManager) {
+            const allBundles = await window.bundleManager.getActiveBundles();
+            const b = allBundles.find(bundle => String(bundle.id) === String(bundleOrId));
+            if (b) {
+                productIds = Array.isArray(b.items) && b.items.length >= 2 ? b.items : [b.item1_id, b.item2_id].filter(Boolean);
+            }
+        }
+    } else if (Array.isArray(bundleOrId)) {
+        productIds = bundleOrId;
+    } else if (bundleOrId && maybeSecondId) {
+        productIds = [bundleOrId, maybeSecondId];
+    } else if (bundleOrId) {
+        productIds = [bundleOrId];
+    }
+
+    if (!productIds || productIds.length === 0) return;
+
+    const products = productIds.map(id => allProducts.find(p => String(p.id) === String(id))).filter(Boolean);
+    if (products.length < productIds.length) {
+        alert('Some items in this combo could not be found.');
+        return;
+    }
+
+    const outOfStockItem = products.find(p => (parseInt(p.stock) || 0) <= 0);
+    if (outOfStockItem) {
+        alert('"' + outOfStockItem.name.split(',')[0] + '" is currently out of stock.');
+        return;
+    }
+
+    products.forEach(p => addToCart(p, 1));
+    showNotification('⚡ Added Flash Deal Combo (' + products.length + ' products) to cart!');
+};
+
+// Safe legacy no-ops to ensure no external references break
+window.closeBundleUpsellModal = function() {
+    const modal = document.getElementById('bundle-upsell-modal');
+    if (modal) modal.remove();
+};
+window.acceptBundleUpsell = function() {};
+function checkAndPromptBundleUpsell() {}
+
 /**
  * DaShop Main Application Logic
  * Full-Stack Client, PWA, Cart, Animations, Autocomplete, Routing
@@ -177,6 +278,7 @@ async function addToCart(product, quantity = 1, triggerBtn = null) {
     }
     const msg = window.i18n ? window.i18n.t('product_added') : 'Added to cart!';
     showNotification(`${product.name}: ${msg}`);
+    // Upsell prompt removed per user request
     return true;
 }
 
@@ -236,7 +338,7 @@ function closeCart() {
 }
 
 // Render cart contents
-function renderCart() {
+async function renderCart() {
     const container = document.getElementById('cart-items');
     const totalEl = document.getElementById('cart-total');
     if (!container) return;
@@ -252,37 +354,59 @@ function renderCart() {
             </div>
         `;
         if (totalEl) totalEl.textContent = '0.00';
+        const summaryDiv = document.getElementById('cart-bundle-summary');
+        if (summaryDiv) summaryDiv.innerHTML = '';
         return;
     }
 
-    let subtotal = 0;
-    let html = '';
+    // Evaluate active bundles
+    let finalCartTotal = 0;
+    const bundleItemIdsSet = new Set();
 
+    if (typeof evaluateCartBundleDiscounts === 'function') {
+        const bundleRes = await evaluateCartBundleDiscounts();
+        if (bundleRes && bundleRes.appliedBundles && bundleRes.appliedBundles.length > 0) {
+            bundleRes.appliedBundles.forEach(b => {
+                (b.itemIds || []).forEach(id => bundleItemIdsSet.add(String(id)));
+            });
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+            finalCartTotal = Math.max(0, subtotal - bundleRes.totalDiscount);
+        } else {
+            finalCartTotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+        }
+    } else {
+        finalCartTotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+    }
+
+    let html = '';
     cart.forEach(item => {
-        const itemTotal = item.price * (item.quantity || 1);
-        subtotal += itemTotal;
         const isEmoji = !item.image || item.image.length <= 4 || !item.image.startsWith('http');
         const imgHtml = isEmoji 
-            ? `<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-2xl">${item.image || '📦'}</div>`
-            : `<img src="${item.image}" alt="${item.name}" class="w-12 h-12 rounded-lg object-contain bg-surface-container p-1">`;
+            ? `<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-2xl shrink-0">${item.image || '📦'}</div>`
+            : `<img src="${item.image}" alt="${escapeHtml(item.name)}" class="w-12 h-12 rounded-lg object-contain bg-surface-container p-1 shrink-0">`;
+
+        const isBundleItem = bundleItemIdsSet.has(String(item.id));
 
         html += `
-            <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low shadow-sm">
-                <div class="flex items-center gap-3 min-w-0">
+            <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-surface-container-low shadow-sm gap-2">
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
                     ${imgHtml}
-                    <div class="min-w-0">
-                        <h4 class="font-title-md text-on-surface font-semibold truncate">${item.name}</h4>
-                        <p class="font-label-md text-on-surface-variant">$${item.price.toFixed(2)}</p>
+                    <div class="min-w-0 flex-1">
+                        <h4 class="font-title-md text-on-surface font-semibold truncate text-xs sm:text-sm" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h4>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span class="font-label-md text-on-surface-variant text-xs">$${parseFloat(item.price).toFixed(2)}</span>
+                            ${isBundleItem ? `<span class="inline-flex items-center gap-0.5 text-[9px] font-bold text-error bg-error/10 px-1.5 py-0.2 rounded-full uppercase tracking-wider shrink-0"><span class="material-symbols-outlined text-[11px]">bolt</span> Combo</span>` : ''}
+                        </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <div class="flex items-center rounded-lg bg-surface-container-lowest px-2 py-1 shadow-sm">
-                        <button onclick="updateQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary font-bold">-</button>
-                        <span class="w-6 text-center font-bold text-on-surface text-sm">${item.quantity}</span>
-                        <button onclick="updateQuantity('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary font-bold">+</button>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <div class="flex items-center rounded-lg bg-surface-container-lowest px-1.5 py-0.5 shadow-sm border border-surface-container">
+                        <button onclick="updateQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary font-bold active:scale-90">-</button>
+                        <span class="w-5 text-center font-bold text-on-surface text-xs sm:text-sm">${item.quantity}</span>
+                        <button onclick="updateQuantity('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary font-bold active:scale-90">+</button>
                     </div>
-                    <button onclick="removeFromCart('${item.id}')" class="text-error hover:bg-error-container/30 p-1.5 rounded-full transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                    <button onclick="removeFromCart('${item.id}')" class="text-error hover:bg-error-container/30 p-1.5 rounded-full transition-colors active:scale-90" title="Remove">
+                        <span class="material-symbols-outlined text-[17px]">delete</span>
                     </button>
                 </div>
             </div>
@@ -290,8 +414,12 @@ function renderCart() {
     });
 
     container.innerHTML = html;
+
+    const existingSummary = document.getElementById('cart-bundle-summary');
+    if (existingSummary) existingSummary.remove();
+
     if (totalEl) {
-        totalEl.textContent = subtotal.toFixed(2);
+        totalEl.textContent = finalCartTotal.toFixed(2);
     }
 }
 
@@ -310,25 +438,117 @@ function closeCheckout() {
     if (modal) modal.classList.add('hidden');
 }
 
-function updateCheckoutSummary() {
+async function updateCheckoutSummary() {
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    let discount = 0;
     
-    if (appliedPromo) {
-        if (appliedPromo.discount_type === 'percentage') {
-            discount = (subtotal * appliedPromo.discount_value) / 100;
-        } else {
-            discount = appliedPromo.discount_value;
+    // Evaluate Flash Deal bundle discounts
+    const bundleRes = await evaluateCartBundleDiscounts();
+    const bundleDiscount = bundleRes.totalDiscount;
+    const appliedBundles = bundleRes.appliedBundles || [];
+
+    let discount = 0;
+    const promoInput = document.getElementById('promo-code-input');
+    const promoSection = promoInput ? (promoInput.closest('.flex.flex-col.gap-1.pt-1') || promoInput.parentElement.parentElement) : null;
+    const promoMsg = document.getElementById('promo-code-msg');
+
+    if (bundleDiscount > 0) {
+        appliedPromo = null; // Disallow promo code stacking
+        discount = bundleDiscount;
+        // Completely hide the promo code form field when a bundle is selected (no stack info revealed)
+        if (promoSection) promoSection.style.display = 'none';
+        if (promoMsg) promoMsg.textContent = '';
+    } else {
+        // Show promo code form field when no bundle is selected
+        if (promoSection) promoSection.style.display = '';
+        if (promoInput) {
+            promoInput.disabled = false;
+            promoInput.placeholder = "e.g. SAVE10";
+        }
+        if (appliedPromo) {
+            if (appliedPromo.discount_type === 'percentage') {
+                discount = (subtotal * appliedPromo.discount_value) / 100;
+            } else {
+                discount = appliedPromo.discount_value;
+            }
         }
     }
-    
+
     const finalTotal = Math.max(0, subtotal - discount);
     
     const summaryContainer = document.getElementById('checkout-summary');
-    if (summaryContainer) {
+    if (!summaryContainer) return;
+
+    if (appliedBundles.length > 0) {
+        // Bundle is active: clearly display the Bundle Price info in checkout
+        const bundleItemIdsSet = new Set();
+        appliedBundles.forEach(b => {
+            (b.itemIds || []).forEach(id => bundleItemIdsSet.add(String(id)));
+        });
+
+        // Calculate other products bought together with the bundle
+        let otherProductsCount = 0;
+        let otherProductsTotal = 0;
+
+        cart.forEach(item => {
+            const isBundleItem = bundleItemIdsSet.has(String(item.id));
+            if (!isBundleItem) {
+                const qty = item.quantity || 1;
+                otherProductsCount += qty;
+                otherProductsTotal += (item.price * qty);
+            } else if ((item.quantity || 1) > 1) {
+                // Quantity beyond 1 bundle unit is priced at standard rate
+                const extraQty = (item.quantity || 1) - 1;
+                otherProductsCount += extraQty;
+                otherProductsTotal += (item.price * extraQty);
+            }
+        });
+
+        let bundlesSummaryHtml = '';
+        appliedBundles.forEach(b => {
+            const namesList = (b.items || []).map(n => n.split(',')[0]).join(', ');
+            bundlesSummaryHtml += `
+                <div class="p-2.5 rounded-xl bg-surface-container-lowest border border-error/25 flex flex-col gap-1 shadow-2xs">
+                    <div class="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+                        <span class="font-bold text-xs sm:text-sm text-on-surface flex items-center gap-1 min-w-0">
+                            <span class="material-symbols-outlined text-error text-[16px] shrink-0">bolt</span>
+                            <span class="truncate">${escapeHtml(b.title)}</span>
+                        </span>
+                        <span class="font-black text-error text-xs sm:text-sm shrink-0 whitespace-nowrap bg-error/10 px-2 py-0.5 rounded-md">
+                            Bundle Price: $${parseFloat(b.bundlePrice).toFixed(2)}
+                        </span>
+                    </div>
+                    <div class="text-[11px] text-on-surface-variant flex items-center gap-1 flex-wrap">
+                        <span class="font-medium text-outline">Included (${(b.items || []).length} items):</span>
+                        <span class="text-on-surface truncate max-w-[200px] sm:max-w-[280px]">${escapeHtml(namesList)}</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        summaryContainer.innerHTML = `
+            <div class="flex flex-col gap-2">
+                ${bundlesSummaryHtml}
+                ${otherProductsCount > 0 ? `
+                <div class="flex items-center justify-between text-xs text-on-surface-variant px-1 pt-1">
+                    <span>Other Products (${otherProductsCount} ${otherProductsCount === 1 ? 'item' : 'items'}):</span>
+                    <span class="font-bold text-on-surface">$${otherProductsTotal.toFixed(2)}</span>
+                </div>
+                ` : ''}
+                <div class="flex items-center justify-between text-xs text-on-surface-variant px-1">
+                    <span>Subtotal (${cart.reduce((s, i) => s + (i.quantity || 1), 0)} items):</span>
+                    <span class="font-semibold text-on-surface">$${finalTotal.toFixed(2)}</span>
+                </div>
+                <div class="flex items-center justify-between font-title-md font-bold text-on-surface pt-2 border-t border-surface-container px-1">
+                    <span>Total Due:</span>
+                    <span class="text-primary text-xl font-black">$${finalTotal.toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+    } else {
+        // Standard non-bundle summary
         summaryContainer.innerHTML = `
             <div class="flex justify-between font-body-sm text-on-surface-variant">
-                <span>Subtotal (${cart.length} items):</span>
+                <span>Subtotal (${cart.reduce((s, i) => s + (i.quantity || 1), 0)} items):</span>
                 <span>$${subtotal.toFixed(2)}</span>
             </div>
             ${appliedPromo ? `
@@ -338,7 +558,7 @@ function updateCheckoutSummary() {
             </div>` : ''}
             <div class="flex justify-between font-title-md font-bold text-on-surface pt-2 border-t border-surface-container">
                 <span>Total Due:</span>
-                <span class="text-primary text-xl">$${finalTotal.toFixed(2)}</span>
+                <span class="text-primary text-xl font-black">$${finalTotal.toFixed(2)}</span>
             </div>
         `;
     }
@@ -532,8 +752,16 @@ async function handleCheckout(event) {
 
     const formData = new FormData(form);
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Evaluate bundle discounts
+    const bundleRes = await evaluateCartBundleDiscounts();
+    const bundleDiscount = bundleRes.totalDiscount;
+    const appliedBundles = bundleRes.appliedBundles;
+
     let discount = 0;
-    if (appliedPromo) {
+    if (bundleDiscount > 0) {
+        discount = bundleDiscount;
+    } else if (appliedPromo) {
         discount = appliedPromo.discount_type === 'percentage' 
             ? (subtotal * appliedPromo.discount_value) / 100 
             : appliedPromo.discount_value;
@@ -568,7 +796,9 @@ async function handleCheckout(event) {
             items: cart,
             subtotal: subtotal,
             discount: discount,
-            promo_code: appliedPromo ? appliedPromo.promo_code : null,
+            promo_code: (bundleDiscount > 0) ? 'FLASH_COMBO' : (appliedPromo ? appliedPromo.promo_code : null),
+            applied_bundles: appliedBundles,
+            bundle_discount: bundleDiscount,
             phone: phone,
             customer_name: name,
             customer_email: email,
@@ -1276,7 +1506,7 @@ window.searchCustomerOrder = async function() {
     }
 };
 
-function renderProductGrid(products, grid) {
+async function renderProductGrid(products, grid) {
     if (!grid) return;
     
     // Only display in-stock products on user product list / catalog
@@ -1287,7 +1517,106 @@ function renderProductGrid(products, grid) {
         countEl.textContent = `${inStockProducts.length} ${inStockProducts.length === 1 ? 'Product' : 'Products'}`;
     }
 
-    if (inStockProducts.length === 0) {
+    let bundleCombosHtml = '';
+    if (currentActiveCategory === 'Flash Deals' && window.bundleManager) {
+        try {
+            const bundles = await window.bundleManager.getActiveBundles();
+            if (bundles && bundles.length > 0) {
+                let cardsHtml = '';
+                bundles.forEach(b => {
+                    const itemIds = Array.isArray(b.items) && b.items.length >= 2
+                        ? b.items
+                        : [b.item1_id, b.item2_id].filter(Boolean);
+                    const items = itemIds.map(id => allProducts.find(p => String(p.id) === String(id))).filter(Boolean);
+                    if (items.length < 2) return;
+
+                    const isOutOfStock = items.some(p => (parseInt(p.stock) || 0) <= 0);
+                    const bundlePrice = parseFloat(b.bundle_price) || 0;
+
+                    const tilesHtml = items.map((it, idx) => {
+                        const img = getProductPrimaryImage(it);
+                        const isEmoji = !img || img.length <= 4 || !img.startsWith('http');
+                        const slug = getProductSlug(it);
+                        return `
+                            <div class="flex items-center gap-2 shrink-0">
+                                <div onclick="event.stopPropagation(); viewProduct('${slug}', ${it.id})" class="w-16 h-16 sm:w-20 sm:h-20 p-1.5 rounded-2xl bg-surface-container-low hover:bg-surface-container border border-surface-container hover:border-primary/50 flex items-center justify-center cursor-pointer transition-all group shadow-2xs shrink-0" title="${escapeHtml(it.name)}">
+                                    <div class="w-full h-full rounded-xl bg-surface-container-lowest flex items-center justify-center p-1 overflow-hidden group-hover:scale-105 transition-transform">
+                                        ${isEmoji ? `<span class="text-3xl">${img || '📦'}</span>` : `<img src="${img}" class="w-full h-full object-contain" alt="${escapeHtml(it.name)}" />`}
+                                    </div>
+                                </div>
+                                ${idx < items.length - 1 ? `
+                                <div class="w-6 h-6 rounded-full bg-error/10 text-error flex items-center justify-center shrink-0 font-black shadow-2xs">
+                                    <span class="material-symbols-outlined text-[15px] font-black">add</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('');
+
+                    cardsHtml += `
+                    <div class="col-span-full rounded-2xl sm:rounded-3xl bg-surface-container-lowest border border-error/25 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col mb-3">
+                        <!-- Card Header -->
+                        <div class="px-3.5 py-2.5 sm:px-4 sm:py-3 bg-gradient-to-r from-error/15 via-error/5 to-surface-container-low/40 border-b border-surface-container/70 flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-error text-white font-extrabold text-[10px] sm:text-xs tracking-wider uppercase shadow-xs shrink-0">
+                                    <span class="material-symbols-outlined text-[14px]">bolt</span>
+                                    <span>Combo Deal</span>
+                                </span>
+                                <h4 class="font-title-md font-extrabold text-on-surface text-xs sm:text-base truncate">${escapeHtml(b.title)}</h4>
+                            </div>
+                            <span class="text-[10px] sm:text-xs font-bold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full border border-surface-container-high shrink-0 whitespace-nowrap">
+                                Limit 1 per order
+                            </span>
+                        </div>
+
+                        <!-- Product Showcase Shelf -->
+                        <div class="p-3 sm:p-4 bg-surface-container-lowest">
+                            <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 px-0.5 scrollbar-none -mx-0.5">
+                                ${tilesHtml}
+                            </div>
+                        </div>
+
+                        <!-- Action Bar / Footer: Responsive on mobile -->
+                        <div class="px-3.5 py-3 sm:px-4 bg-surface-container-low/70 border-t border-surface-container/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+                            <div class="flex items-center justify-between sm:justify-start sm:flex-col sm:items-start gap-1">
+                                <span class="text-[10px] sm:text-xs text-on-surface-variant block font-medium leading-none">Bundle Price</span>
+                                <div class="flex items-baseline gap-1.5">
+                                    <span class="text-xl sm:text-2xl font-black text-error leading-none">$${bundlePrice.toFixed(2)}</span>
+                                    <span class="text-[11px] text-on-surface-variant font-medium">for ${items.length} items</span>
+                                </div>
+                            </div>
+                            <button type="button" ${isOutOfStock ? 'disabled' : `onclick="addBundleToCart('${b.id}')"`} class="${isOutOfStock ? 'bg-surface-container-highest text-outline cursor-not-allowed opacity-60' : 'bg-primary hover:bg-primary-container text-on-primary active:scale-95 shadow-md hover:shadow-lg'} w-full sm:w-auto px-5 py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all">
+                                <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                <span>${isOutOfStock ? 'Out of Stock' : `Add Combo ($${bundlePrice.toFixed(2)})`}</span>
+                            </button>
+                        </div>
+                    </div>`;
+                });
+
+                if (cardsHtml) {
+                    bundleCombosHtml = `
+                    <div class="col-span-full mb-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-7 h-7 rounded-full bg-error/10 text-error flex items-center justify-center shadow-xs">
+                                <span class="material-symbols-outlined text-[18px]">bolt</span>
+                            </span>
+                            <div>
+                                <h3 class="font-headline-md font-bold text-on-surface text-base sm:text-lg leading-tight">Exclusive Flash Deal Combos</h3>
+                                <p class="text-xs text-on-surface-variant">Special bundle packages with 1-click add to cart</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            ${cardsHtml}
+                        </div>
+                    </div>`;
+                }
+            }
+        } catch(e) {
+            console.warn('Error loading bundles for catalog:', e);
+        }
+    }
+
+    if (inStockProducts.length === 0 && !bundleCombosHtml) {
         const emptyMsg = window.i18n ? window.i18n.t('no_products') : 'No products found.';
         grid.innerHTML = `<div class="col-span-full p-8 text-center text-on-surface-variant font-medium">${emptyMsg}</div>`;
         return;
@@ -1328,7 +1657,7 @@ function renderProductGrid(products, grid) {
         </div>`;
     });
 
-    grid.innerHTML = html;
+    grid.innerHTML = bundleCombosHtml + html;
 }
 
 window.handleCardClick = function(event, productId, slug) {
@@ -1871,6 +2200,95 @@ async function loadProductDetail() {
             const qty = window.currentQty || 1;
             addToCart(product, qty, addBtn);
         };
+    }
+
+    // Render Flash Deal Combo Box if product has active pairing
+    const bundleContainer = document.getElementById('detail-bundle-container');
+    if (bundleContainer && window.bundleManager) {
+        try {
+            const bundle = await window.bundleManager.findBundleForProduct(product.id);
+            if (bundle) {
+                const itemIds = Array.isArray(bundle.items) && bundle.items.length >= 2
+                    ? bundle.items
+                    : [bundle.item1_id, bundle.item2_id].filter(Boolean);
+                const partnerIds = itemIds.filter(id => String(id) !== String(product.id));
+                const partners = partnerIds.map(id => allProducts.find(p => String(p.id) === String(id))).filter(Boolean);
+
+                if (partners.length > 0) {
+                    const allComboProducts = [product, ...partners];
+                    const anyOutOfStock = allComboProducts.some(p => (parseInt(p.stock) || 0) <= 0);
+                    const bundlePrice = parseFloat(bundle.bundle_price) || 0;
+
+                    const detailTilesHtml = allComboProducts.map((it, idx) => {
+                        const isCurrent = String(it.id) === String(product.id);
+                        const img = getProductPrimaryImage(it);
+                        const isEmoji = !img || img.length <= 4 || !img.startsWith('http');
+                        const slug = getProductSlug(it);
+                        return `
+                        <div class="flex items-center gap-2 shrink-0">
+                            <div ${isCurrent ? '' : `onclick="viewProduct('${slug}', ${it.id})"`} class="w-16 h-16 sm:w-20 sm:h-20 p-1.5 rounded-2xl bg-surface-container-low border ${isCurrent ? 'border-primary ring-2 ring-primary/20 cursor-default' : 'border-surface-container hover:border-primary/50 cursor-pointer'} flex items-center justify-center shadow-2xs relative transition-all group shrink-0" title="${escapeHtml(it.name)}">
+                                ${isCurrent ? `
+                                <span class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.2 rounded-full bg-primary text-on-primary font-bold text-[8px] uppercase tracking-wider shadow-xs whitespace-nowrap">
+                                    This Item
+                                </span>
+                                ` : ''}
+                                <div class="w-full h-full rounded-xl bg-surface-container-lowest flex items-center justify-center p-1 overflow-hidden group-hover:scale-105 transition-transform">
+                                    ${isEmoji ? `<span class="text-2xl">${img || '📦'}</span>` : `<img src="${img}" class="w-full h-full object-contain" alt="${escapeHtml(it.name)}" />`}
+                                </div>
+                            </div>
+                            ${idx < allComboProducts.length - 1 ? `
+                            <div class="w-6 h-6 rounded-full bg-error/10 text-error flex items-center justify-center shrink-0 font-black">
+                                <span class="material-symbols-outlined text-[14px] font-black">add</span>
+                            </div>
+                            ` : ''}
+                        </div>`;
+                    }).join('');
+
+                    bundleContainer.innerHTML = `
+                        <div class="rounded-2xl bg-surface-container-lowest border-2 border-error/25 shadow-sm overflow-hidden flex flex-col">
+                            <!-- Header -->
+                            <div class="px-3.5 py-2.5 sm:px-4 sm:py-3 bg-gradient-to-r from-error/15 via-error/5 to-surface-container-low/40 border-b border-surface-container/70 flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-error text-white font-extrabold text-[10px] tracking-wider uppercase shadow-xs shrink-0">
+                                        <span class="material-symbols-outlined text-[13px]">bolt</span>
+                                        <span>Combo Deal</span>
+                                    </span>
+                                    <h4 class="font-title-md font-bold text-on-surface text-xs sm:text-sm truncate">${escapeHtml(bundle.title)}</h4>
+                                </div>
+                                <span class="text-[10px] sm:text-xs font-bold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full border border-surface-container-high shrink-0 whitespace-nowrap">
+                                    Limit 1 per order
+                                </span>
+                            </div>
+
+                            <!-- Product Showcase Shelf -->
+                            <div class="p-3 sm:p-4 bg-surface-container-lowest">
+                                <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 px-0.5 scrollbar-none -mx-0.5">
+                                    ${detailTilesHtml}
+                                </div>
+                            </div>
+
+                            <!-- Action Bar / Footer: Responsive on mobile -->
+                            <div class="px-3.5 py-3 sm:px-4 bg-surface-container-low/70 border-t border-surface-container/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+                                <div class="flex items-center justify-between sm:justify-start sm:flex-col sm:items-start gap-1">
+                                    <span class="text-[10px] sm:text-xs text-on-surface-variant block font-medium leading-none">Bundle Price</span>
+                                    <div class="flex items-baseline gap-1.5">
+                                        <span class="text-xl sm:text-2xl font-black text-error leading-none">$${bundlePrice.toFixed(2)}</span>
+                                        <span class="text-[11px] text-on-surface-variant font-medium">for ${allComboProducts.length} items</span>
+                                    </div>
+                                </div>
+                                <button type="button" ${anyOutOfStock ? 'disabled' : `onclick="addBundleToCart('${bundle.id}')"`} class="${anyOutOfStock ? 'bg-surface-container-highest text-outline cursor-not-allowed opacity-60' : 'bg-primary hover:bg-primary-container text-on-primary active:scale-95 shadow-md hover:shadow-lg'} w-full sm:w-auto px-5 py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all">
+                                    <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                    <span>${anyOutOfStock ? 'Combo Unavailable' : `Add Combo ($${bundlePrice.toFixed(2)})`}</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    bundleContainer.classList.remove('hidden');
+                }
+            }
+        } catch(e) {
+            console.warn('Error rendering detail combo:', e);
+        }
     }
 
     // Render Discover More / Recommended products

@@ -198,6 +198,31 @@ class BannerManager {
         }
     }
 
+    async updateBanner(id, bannerData) {
+        const banners = await this.getBanners();
+        const index = banners.findIndex(b => String(b.id) === String(id));
+        if (index !== -1) {
+            banners[index] = {
+                ...banners[index],
+                title: bannerData.title ? bannerData.title.trim() : banners[index].title,
+                subtitle: bannerData.subtitle !== undefined ? bannerData.subtitle.trim() : banners[index].subtitle,
+                tag: bannerData.tag ? bannerData.tag.trim() : banners[index].tag,
+                tag_icon: bannerData.tag_icon || banners[index].tag_icon,
+                promo_code: bannerData.promo_code ? bannerData.promo_code.trim().toUpperCase() : '',
+                link_url: bannerData.link_url ? bannerData.link_url.trim() : banners[index].link_url,
+                button_text: bannerData.button_text ? bannerData.button_text.trim() : banners[index].button_text,
+                theme: bannerData.theme || banners[index].theme,
+                image_url: bannerData.image_url !== undefined ? bannerData.image_url.trim() : banners[index].image_url,
+                active: bannerData.active !== undefined ? !!bannerData.active : banners[index].active,
+                updated_at: new Date().toISOString()
+            };
+            this.saveLocalBanners(banners);
+            await this.syncToSupabase(banners);
+            return banners[index];
+        }
+        return null;
+    }
+
     async createBanner(bannerData) {
         const banners = await this.getBanners();
         const newBanner = {
@@ -405,5 +430,191 @@ class PromoManager {
     }
 }
 
+class BundleManager {
+    constructor() {
+        this.storageKey = 'dashop_bundles';
+        this.configRowName = '__dashop_bundles__';
+        this.defaultBundles = [
+            {
+                id: 'bundle_1',
+                title: "Household Cleaning Combo",
+                items: [29, 259],
+                bundle_price: 4.50,
+                max_per_order: 1,
+                category: "Flash Deals",
+                active: true,
+                created_at: new Date().toISOString()
+            }
+        ];
+    }
+
+    normalizeBundle(b) {
+        if (!b) return b;
+        let items = [];
+        if (Array.isArray(b.items) && b.items.length > 0) {
+            items = b.items;
+        } else if (b.item1_id && b.item2_id) {
+            items = [b.item1_id, b.item2_id];
+        }
+        b.items = items.map(id => String(id).trim()).filter(Boolean);
+        return b;
+    }
+
+    async getBundles() {
+        try {
+            if (window.supabaseClient) {
+                const { data: configData, error: configErr } = await window.supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('category', '__dashop_config__')
+                    .eq('name', this.configRowName)
+                    .maybeSingle();
+
+                if (!configErr && configData && configData.description) {
+                    try {
+                        const parsed = JSON.parse(configData.description);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            const normalized = parsed.map(b => this.normalizeBundle(b));
+                            this.saveLocalBundles(normalized);
+                            return normalized;
+                        }
+                    } catch(e) {}
+                }
+            }
+        } catch (e) {
+            console.log('Using local bundles fallback');
+        }
+
+        const stored = localStorage.getItem(this.storageKey);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed.map(b => this.normalizeBundle(b));
+                }
+            } catch (e) {}
+        }
+
+        const defaultNormalized = this.defaultBundles.map(b => this.normalizeBundle(b));
+        this.saveLocalBundles(defaultNormalized);
+        this.syncToSupabase(defaultNormalized).catch(() => {});
+        return defaultNormalized;
+    }
+
+    async getActiveBundles() {
+        const bundles = await this.getBundles();
+        return bundles.filter(b => b.active === true);
+    }
+
+    async findBundleForProduct(productId) {
+        if (!productId) return null;
+        const pId = String(productId);
+        const active = await this.getActiveBundles();
+        return active.find(b => Array.isArray(b.items) && b.items.includes(pId)) || null;
+    }
+
+    saveLocalBundles(bundles) {
+        localStorage.setItem(this.storageKey, JSON.stringify(bundles));
+    }
+
+    async syncToSupabase(bundles) {
+        if (!window.supabaseClient) return;
+        try {
+            const { data: existing } = await window.supabaseClient
+                .from('products')
+                .select('id')
+                .eq('category', '__dashop_config__')
+                .eq('name', this.configRowName)
+                .maybeSingle();
+
+            const payload = {
+                name: this.configRowName,
+                description: JSON.stringify(bundles),
+                price: 0,
+                stock: 0,
+                category: '__dashop_config__'
+            };
+
+            if (existing && existing.id) {
+                await window.supabaseClient
+                    .from('products')
+                    .update(payload)
+                    .eq('id', existing.id);
+            } else {
+                await window.supabaseClient
+                    .from('products')
+                    .insert([payload]);
+            }
+        } catch(e) {
+            console.warn('Could not sync bundles to Supabase:', e);
+        }
+    }
+
+    async createBundle(bundleData) {
+        const bundles = await this.getBundles();
+        const rawItems = Array.isArray(bundleData.items) ? bundleData.items : [bundleData.item1_id, bundleData.item2_id];
+        const items = rawItems.map(String).filter(Boolean).slice(0, 6);
+
+        const newBundle = {
+            id: 'bundle_' + Date.now(),
+            title: bundleData.title ? bundleData.title.trim() : 'Flash Deal Combo',
+            items: items,
+            bundle_price: parseFloat(bundleData.bundle_price) || 0,
+            max_per_order: 1,
+            category: 'Flash Deals',
+            active: bundleData.active !== undefined ? !!bundleData.active : true,
+            created_at: new Date().toISOString()
+        };
+
+        bundles.unshift(newBundle);
+        this.saveLocalBundles(bundles);
+        await this.syncToSupabase(bundles);
+        return newBundle;
+    }
+
+    async updateBundle(id, bundleData) {
+        const bundles = await this.getBundles();
+        const index = bundles.findIndex(b => String(b.id) === String(id));
+        if (index !== -1) {
+            let items = bundles[index].items;
+            if (Array.isArray(bundleData.items)) {
+                items = bundleData.items.map(String).filter(Boolean).slice(0, 6);
+            }
+            bundles[index] = {
+                ...bundles[index],
+                title: bundleData.title ? bundleData.title.trim() : bundles[index].title,
+                items: items,
+                bundle_price: parseFloat(bundleData.bundle_price) || bundles[index].bundle_price,
+                active: bundleData.active !== undefined ? !!bundleData.active : bundles[index].active,
+                updated_at: new Date().toISOString()
+            };
+            this.saveLocalBundles(bundles);
+            await this.syncToSupabase(bundles);
+            return bundles[index];
+        }
+        return null;
+    }
+
+    async toggleBundleStatus(id) {
+        const bundles = await this.getBundles();
+        const bundle = bundles.find(b => String(b.id) === String(id));
+        if (bundle) {
+            bundle.active = !bundle.active;
+            this.saveLocalBundles(bundles);
+            await this.syncToSupabase(bundles);
+        }
+        return bundle;
+    }
+
+    async deleteBundle(id) {
+        let bundles = await this.getBundles();
+        bundles = bundles.filter(b => String(b.id) !== String(id));
+        this.saveLocalBundles(bundles);
+        await this.syncToSupabase(bundles);
+        return true;
+    }
+}
+
 window.promoManager = new PromoManager();
 window.bannerManager = new BannerManager();
+window.bundleManager = new BundleManager();

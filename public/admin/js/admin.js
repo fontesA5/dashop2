@@ -1658,6 +1658,8 @@ window.adminQuickBarcodeLookup = function() {
 window.openManagePromosModal = async function() {
     await renderBannersList();
     await renderPromosList();
+    if (window.populateBundleItemSelects) window.populateBundleItemSelects();
+    if (window.renderAdminBundlesList) await window.renderAdminBundlesList();
     const modal = document.getElementById('manage-promos-modal');
     if (modal) modal.classList.remove('hidden');
 };
@@ -1671,23 +1673,37 @@ window.closeManagePromosModal = function() {
 window.switchPromoTab = function(tab) {
     const bannersPanel = document.getElementById('promo-panel-banners');
     const codesPanel = document.getElementById('promo-panel-codes');
+    const bundlesPanel = document.getElementById('promo-panel-bundles');
     const bannersBtn = document.getElementById('promo-tab-btn-banners');
     const codesBtn = document.getElementById('promo-tab-btn-codes');
+    const bundlesBtn = document.getElementById('promo-tab-btn-bundles');
+
+    // Hide all panels & reset tab styles
+    bannersPanel?.classList.add('hidden');
+    codesPanel?.classList.add('hidden');
+    bundlesPanel?.classList.add('hidden');
+
+    bannersBtn?.classList.remove('border-primary', 'text-primary');
+    bannersBtn?.classList.add('border-transparent', 'text-on-surface-variant');
+    codesBtn?.classList.remove('border-primary', 'text-primary');
+    codesBtn?.classList.add('border-transparent', 'text-on-surface-variant');
+    bundlesBtn?.classList.remove('border-primary', 'text-primary');
+    bundlesBtn?.classList.add('border-transparent', 'text-on-surface-variant');
 
     if (tab === 'banners') {
         bannersPanel?.classList.remove('hidden');
-        codesPanel?.classList.add('hidden');
         bannersBtn?.classList.add('border-primary', 'text-primary');
         bannersBtn?.classList.remove('border-transparent', 'text-on-surface-variant');
-        codesBtn?.classList.remove('border-primary', 'text-primary');
-        codesBtn?.classList.add('border-transparent', 'text-on-surface-variant');
+    } else if (tab === 'bundles') {
+        bundlesPanel?.classList.remove('hidden');
+        bundlesBtn?.classList.add('border-primary', 'text-primary');
+        bundlesBtn?.classList.remove('border-transparent', 'text-on-surface-variant');
+        if (window.populateBundleItemSelects) window.populateBundleItemSelects();
+        if (window.renderAdminBundlesList) window.renderAdminBundlesList();
     } else {
-        bannersPanel?.classList.add('hidden');
         codesPanel?.classList.remove('hidden');
         codesBtn?.classList.add('border-primary', 'text-primary');
         codesBtn?.classList.remove('border-transparent', 'text-on-surface-variant');
-        bannersBtn?.classList.remove('border-primary', 'text-primary');
-        bannersBtn?.classList.add('border-transparent', 'text-on-surface-variant');
     }
 };
 
@@ -1762,9 +1778,15 @@ async function renderBannersList() {
                         <span>${b.active ? 'Active (Turn OFF)' : 'Disabled (Turn ON)'}</span>
                     </button>
 
-                    <button type="button" onclick="handleDeleteBanner('${b.id}')" class="p-1.5 rounded-lg hover:bg-error-container/40 text-error transition active:scale-90" title="Delete Banner">
-                        <span class="material-symbols-outlined text-[18px]">delete</span>
-                    </button>
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" onclick="editBanner('${b.id}')" class="px-2.5 py-1 text-xs font-bold text-primary hover:bg-primary/10 rounded-lg active:scale-95 transition flex items-center gap-1" title="Edit Banner">
+                            <span class="material-symbols-outlined text-[15px]">edit</span>
+                            <span>Edit</span>
+                        </button>
+                        <button type="button" onclick="handleDeleteBanner('${b.id}')" class="p-1.5 rounded-lg hover:bg-error-container/40 text-error transition active:scale-90" title="Delete Banner">
+                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1774,8 +1796,61 @@ async function renderBannersList() {
     container.innerHTML = html;
 }
 
+window.editBanner = async function(id) {
+    if (!window.bannerManager) return;
+    const banners = await window.bannerManager.getBanners();
+    const b = banners.find(item => String(item.id) === String(id));
+    if (!b) return;
+
+    document.getElementById('banner-edit-id').value = b.id;
+    document.getElementById('banner-title').value = b.title || '';
+    document.getElementById('banner-subtitle').value = b.subtitle || '';
+    document.getElementById('banner-tag').value = b.tag || 'Limited Time';
+    document.getElementById('banner-icon').value = b.tag_icon || 'local_fire_department';
+    document.getElementById('banner-promo-code').value = b.promo_code || '';
+    document.getElementById('banner-link').value = b.link_url || '/catalog';
+    document.getElementById('banner-btn-text').value = b.button_text || 'Shop now';
+    document.getElementById('banner-image').value = b.image_url || '';
+    document.getElementById('banner-active').checked = !!b.active;
+
+    const themeRadio = document.querySelector(`input[name="banner-theme"][value="${b.theme || 'primary'}"]`);
+    if (themeRadio) themeRadio.checked = true;
+
+    window.updateBannerImagePreview();
+
+    const submitBtnText = document.getElementById('banner-submit-btn-text');
+    if (submitBtnText) submitBtnText.textContent = 'Update Banner';
+
+    const cancelBtn = document.getElementById('banner-cancel-edit-btn');
+    if (cancelBtn) cancelBtn.classList.remove('hidden');
+
+    const form = document.querySelector('#promo-panel-banners form');
+    if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+window.cancelEditBanner = function() {
+    const editIdInput = document.getElementById('banner-edit-id');
+    if (editIdInput) editIdInput.value = '';
+
+    const form = document.querySelector('#promo-panel-banners form');
+    if (form) form.reset();
+
+    document.getElementById('banner-tag').value = 'Limited Time';
+    document.getElementById('banner-link').value = '/catalog';
+    document.getElementById('banner-btn-text').value = 'Shop now';
+    document.getElementById('banner-active').checked = true;
+    window.clearBannerImage();
+
+    const submitBtnText = document.getElementById('banner-submit-btn-text');
+    if (submitBtnText) submitBtnText.textContent = 'Add Banner to Carousel';
+
+    const cancelBtn = document.getElementById('banner-cancel-edit-btn');
+    if (cancelBtn) cancelBtn.classList.add('hidden');
+};
+
 window.handleCreateBanner = async function(event) {
     event.preventDefault();
+    const editId = (document.getElementById('banner-edit-id')?.value || '').trim();
     const title = document.getElementById('banner-title').value.trim();
     const subtitle = document.getElementById('banner-subtitle').value.trim();
     const tag = document.getElementById('banner-tag').value.trim() || 'Limited Time';
@@ -1792,28 +1867,20 @@ window.handleCreateBanner = async function(event) {
     if (!title) return;
 
     if (window.bannerManager) {
-        await window.bannerManager.createBanner({
-            title,
-            subtitle,
-            tag,
-            tag_icon,
-            promo_code,
-            link_url,
-            button_text,
-            theme,
-            image_url,
-            active
-        });
+        if (editId) {
+            await window.bannerManager.updateBanner(editId, {
+                title, subtitle, tag, tag_icon, promo_code, link_url, button_text, theme, image_url, active
+            });
+            showNotification(`Banner "${title}" updated successfully!`);
+        } else {
+            await window.bannerManager.createBanner({
+                title, subtitle, tag, tag_icon, promo_code, link_url, button_text, theme, image_url, active
+            });
+            showNotification(`Banner "${title}" created and saved!`);
+        }
 
-        event.target.reset();
-        document.getElementById('banner-tag').value = 'Limited Time';
-        document.getElementById('banner-link').value = '/catalog';
-        document.getElementById('banner-btn-text').value = 'Shop now';
-        document.getElementById('banner-active').checked = true;
-        window.clearBannerImage();
-
+        cancelEditBanner();
         await renderBannersList();
-        showNotification(`Banner "${title}" created and saved!`);
     }
 };
 
@@ -1977,637 +2044,260 @@ window.deletePromoCode = async function(id) {
     }
 };
 
-// Initialize Drag and Drop image upload listeners
-function initAdminModals() {
-    const dropZone = document.getElementById('image-drop-zone');
-    const fileInput = document.getElementById('file-upload-input');
+// Flash Deal Bundles Admin Management (Supports 2 to 6 Products & Editing)
+window.bundleProductRows = ['', ''];
 
-    if (dropZone && fileInput) {
-        dropZone.addEventListener('click', () => fileInput.click());
+window.renderBundleProductRows = function() {
+    const container = document.getElementById('bundle-items-container');
+    const addBtn = document.getElementById('bundle-add-item-btn');
+    if (!container) return;
 
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('border-primary', 'bg-primary/5');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('border-primary', 'bg-primary/5');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-primary', 'bg-primary/5');
-            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                handleImageFiles(e.dataTransfer.files);
-            }
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files.length > 0) {
-                handleImageFiles(e.target.files);
-            }
-        });
+    if (!Array.isArray(window.bundleProductRows) || window.bundleProductRows.length < 2) {
+        window.bundleProductRows = ['', ''];
     }
 
-    // Auto-generate slug when name is typed
-    const nameInput = document.getElementById('prod-name');
-    const slugInput = document.getElementById('prod-slug');
-    if (nameInput && slugInput) {
-        nameInput.addEventListener('input', () => {
-            if (!editingProductId) {
-                slugInput.value = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-            }
-        });
-    }
-}
+    const sorted = [...(adminProducts || [])].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-// Convert files to base64 for batch gallery storage
-function handleImageFiles(files) {
-    Array.from(files).forEach(file => {
-        if (!file.type.startsWith('image/')) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const b64 = e.target.result;
-            uploadedImageFiles.push(b64);
-            const previewContainer = document.getElementById('product-images-preview');
-            if (previewContainer) {
-                const div = document.createElement('div');
-                div.className = "relative w-16 h-16 rounded-xl border border-surface-container bg-surface-container-low overflow-hidden";
-                div.innerHTML = `<img src="${b64}" class="w-full h-full object-contain">`;
-                previewContainer.appendChild(div);
-            }
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-// =========================================================================
-// Real-Time New Order Alerts (Audio Chime, System Notifications & Banner)
-// =========================================================================
-
-// Synthesize pleasant, crisp multi-tone chime (Web Audio API)
-function playOrderAlertChime() {
-    const soundEnabled = localStorage.getItem('dashop_admin_sound_enabled') !== 'false';
-    if (!soundEnabled) return;
-
-    try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-
-        if (ctx.state === 'suspended') {
-            ctx.resume();
-        }
-
-        // Clean POS / cash register chime chord: C5, E5, G5, C6
-        const notes = [
-            { freq: 523.25, time: 0.00, dur: 0.14 },
-            { freq: 659.25, time: 0.11, dur: 0.14 },
-            { freq: 783.99, time: 0.22, dur: 0.16 },
-            { freq: 1046.50, time: 0.36, dur: 0.50 }
-        ];
-
-        notes.forEach(n => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(n.freq, ctx.currentTime + n.time);
-
-            gain.gain.setValueAtTime(0, ctx.currentTime + n.time);
-            gain.gain.linearRampToValueAtTime(0.28, ctx.currentTime + n.time + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n.time + n.dur);
-
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-
-            osc.start(ctx.currentTime + n.time);
-            osc.stop(ctx.currentTime + n.time + n.dur);
-        });
-    } catch (e) {
-        console.warn('[Admin Alerts] Sound playback error:', e);
-    }
-}
-
-// OS / Browser Native System Notification
-function sendSystemOrderNotification(order) {
-    if (!('Notification' in window)) return;
-    if (Notification.permission !== 'granted') return;
-
-    const customer = order.customer_name || order.customer_phone || 'Customer';
-    const total = order.total ? `$${parseFloat(order.total).toFixed(2)}` : '$0.00';
-    const body = `${customer} placed a new order for ${total}. Tap to view details!`;
-
-    try {
-        const notif = new Notification(`🔔 New Order #${order.id}`, {
-            body: body,
-            icon: '/icons/icon-192x192.png',
-            badge: '/icons/icon-192x192.png',
-            tag: `order-${order.id}`,
-            requireInteraction: true
+    let html = '';
+    window.bundleProductRows.forEach((val, idx) => {
+        let optionsHtml = '<option value="">Select Product...</option>';
+        sorted.forEach(p => {
+            optionsHtml += `<option value="${p.id}" ${String(p.id) === String(val) ? 'selected' : ''}>[#${p.id}] ${escapeAdminHtml(p.name)}</option>`;
         });
 
-        notif.onclick = () => {
-            window.focus();
-            if (window.location.pathname.includes('orders')) {
-                const card = document.getElementById(`order-card-${order.id}`);
-                if (card) {
-                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    card.classList.add('ring-4', 'ring-primary');
-                    setTimeout(() => card.classList.remove('ring-4', 'ring-primary'), 3500);
-                }
-            } else {
-                window.location.href = `/admin/orders.html#order-card-${order.id}`;
-            }
-            notif.close();
-        };
-    } catch (e) {
-        console.warn('[Admin Alerts] System notification failed:', e);
-    }
-}
-
-// In-App Floating Top Toast / Banner
-function showInAppNewOrderBanner(order) {
-    const existing = document.getElementById('new-order-banner-alert');
-    if (existing) existing.remove();
-
-    const customer = order.customer_name || order.customer_phone || 'Customer';
-    const total = order.total ? `$${parseFloat(order.total).toFixed(2)}` : '$0.00';
-
-    const banner = document.createElement('div');
-    banner.id = 'new-order-banner-alert';
-    banner.className = 'fixed top-20 right-4 left-4 sm:left-auto sm:right-6 sm:w-96 z-[99999] bg-primary text-white rounded-2xl p-4 shadow-2xl border border-primary-container flex items-center justify-between gap-3 transition-all duration-300 transform translate-y-[-20px] opacity-0';
-
-    banner.innerHTML = `
-        <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-secondary-container text-[24px]">notifications_active</span>
-            </div>
-            <div class="min-w-0">
-                <div class="flex items-center gap-1.5">
-                    <span class="text-[10px] font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">New Order</span>
-                    <span class="font-mono text-xs font-bold text-secondary-container">#${order.id}</span>
-                </div>
-                <h4 class="font-extrabold text-sm truncate text-white mt-0.5">${customer}</h4>
-                <p class="text-xs text-white/80 font-semibold">${total}</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-2 shrink-0">
-            <a href="/admin/orders.html#order-card-${order.id}" onclick="document.getElementById('new-order-banner-alert')?.remove()" class="px-3 py-1.5 bg-white text-primary rounded-xl font-bold text-xs shadow hover:bg-white/90 active:scale-95 transition-all">
-                View
-            </a>
-            <button onclick="document.getElementById('new-order-banner-alert')?.remove()" class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-white/80 hover:text-white transition-colors" title="Close">
-                <span class="material-symbols-outlined text-[18px]">close</span>
+        html += `
+        <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-on-surface-variant w-14 shrink-0">Item ${idx + 1}:</span>
+            <select onchange="window.bundleProductRows[${idx}] = this.value;" required class="bundle-item-select flex-1 px-3 py-2 rounded-lg bg-surface-container-lowest text-on-surface text-xs outline-none border border-surface-container focus:border-primary">
+                ${optionsHtml}
+            </select>
+            ${window.bundleProductRows.length > 2 ? `
+            <button type="button" onclick="removeBundleProductRow(${idx})" class="p-1.5 rounded-lg text-outline hover:text-error hover:bg-error/10 transition" title="Remove Item">
+                <span class="material-symbols-outlined text-[16px]">close</span>
             </button>
-        </div>
-    `;
-
-    document.body.appendChild(banner);
-
-    requestAnimationFrame(() => {
-        banner.classList.remove('translate-y-[-20px]', 'opacity-0');
-        banner.classList.add('translate-y-0', 'opacity-100');
+            ` : '<div class="w-7"></div>'}
+        </div>`;
     });
 
-    // Auto dismiss after 12 seconds
-    setTimeout(() => {
-        if (banner && banner.parentElement) {
-            banner.classList.add('opacity-0', 'translate-y-[-20px]');
-            setTimeout(() => banner.remove(), 350);
-        }
-    }, 12000);
-}
+    container.innerHTML = html;
 
-// Flash document title when tab is not active
-function flashAdminDocumentTitle(alertText) {
-    if (!originalDocumentTitle) originalDocumentTitle = document.title || 'DASHOP Admin';
-    if (titleFlashInterval) clearInterval(titleFlashInterval);
-
-    let state = false;
-    titleFlashInterval = setInterval(() => {
-        document.title = state ? alertText : originalDocumentTitle;
-        state = !state;
-    }, 1000);
-
-    const onFocus = () => {
-        if (titleFlashInterval) {
-            clearInterval(titleFlashInterval);
-            titleFlashInterval = null;
-        }
-        document.title = originalDocumentTitle;
-        window.removeEventListener('focus', onFocus);
-    };
-    window.addEventListener('focus', onFocus);
-}
-
-// Master handler for new orders
-function handleIncomingNewOrder(order) {
-    if (!order || !order.id) return;
-    const orderIdStr = String(order.id);
-    if (knownAdminOrderIds.has(orderIdStr)) return;
-    knownAdminOrderIds.add(orderIdStr);
-
-    console.log('[Admin Alerts] 🔔 New order received:', order);
-
-    // 1. Play audio chime
-    playOrderAlertChime();
-
-    // 2. Dispatch native OS system notification
-    sendSystemOrderNotification(order);
-
-    // 3. Show in-app banner
-    showInAppNewOrderBanner(order);
-
-    // 4. Update data array
-    adminOrders = [order, ...adminOrders.filter(o => String(o.id) !== orderIdStr)];
-
-    // 5. Re-render UI components
-    renderDashboardKPIs();
-    renderRecentOrdersFeed();
-    renderOrdersPage();
-
-    // 6. Flash document title
-    flashAdminDocumentTitle(`🔔 (1) New Order #${order.id}!`);
-}
-
-// Supabase Real-time Channel Listener
-function setupAdminRealtimeOrderListener() {
-    if (!window.supabaseClient) return;
-
-    try {
-        window.supabaseClient
-            .channel('admin-orders-realtime')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
-                if (payload && payload.new) {
-                    handleIncomingNewOrder(payload.new);
-                }
-            })
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (payload) => {
-                if (payload && payload.new) {
-                    const idx = adminOrders.findIndex(o => String(o.id) === String(payload.new.id));
-                    if (idx !== -1) {
-                        adminOrders[idx] = payload.new;
-                        renderDashboardKPIs();
-                        renderRecentOrdersFeed();
-                        renderOrdersPage();
-                    }
-                }
-            })
-            .subscribe((status) => {
-                console.log('[Admin Realtime] Orders channel status:', status);
-            });
-    } catch (e) {
-        console.warn('[Admin Realtime] Subscription initialization error:', e);
-    }
-}
-
-// Background Polling Safety Net (every 12 seconds)
-function startAdminOrdersPolling() {
-    setInterval(async () => {
-        if (!window.supabaseClient) return;
-        try {
-            const { data, error } = await window.supabaseClient
-                .from('orders')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(10);
-
-            if (!error && data && data.length > 0) {
-                if (isInitialAdminOrderLoad) return;
-
-                const newOrders = data.filter(o => !knownAdminOrderIds.has(String(o.id)));
-                if (newOrders.length > 0) {
-                    // Process from oldest to newest of the fresh batch
-                    newOrders.reverse().forEach(order => {
-                        handleIncomingNewOrder(order);
-                    });
-                }
-            }
-        } catch (err) {
-            console.error('[Admin Polling] Error checking orders:', err);
-        }
-    }, 12000);
-}
-
-// Initialize Admin Order Alerts Controls & UI
-function initAdminOrderAlerts() {
-    updateAdminNotifUI();
-
-    // Unlock AudioContext on first user interaction so sounds can play freely
-    const unlockAudio = () => {
-        try {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (AudioCtx) {
-                const ctx = new AudioCtx();
-                if (ctx.state === 'suspended') ctx.resume();
-            }
-        } catch(e) {}
-        document.removeEventListener('click', unlockAudio);
-        document.removeEventListener('keydown', unlockAudio);
-    };
-    document.addEventListener('click', unlockAudio, { once: true });
-    document.addEventListener('keydown', unlockAudio, { once: true });
-
-    // Close notification dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        const dd = document.getElementById('admin-notif-dropdown');
-        const btn = document.getElementById('admin-notif-btn');
-        if (dd && !dd.classList.contains('hidden')) {
-            if (!dd.contains(e.target) && (!btn || !btn.contains(e.target))) {
-                dd.classList.add('hidden');
-            }
-        }
-    });
-
-    // Check if browser notifications are already granted or request permission gently
-    if ('Notification' in window && Notification.permission === 'default') {
-        const promptAsked = sessionStorage.getItem('dashop_admin_notif_prompted');
-        if (!promptAsked) {
-            sessionStorage.setItem('dashop_admin_notif_prompted', 'true');
-            setTimeout(() => {
-                const dd = document.getElementById('admin-notif-dropdown');
-                if (dd) dd.classList.remove('hidden');
-            }, 2500);
-        }
-    }
-}
-
-// Highlight order if deep-linked via hash
-function checkHighlightedOrder() {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#order-card-')) {
-        setTimeout(() => {
-            const card = document.querySelector(hash);
-            if (card) {
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                card.classList.add('ring-4', 'ring-primary');
-                setTimeout(() => card.classList.remove('ring-4', 'ring-primary'), 3500);
-            }
-        }, 600);
-    }
-}
-
-// UI Dropdown & Settings Controls
-window.toggleAdminNotifSettings = function(e) {
-    if (e) e.stopPropagation();
-    const dd = document.getElementById('admin-notif-dropdown');
-    if (dd) dd.classList.toggle('hidden');
-    updateAdminNotifUI();
-};
-
-window.toggleSoundAlert = function() {
-    const current = localStorage.getItem('dashop_admin_sound_enabled') !== 'false';
-    const next = !current;
-    localStorage.setItem('dashop_admin_sound_enabled', next ? 'true' : 'false');
-    updateAdminNotifUI();
-    if (next) {
-        playOrderAlertChime();
-        showNotification('Sound alerts enabled 🔊');
-    } else {
-        showNotification('Sound alerts muted 🔇');
-    }
-};
-
-window.requestSystemNotifPermission = async function() {
-    if (!('Notification' in window)) {
-        alert('Your browser does not support desktop notifications.');
-        return;
-    }
-    try {
-        const perm = await Notification.requestPermission();
-        updateAdminNotifUI();
-        if (perm === 'granted') {
-            showNotification('System notifications enabled! 🔔');
-            new Notification('DASHOP Admin Alerts Active', {
-                body: 'You will receive notifications here whenever a new customer order is placed.',
-                icon: '/icons/icon-192x192.png'
-            });
-        } else if (perm === 'denied') {
-            alert('Notifications were blocked. Please enable notifications in your browser address bar / site settings.');
-        }
-    } catch (err) {
-        console.error('Permission request failed:', err);
-    }
-};
-
-window.testOrderNotification = function() {
-    playOrderAlertChime();
-    const testId = Math.floor(1000 + Math.random() * 9000);
-    const sampleOrder = {
-        id: testId,
-        customer_name: 'Test Customer',
-        customer_phone: '+1 555-0199',
-        total: '49.99',
-        created_at: new Date().toISOString()
-    };
-    showInAppNewOrderBanner(sampleOrder);
-    sendSystemOrderNotification(sampleOrder);
-    showNotification('Test alert & sound triggered! 🔔');
-};
-
-function updateAdminNotifUI() {
-    const soundEnabled = localStorage.getItem('dashop_admin_sound_enabled') !== 'false';
-    const soundBtn = document.getElementById('sound-toggle-btn');
-    const soundLabel = document.getElementById('sound-toggle-label');
-    if (soundBtn && soundLabel) {
-        soundLabel.textContent = soundEnabled ? 'On' : 'Off';
-        if (soundEnabled) {
-            soundBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition-all flex items-center gap-1';
+    if (addBtn) {
+        if (window.bundleProductRows.length >= 6) {
+            addBtn.classList.add('hidden');
         } else {
-            soundBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-all flex items-center gap-1';
+            addBtn.classList.remove('hidden');
         }
-    }
-
-    const pushBtn = document.getElementById('push-perm-btn');
-    const permPill = document.getElementById('notif-perm-pill');
-    if (pushBtn && permPill) {
-        if (!('Notification' in window)) {
-            pushBtn.textContent = 'Unsupported';
-            pushBtn.disabled = true;
-            permPill.textContent = 'Unsupported';
-            permPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant';
-        } else if (Notification.permission === 'granted') {
-            pushBtn.textContent = 'Allowed';
-            pushBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-secondary-container text-on-secondary-container';
-            permPill.textContent = 'Active';
-            permPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container';
-        } else if (Notification.permission === 'denied') {
-            pushBtn.textContent = 'Blocked';
-            pushBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-error-container text-error';
-            permPill.textContent = 'Blocked';
-            permPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-error-container text-error';
-        } else {
-            pushBtn.textContent = 'Enable';
-            pushBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition-all';
-            permPill.textContent = 'Off';
-            permPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant';
-        }
-    }
-}
-
-// =========================================================================
-// Telegram Store Bot Configuration & Testing
-// =========================================================================
-
-window.openTelegramConfigModal = async function() {
-    const modal = document.getElementById('telegram-config-modal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-
-    // Close alerts dropdown
-    const dd = document.getElementById('admin-notif-dropdown');
-    if (dd) dd.classList.add('hidden');
-
-    await loadTelegramConfigToForm();
-};
-
-window.closeTelegramConfigModal = function() {
-    const modal = document.getElementById('telegram-config-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
     }
 };
 
-async function loadTelegramConfigToForm() {
-    let config = null;
-    try {
-        if (window.supabaseClient) {
-            const { data } = await window.supabaseClient
-                .from('products')
-                .select('description')
-                .eq('category', '__dashop_config__')
-                .eq('name', '__dashop_telegram_config__')
-                .maybeSingle();
-            if (data && data.description) {
-                config = JSON.parse(data.description);
-            }
-        }
-    } catch (e) {
-        console.warn('Could not load Telegram config from Supabase:', e);
+window.addBundleProductRow = function(selectedId = '') {
+    if (!Array.isArray(window.bundleProductRows)) window.bundleProductRows = ['', ''];
+    if (window.bundleProductRows.length < 6) {
+        window.bundleProductRows.push(selectedId ? String(selectedId) : '');
+        window.renderBundleProductRows();
     }
-
-    if (!config) {
-        const local = localStorage.getItem('dashop_telegram_config');
-        if (local) {
-            try { config = JSON.parse(local); } catch(e) {}
-        }
-    }
-
-    if (config) {
-        const enabledEl = document.getElementById('tg-alerts-enabled');
-        const tokenEl = document.getElementById('tg-bot-token');
-        const chatEl = document.getElementById('tg-chat-id');
-        if (enabledEl) enabledEl.checked = config.enabled !== false;
-        if (tokenEl) tokenEl.value = config.botToken || '';
-        if (chatEl) chatEl.value = config.chatId || '';
-    }
-}
-
-window.saveTelegramConfig = async function() {
-    const enabled = document.getElementById('tg-alerts-enabled')?.checked ?? true;
-    const botToken = document.getElementById('tg-bot-token')?.value?.trim() || '';
-    const chatId = document.getElementById('tg-chat-id')?.value?.trim() || '';
-
-    const config = {
-        enabled: enabled,
-        botToken: botToken,
-        chatId: chatId
-    };
-
-    // Save locally first
-    localStorage.setItem('dashop_telegram_config', JSON.stringify(config));
-
-    // Save to Supabase for persistence across all store sessions
-    if (window.supabaseClient) {
-        try {
-            const { data: existing } = await window.supabaseClient
-                .from('products')
-                .select('id')
-                .eq('category', '__dashop_config__')
-                .eq('name', '__dashop_telegram_config__')
-                .maybeSingle();
-
-            const payload = {
-                name: '__dashop_telegram_config__',
-                description: JSON.stringify(config),
-                price: 0,
-                stock: 0,
-                category: '__dashop_config__'
-            };
-
-            if (existing && existing.id) {
-                await window.supabaseClient
-                    .from('products')
-                    .update(payload)
-                    .eq('id', existing.id);
-            } else {
-                await window.supabaseClient
-                    .from('products')
-                    .insert([payload]);
-            }
-            console.log('[Telegram Config] Saved to Supabase successfully');
-        } catch (err) {
-            console.error('[Telegram Config] Failed to save to Supabase:', err);
-        }
-    }
-
-    showNotification('Telegram settings saved successfully! 📱');
-    window.closeTelegramConfigModal();
 };
 
-window.testTelegramAlert = async function() {
-    const botToken = document.getElementById('tg-bot-token')?.value?.trim();
-    const chatId = document.getElementById('tg-chat-id')?.value?.trim();
+window.removeBundleProductRow = function(index) {
+    if (window.bundleProductRows.length > 2) {
+        window.bundleProductRows.splice(index, 1);
+        window.renderBundleProductRows();
+    }
+};
 
-    if (!botToken || !chatId) {
-        alert('Please enter both your Telegram Bot Token and Chat ID first.');
+window.populateBundleItemSelects = function() {
+    window.renderBundleProductRows();
+};
+
+window.renderAdminBundlesList = async function() {
+    const container = document.getElementById('bundles-list-container');
+    const badge = document.getElementById('active-bundles-count-badge');
+    if (!container || !window.bundleManager) return;
+
+    const bundles = await window.bundleManager.getBundles();
+    const activeCount = bundles.filter(b => b.active).length;
+    if (badge) badge.textContent = activeCount;
+
+    if (bundles.length === 0) {
+        container.innerHTML = `<p class="text-center text-on-surface-variant p-4 bg-surface-container-low rounded-xl">No combos created yet. Use the form above to pair products.</p>`;
         return;
     }
 
-    const testTime = new Date().toLocaleTimeString();
-    const text = `🔔 <b>TEST ALERT - DASHOP STORE</b>\n\n` +
-                 `🎉 <b>Success!</b> Your phone is successfully linked to DASHOP.\n\n` +
-                 `Whenever a customer places an order, your phone will buzz immediately with the order details and customer contact.\n\n` +
-                 `⏱ <i>Time tested: ${testTime}</i>\n` +
-                 `🌐 <b>Store:</b> dashop.site`;
+    let html = '';
+    bundles.forEach(b => {
+        let items = Array.isArray(b.items) && b.items.length > 0 ? b.items : [b.item1_id, b.item2_id].filter(Boolean);
+        const bundlePrice = parseFloat(b.bundle_price) || 0;
 
-    try {
-        const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: chatId,
-                text: text,
-                parse_mode: 'HTML'
-            })
+        let itemsHtml = '';
+        items.forEach((id, idx) => {
+            const p = (adminProducts || []).find(prod => String(prod.id) === String(id));
+            const pName = p ? p.name : `Product #${id}`;
+            itemsHtml += `
+            <div class="flex items-center justify-between text-xs py-0.5">
+                <span class="text-on-surface-variant"><strong>${idx + 1}.</strong> ${escapeAdminHtml(pName)}</span>
+            </div>`;
         });
 
-        const data = await res.json();
-        if (data.ok) {
-            showNotification('✅ Test message sent! Check your Telegram on your phone.');
-            if (typeof playOrderAlertChime === 'function') playOrderAlertChime();
+        html += `
+        <div class="p-4 rounded-xl border ${b.active ? 'border-surface-container bg-surface-container-low' : 'border-surface-container/40 bg-surface-container-low/40 opacity-70'} flex flex-col gap-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="material-symbols-outlined text-error text-[20px]">bolt</span>
+                    <span class="font-bold text-on-surface text-sm">${escapeAdminHtml(b.title)}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${b.active ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-highest text-outline'}">
+                        ${b.active ? 'Active' : 'Paused'}
+                    </span>
+                    <span class="text-[10px] text-on-surface-variant font-semibold">(${items.length} products)</span>
+                </div>
+                <div class="flex items-center gap-1.5 self-end sm:self-auto">
+                    <button type="button" onclick="editBundle('${b.id}')" class="px-2.5 py-1 text-xs font-bold text-primary hover:bg-primary/10 rounded-lg active:scale-95 transition flex items-center gap-1" title="Edit Combo">
+                        <span class="material-symbols-outlined text-[15px]">edit</span>
+                        <span>Edit</span>
+                    </button>
+                    <button type="button" onclick="adminToggleBundleStatus('${b.id}')" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-surface-container hover:bg-surface-container active:scale-95 transition">
+                        ${b.active ? 'Pause' : 'Activate'}
+                    </button>
+                    <button type="button" onclick="adminDeleteBundle('${b.id}')" class="p-1.5 text-error hover:bg-error/10 rounded-lg active:scale-95 transition" title="Delete Combo">
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Items summary (Clean bundle price info only, no regular price or save price) -->
+            <div class="text-xs text-on-surface-variant flex flex-col gap-1 bg-surface-container-lowest p-2.5 rounded-lg border border-surface-container/60">
+                ${itemsHtml}
+                <div class="pt-1.5 mt-0.5 border-t border-surface-container flex items-center justify-between font-bold">
+                    <span class="text-on-surface">Bundle Price: <strong class="text-error text-sm">$${bundlePrice.toFixed(2)}</strong></span>
+                    <span class="text-[11px] text-on-surface-variant font-medium">(Limit 1 per order)</span>
+                </div>
+            </div>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+};
+
+window.editBundle = async function(id) {
+    if (!window.bundleManager) return;
+    const bundles = await window.bundleManager.getBundles();
+    const b = bundles.find(item => String(item.id) === String(id));
+    if (!b) return;
+
+    document.getElementById('bundle-edit-id').value = b.id;
+    document.getElementById('bundle-title').value = b.title || '';
+    document.getElementById('bundle-price-input').value = b.bundle_price || '';
+
+    // Populate items (2 to 6)
+    let items = [];
+    if (Array.isArray(b.items) && b.items.length > 0) {
+        items = b.items;
+    } else if (b.item1_id && b.item2_id) {
+        items = [b.item1_id, b.item2_id];
+    }
+    window.bundleProductRows = items.map(String);
+    if (window.bundleProductRows.length < 2) window.bundleProductRows.push('');
+    window.renderBundleProductRows();
+
+    const titleText = document.getElementById('bundle-form-title-text');
+    if (titleText) titleText.textContent = 'Edit Flash Deal Combo';
+
+    const submitBtnText = document.getElementById('bundle-submit-btn-text');
+    if (submitBtnText) submitBtnText.textContent = 'Update Combo Promotion';
+
+    const cancelBtn = document.getElementById('bundle-cancel-edit-btn');
+    if (cancelBtn) cancelBtn.classList.remove('hidden');
+
+    const form = document.querySelector('#promo-panel-bundles form');
+    if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+window.cancelEditBundle = function() {
+    const editIdInput = document.getElementById('bundle-edit-id');
+    if (editIdInput) editIdInput.value = '';
+
+    const form = document.querySelector('#promo-panel-bundles form');
+    if (form) form.reset();
+
+    const titleText = document.getElementById('bundle-form-title-text');
+    if (titleText) titleText.textContent = 'Create Flash Deal Combo';
+
+    const submitBtnText = document.getElementById('bundle-submit-btn-text');
+    if (submitBtnText) submitBtnText.textContent = 'Create Combo Promotion';
+
+    const cancelBtn = document.getElementById('bundle-cancel-edit-btn');
+    if (cancelBtn) cancelBtn.classList.add('hidden');
+
+    window.bundleProductRows = ['', ''];
+    window.renderBundleProductRows();
+};
+
+window.handleCreateBundle = async function(event) {
+    event.preventDefault();
+    const editId = (document.getElementById('bundle-edit-id')?.value || '').trim();
+    const title = (document.getElementById('bundle-title')?.value || '').trim();
+    const bundle_price = parseFloat(document.getElementById('bundle-price-input')?.value) || 0;
+
+    // Collect product IDs from current rows
+    const selects = document.querySelectorAll('.bundle-item-select');
+    const items = [];
+    selects.forEach(sel => {
+        if (sel.value) items.push(String(sel.value).trim());
+    });
+
+    if (items.length < 2) {
+        alert('Please select at least 2 products for the combo.');
+        return;
+    }
+    if (items.length > 6) {
+        alert('A combo can have a maximum of 6 products.');
+        return;
+    }
+    const unique = new Set(items);
+    if (unique.size !== items.length) {
+        alert('All products in a combo must be distinct. Please do not select the same product twice.');
+        return;
+    }
+    if (bundle_price <= 0) {
+        alert('Please enter a valid bundle price greater than $0.');
+        return;
+    }
+
+    if (window.bundleManager) {
+        if (editId) {
+            await window.bundleManager.updateBundle(editId, {
+                title: title || 'Flash Deal Combo',
+                items: items,
+                bundle_price: bundle_price
+            });
+            showNotification('Flash Deal Combo updated successfully!');
         } else {
-            alert('Telegram Error: ' + (data.description || 'Check your bot token and chat ID.'));
+            await window.bundleManager.createBundle({
+                title: title || 'Flash Deal Combo',
+                items: items,
+                bundle_price: bundle_price,
+                active: true
+            });
+            showNotification('Flash Deal Combo created successfully!');
         }
-    } catch (err) {
-        console.error('Test Telegram alert failed:', err);
-        alert('Failed to connect to Telegram API: ' + err.message);
+
+        cancelEditBundle();
+        await renderAdminBundlesList();
     }
 };
 
-// Window exports
-window.playOrderAlertChime = playOrderAlertChime;
-window.sendSystemOrderNotification = sendSystemOrderNotification;
-window.showInAppNewOrderBanner = showInAppNewOrderBanner;
-window.handleIncomingNewOrder = handleIncomingNewOrder;
-window.setupAdminRealtimeOrderListener = setupAdminRealtimeOrderListener;
-window.startAdminOrdersPolling = startAdminOrdersPolling;
-window.initAdminOrderAlerts = initAdminOrderAlerts;
-window.checkHighlightedOrder = checkHighlightedOrder;
-window.openTelegramConfigModal = openTelegramConfigModal;
-window.closeTelegramConfigModal = closeTelegramConfigModal;
-window.saveTelegramConfig = saveTelegramConfig;
-window.testTelegramAlert = testTelegramAlert;
+window.adminToggleBundleStatus = async function(id) {
+    if (window.bundleManager) {
+        await window.bundleManager.toggleBundleStatus(id);
+        await renderAdminBundlesList();
+    }
+};
+
+window.adminDeleteBundle = async function(id) {
+    if (confirm('Delete this combo promotion?')) {
+        if (window.bundleManager) {
+            await window.bundleManager.deleteBundle(id);
+            await renderAdminBundlesList();
+            showNotification('Combo deleted');
+        }
+    }
+};
